@@ -8,6 +8,9 @@ import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
+import { redirect } from 'next/navigation';
+import { useEffect } from "react";
+
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

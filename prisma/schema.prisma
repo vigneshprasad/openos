@@ -38,13 +38,14 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
+    id               String             @id @default(cuid())
+    name             String?
+    email            String?            @unique
+    emailVerified    DateTime?
+    image            String?
+    accounts         Account[]
+    sessions         Session[]
+    DatabaseResource DatabaseResource[]
 }
 
 model VerificationToken {
@@ -53,4 +54,63 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model DatabaseResource {
+    id                       String                     @id @default(cuid())
+    name                     String
+    type                     String
+    port                     Int
+    host                     String
+    dbName                   String
+    username                 String
+    password                 String
+    createdAt                DateTime                   @default(now())
+    updatedAt                DateTime                   @updatedAt
+    deletedAt                DateTime?
+    userId                   String
+    user                     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    ResourceSchemaEmbeddings ResourceSchemaEmbeddings[]
+    status                   Boolean
+
+    @@index([userId])
+}
+
+model ReportTemplate {
+    id        String                    @id @default(cuid())
+    name      String
+    fields    ReportTemplatesOnFields[]
+    createdAt DateTime                  @default(now())
+}
+
+model ReportField {
+    id        String                    @id @default(cuid())
+    name      String
+    createdAt DateTime                  @default(now())
+    templates ReportTemplatesOnFields[]
+}
+
+model ReportTemplatesOnFields {
+    id               String         @id @default(cuid())
+    reportTemplate   ReportTemplate @relation(fields: [reportTemplateId], references: [id])
+    reportTemplateId String
+    reportField      ReportField    @relation(fields: [reportFieldId], references: [id])
+    reportFieldId    String
+    createdAt        DateTime       @default(now())
+
+    @@index([reportTemplateId])
+    @@index([reportFieldId])
+}
+
+model ResourceSchemaEmbeddings {
+    id                 String           @id @default(cuid())
+    name               String           @db.Text
+    createdAt          DateTime         @default(now())
+    updatedAt          DateTime         @updatedAt
+    deletedAt          DateTime?
+    databaseResource   DatabaseResource @relation(fields: [databaseResourceId], references: [id], onDelete: Cascade)
+    databaseResourceId String
+    embeddings         Json
+
+    @@index([databaseResourceId])
 }
