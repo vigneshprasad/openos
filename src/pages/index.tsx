@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
+import { errorMonitor } from "stream";
 import { Navbar } from "~/components/Navbar";
 import { api } from "~/utils/api";
 
@@ -8,11 +9,19 @@ type TableRow = {
     [key: string]: string | number | boolean | null;
 }
 
+type Error = {
+    message: string;
+    cause: string;
+    query: string;
+}
+
 type QueryAndResult = {
     query: string;
-    count: number;
     result: TableRow[];
     name: string;
+    success: boolean;
+    message?: string;
+    description?: string;
 }
 
 const Home: NextPage = () => {
@@ -21,20 +30,32 @@ const Home: NextPage = () => {
     const [command, setCommand] = useState<string>("");
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState<Error>();
     const [loading, setLoading] = useState(false);
 
     const runQuery = api.queryRouter.runQuery.useMutation({
         onSuccess: (data) => {
-            setSuccess(true);
-            setData(data as unknown as QueryAndResult);
-            setError(false);
-            setLoading(false);
+            const dataResult = data as QueryAndResult;
+            if(dataResult.success) {
+                setSuccess(true);
+                setData(data as unknown as QueryAndResult);
+                setError(false);
+                setLoading(false);
+            } else {
+                setSuccess(false);
+                setError(true);
+                setErrorMessage({
+                    message: dataResult.message as string,
+                    cause: dataResult.description as string,
+                    query: dataResult.query
+                })
+                setLoading(false);
+            }
         },
         onError: (err) => {
             setSuccess(false);
             setError(true);
-            setErrorMessage(err.message);
+            setErrorMessage(err as unknown as Error);
             setLoading(false);
         },
     });
@@ -42,6 +63,7 @@ const Home: NextPage = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        setData(undefined);
         setSuccess(false);
         setError(false);
 
@@ -49,7 +71,6 @@ const Home: NextPage = () => {
             query: command,
         });
     };
-
 
     return (
         <>
@@ -93,6 +114,7 @@ const Home: NextPage = () => {
                         <br />
                     </div>}
                     <div className="flex flex-col text-white w-full text-center">
+                        { data?.result && data.result.length === 0 && <h1>No results</h1>}
                         {
                             data?.result && data.result.length > 0 &&
                             <div className="w-full max-w-screen overflow-x-auto">
@@ -113,7 +135,6 @@ const Home: NextPage = () => {
                                     {data?.result && data.result.map((row: TableRow, index:number) => (
                                         <tr key={index}>
                                             {Object.keys(row).map((key: string) => {
-                                                console.log(row[key]);
                                                 return (      
                                                     <td key={key}>{row[key]?.toString()}</td>
                                                 )}
@@ -123,14 +144,14 @@ const Home: NextPage = () => {
                                 </table>
                             </div>
                         }
-                        {
-                            data?.count &&
-                            <h1> Query Result: {data.count} </h1>
-                        }
 
-                        <div className="flex justify-content-end mt-8">
+                        <div className="justify-content-end mt-8">
                             {success && <p className="text-green-500">Success</p>}
-                            {error && <p className="text-red-500">Error: {errorMessage}</p>}
+                            {error && <p className="text-red-500">Error: {errorMessage?.message} </p>}
+                            <br />
+                            {error && <p className="text-red-500">Details: {String(errorMessage?.cause)} </p>}
+                            <br />
+                            {error && <p className="text-red-500">Query: {String(errorMessage?.query)} </p>}
                         </div>
                     </div>
                 </div>

@@ -10,21 +10,9 @@ import {
 import { openai } from '~/server/services/openai'
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { createContext } from "~/utils/createContext";
-import { TRPCError } from "@trpc/server";
 
 type TableRow = {
     [key: string]: string | number | boolean | null;
-}
-
-type TableCount = {
-    count: number;
-}
-
-type QueryAndResult = {
-    query: string;
-    count: number;
-    result: TableRow[];
-    name: string;
 }
 
 export const queryRouter = createTRPCRouter({
@@ -51,7 +39,7 @@ export const queryRouter = createTRPCRouter({
             return "Database Resource not found"
         }
         const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
-    
+        let sqlQuery = "";
         try {
             const client = new Client({
                 connectionString: dbUrl,
@@ -64,8 +52,6 @@ export const queryRouter = createTRPCRouter({
                     databaseResourceId: databaseResource.id
                 }
             });
-
-            const queryAndResult: QueryAndResult[] = [];
 
             let prompt = "### Postgres SQL table with their properties\n#\n";
 
@@ -86,47 +72,44 @@ export const queryRouter = createTRPCRouter({
             if(completion?.data?.choices.length > 0) {
                 const text = completion?.data?.choices[0]?.text;
                 if(text) {
-                    const sqlQuery = text;
+                    sqlQuery = text;
                     try {
-                        const res: QueryResult<TableCount | TableRow> = await client.query<TableCount | TableRow>(
+                        const res: QueryResult<TableRow> = await client.query<TableRow>(
                             sqlQuery
                         )
 
                         await client.end();
-                        if(res.rows.length > 1) {
+                        if(res.rows.length > 0) {
                             return {
+                                success: true,
                                 query: sqlQuery,
                                 result: res.rows,
                             };
                         }
-                        if((res.rows[0] as TableCount).count) {
-                            return {
-                                query: sqlQuery,
-                                count: (res.rows[0] as TableCount).count,
-                            };
-                        }
-                        console.log(res.rows);
                     }
                     catch(e) {
-                        console.error("Error", e);
                         await client.end();
-                        throw new TRPCError({
-                            code: 'INTERNAL_SERVER_ERROR',
-                            message: 'An unexpected error occurred, please try again later.',
-                            cause: e,
-                        });
+                        return {
+                            success: false,
+                            query: sqlQuery,
+                            message: 'An error occurred while trying to run your query.',
+                            description: e
+                        };
                     }
                         
                 }
-                return queryAndResult;
+                return {
+                    query: sqlQuery,
+                    result: []
+                }
             }
         } catch(e) {
-            console.error("Error", e)
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
+            return {
+                success: false,
+                query: sqlQuery, 
                 message: 'An unexpected error occurred, please try again later.',
-                cause: e,
-            });
+                description: e
+            }
         }
     }),
 
