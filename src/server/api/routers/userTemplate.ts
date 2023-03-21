@@ -116,6 +116,7 @@ export const userTemplateRouter = createTRPCRouter({
                     }
                 }
             }
+            await client.end();
             return queryAndResult;
 
         } catch(e) {

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { Client } from "pg";
+import { Client} from "pg";
+import type { QueryResult } from "pg";
 
 import {
   createTRPCRouter,
@@ -9,9 +10,14 @@ import {
 import { openai } from '~/server/services/openai'
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { createContext } from "~/utils/createContext";
+import { TRPCError } from "@trpc/server";
 
 type TableRow = {
     [key: string]: string | number | boolean | null;
+}
+
+type TableCount = {
+    count: number;
 }
 
 type QueryAndResult = {
@@ -82,29 +88,33 @@ export const queryRouter = createTRPCRouter({
                 if(text) {
                     const sqlQuery = text;
                     try {
-                        const res = await client.query<{count:number}>(
+                        const res: QueryResult<TableCount | TableRow> = await client.query<TableCount | TableRow>(
                             sqlQuery
                         )
-                        console.log(res.rows);
+
+                        await client.end();
                         if(res.rows.length > 1) {
                             return {
                                 query: sqlQuery,
                                 result: res.rows,
                             };
                         }
-                        if(res.rows[0]?.count) {
+                        if((res.rows[0] as TableCount).count) {
                             return {
                                 query: sqlQuery,
-                                count: res.rows[0]?.count,
+                                count: (res.rows[0] as TableCount).count,
                             };
                         }
                         console.log(res.rows);
                     }
                     catch(e) {
-                        return {
-                            query: sqlQuery,
-                            result: -1,
-                        };
+                        console.error("Error", e);
+                        await client.end();
+                        throw new TRPCError({
+                            code: 'INTERNAL_SERVER_ERROR',
+                            message: 'An unexpected error occurred, please try again later.',
+                            cause: e,
+                        });
                     }
                         
                 }
@@ -112,6 +122,11 @@ export const queryRouter = createTRPCRouter({
             }
         } catch(e) {
             console.error("Error", e)
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'An unexpected error occurred, please try again later.',
+                cause: e,
+            });
         }
     }),
 

@@ -19,27 +19,26 @@ type Schema = {
 }
 
 export const databaseResourceRouter = createTRPCRouter({
-  getPostgresSchema: protectedProcedure
-    .query(async () => {
-        // const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
-        const dbUrl = 'postgres://breucpiwudpfts:71968ba018ea57518792b4e20bf4d3c541173467199a116b347a33c1d6df18db@ec2-54-170-90-26.eu-west-1.compute.amazonaws.com:5432/d4pijnt26qbrav'
+//   getPostgresSchema: protectedProcedure
+//     .query(async () => {
+//         // const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
 
-        try {
-          const client = new Client({
-            connectionString: dbUrl,
-            ssl: { rejectUnauthorized: false, }
-          });
-          await client.connect();
-          const sqlQuery = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public'"
-          const res = await client.query<Schema>(
-            sqlQuery
-          )
-          return res;
-        } catch(e) {
-          console.error("Error", e)
-          return "An unexpected error occured";
-        }
-    }),
+//         try {
+//           const client = new Client({
+//             connectionString: dbUrl,
+//             ssl: { rejectUnauthorized: false, }
+//           });
+//           await client.connect();
+//           const sqlQuery = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public'"
+//           const res = await client.query<Schema>(
+//             sqlQuery
+//           )
+//           return res;
+//         } catch(e) {
+//           console.error("Error", e)
+//           return "An unexpected error occured";
+//         }
+//     }),
 
   getAll: protectedProcedure
     .query(({ ctx }) => {
@@ -69,8 +68,7 @@ export const databaseResourceRouter = createTRPCRouter({
         dbPassword: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
-        // const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
-        const dbUrl = `postgresql://postgres:0g-Yquy1-Vsofko-zik7yz=31TQfPh@worknetwork-api-dev-db-database.cof0pxz5maxa.ap-south-1.rds.amazonaws.com:5432/worknetworkapidevdb?sslmode=require`;
+        const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
         const client = new Client({
             connectionString: dbUrl,
             ssl: { rejectUnauthorized: false, }
@@ -86,6 +84,7 @@ export const databaseResourceRouter = createTRPCRouter({
             const res = await client.query<Schema>(
                 sqlQuery
             )
+            await client.end();
             const databaseResource = await ctx.prisma.databaseResource.create({
                 data: {
                     name: input.name,
@@ -100,7 +99,6 @@ export const databaseResourceRouter = createTRPCRouter({
                 },
             });
             const tables = convertSchemaToStringArray(res.rows);
-            console.log(tables);
             for(let i = 0; i < tables.length; i++) {
                 if(tables[i]) {
                     const res = await openai.createEmbedding({
@@ -119,6 +117,7 @@ export const databaseResourceRouter = createTRPCRouter({
             }
         } catch(e) {
             console.error("Error", e)
+            await client.end();
             return "Could not create database";
         }
     })

@@ -130,7 +130,7 @@ const Home: NextPage = () => {
 
                         <div className="flex justify-content-end mt-8">
                             {success && <p className="text-green-500">Success</p>}
-                            {error && <p className="text-red-500">Error</p>}
+                            {error && <p className="text-red-500">Error: {errorMessage}</p>}
                         </div>
                     </div>
                 </div>
