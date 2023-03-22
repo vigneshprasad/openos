@@ -1,4 +1,4 @@
-import type { QueryResultType, TableRow } from "~/pages/types/types";
+import type { QueryResultType, TableRow } from "~/types/types";
 
 interface Props {
     props: QueryResultType;

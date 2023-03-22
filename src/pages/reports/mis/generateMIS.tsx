@@ -10,7 +10,7 @@ const GenerateMIS: NextPage = () => {
     const router = useRouter();
     const { resource, template } = router.query; 
 
-    const { data : data } = api.userTemplate.getMIS.useQuery({
+    api.userTemplate.getMIS.useQuery({
         resource: String(resource),
         template: String(template)
     })

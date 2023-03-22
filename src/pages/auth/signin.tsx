@@ -1,9 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { Navbar } from "~/components/Navbar";
-import { signIn, useSession } from "next-auth/react";
-import { redirect } from 'next/navigation';
-import { useEffect } from "react";
+import { signIn } from "next-auth/react";
+// import { redirect } from 'next/navigation';
+// import { useEffect } from "react";
 
 const Home: NextPage = () => {
 //   const { data: sessionData } = useSession();

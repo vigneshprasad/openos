@@ -8,7 +8,7 @@ import { createContext } from "~/utils/createContext";
 
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { DATABASE_QUERY } from "~/constants/commandConstants";
-import { type TableRow } from "~/pages/types/types";
+import { type TableRow } from "~/types/types";
 
 
 export const runQuery = async (query: string, userId: string) => {

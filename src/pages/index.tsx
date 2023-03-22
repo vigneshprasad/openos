@@ -5,7 +5,7 @@ import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
 import { DATABASE_QUERY } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { QueryResultType } from "./types/types";
+import type { QueryResultType } from "../types/types";
 
 type CommandDataType = {
     type: string,
