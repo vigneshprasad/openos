@@ -2,7 +2,6 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { Navbar } from "~/components/Navbar";
 
-
 import { api } from "~/utils/api";
 import Link from "next/link";
 import { useRouter } from "next/router";

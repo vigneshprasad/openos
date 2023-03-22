@@ -24,6 +24,7 @@
     "next-auth": "^4.19.0",
     "openai": "^3.2.1",
     "pg": "^8.10.0",
+    "razorpay": "^2.8.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.9.1",
