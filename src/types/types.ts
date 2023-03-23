@@ -1,7 +1,14 @@
-export type QueryResultType = [
-    undefined | QueryAndResult,
+export type CommandResultType = [
+    undefined | QueryAndResult | JsonData,
     undefined | Error
 ]
+
+export type JsonData = {
+    dateRange: { from: Date, to: Date },
+    customer: { name: string | undefined , email: string | undefined, phone: string | undefined },
+    orderId: string | undefined,
+    entityName: string,
+}
 
 export type QueryAndResult = {
     query: string;

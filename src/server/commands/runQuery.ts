@@ -6,7 +6,7 @@ import { openai } from "../services/openai";
 
 import { createContext } from "~/utils/createContext";
 
-import { COMPLETIONS_MODEL } from "~/constants/openAi";
+import { SQL_MODEL } from "~/constants/openAi";
 import { DATABASE_QUERY } from "~/constants/commandConstants";
 import { type TableRow } from "~/types/types";
 
@@ -54,18 +54,18 @@ export const runQuery = async (query: string, userId: string) => {
             1000
         )
         prompt += schemaString;
-        const newPrompt = prompt + `### A query to get ${query}\n`;
+        const newPrompt = prompt + `### A query to get ${query}\nSELECT`;
         const completion = await openai.createCompletion({
-            model: COMPLETIONS_MODEL,
+            model: SQL_MODEL,
             prompt: newPrompt,
-            temperature: 1,
+            temperature: 0,
             max_tokens: 150,
             stop: ["#", ";"]
         });
         if(completion?.data?.choices.length > 0) {
             const text = completion?.data?.choices[0]?.text;
             if(text) {
-                sqlQuery = text;
+                sqlQuery = "SELECT " + text;
                 try {
                     const res: QueryResult<TableRow> = await client.query<TableRow>(
                         sqlQuery

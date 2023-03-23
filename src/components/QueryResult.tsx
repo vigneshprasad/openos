@@ -1,11 +1,12 @@
-import type { QueryResultType, TableRow } from "~/types/types";
+import type { QueryAndResult, CommandResultType, TableRow } from "~/types/types";
 
 interface Props {
-    props: QueryResultType;
+    props: CommandResultType;
 }
 
 const QueryResult: React.FC<Props> = ({ props }) => {
-    const [data, error ] = props
+    const [dataRaw, error ] = props
+    const data = dataRaw as QueryAndResult;
     return (
         <>
             { data && 

@@ -1,15 +1,16 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
+import JsonDataComponent from "~/components/JsonDataComponent";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { DATABASE_QUERY } from "~/constants/commandConstants";
+import { DATABASE_QUERY, GET_DATA } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { QueryResultType } from "../types/types";
+import type { CommandResultType } from "../types/types";
 
 type CommandDataType = {
     type: string,
-    data: QueryResultType
+    data: CommandResultType
 }
 
 const Home: NextPage = () => {
@@ -34,6 +35,7 @@ const Home: NextPage = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        setError(false);
         setData(undefined);
         runQuery.mutate({ query: command });        
     };
@@ -74,6 +76,10 @@ const Home: NextPage = () => {
                     {
                         data?.type && data?.data && data?.type === DATABASE_QUERY && 
                             <QueryResult props={data?.data} />
+                    }
+                    {
+                        data?.type && data?.data && data?.type === GET_DATA && 
+                            <JsonDataComponent props={data?.data} />
                     }
                     {error && <div className="text-white">Error</div>}
                 </div>
