@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
-import JsonDataComponent from "~/components/JsonDataComponent";
+import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
 import { DATABASE_QUERY, GET_DATA } from "~/constants/commandConstants";
@@ -79,7 +79,7 @@ const Home: NextPage = () => {
                     }
                     {
                         data?.type && data?.data && data?.type === GET_DATA && 
-                            <JsonDataComponent props={data?.data} />
+                            <RazorpayData props={data?.data} />
                     }
                     {error && <div className="text-white">Error</div>}
                 </div>

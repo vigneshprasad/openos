@@ -4,7 +4,7 @@ interface Props {
     props: CommandResultType;
 }
 
-const JsonDataComponent: React.FC<Props> = ({ props }) => {
+const RazorpayData: React.FC<Props> = ({ props }) => {
     const [dataRaw, error ] = props
     const data = dataRaw as JsonData;
     return (
@@ -35,6 +35,12 @@ const JsonDataComponent: React.FC<Props> = ({ props }) => {
                             `The entity to provide was interpreted as ${String(data.entityName)}`
                         }
                     </h3>
+                    <h3>
+                        {
+                            data.orderId && 
+                            `The orderID was interpreted as ${String(data.orderId)}`
+                        }
+                    </h3>
                 </div>
             }
             {error && 
@@ -50,4 +56,4 @@ const JsonDataComponent: React.FC<Props> = ({ props }) => {
     );
 };
 
-export default JsonDataComponent;
+export default RazorpayData;
