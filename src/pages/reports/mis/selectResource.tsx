@@ -5,6 +5,7 @@ import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { DatabaseResourceForm } from "~/components/DatabaseResourceForm";
 import Link from "next/link";
+import { RazorpayResourceForm } from "~/components/RazorpayResourceForm";
 
 const SelectResource: NextPage = () => {
 
@@ -40,6 +41,7 @@ const SelectResource: NextPage = () => {
                             </Link>
                         ))}
                         <DatabaseResourceForm />
+                        <RazorpayResourceForm />
                     </div>
                 </div>
             </main>

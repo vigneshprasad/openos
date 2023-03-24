@@ -19,27 +19,7 @@ type Schema = {
 }
 
 export const databaseResourceRouter = createTRPCRouter({
-//   getPostgresSchema: protectedProcedure
-//     .query(async () => {
-//         // const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
-
-//         try {
-//           const client = new Client({
-//             connectionString: dbUrl,
-//             ssl: { rejectUnauthorized: false, }
-//           });
-//           await client.connect();
-//           const sqlQuery = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public'"
-//           const res = await client.query<Schema>(
-//             sqlQuery
-//           )
-//           return res;
-//         } catch(e) {
-//           console.error("Error", e)
-//           return "An unexpected error occured";
-//         }
-//     }),
-
+    
   getAll: protectedProcedure
     .query(({ ctx }) => {
       return ctx.prisma.databaseResource.findMany({

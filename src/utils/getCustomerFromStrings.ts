@@ -1,7 +1,7 @@
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { openai } from "~/server/services/openai";
 
-type CustomerDetails = {
+export type CustomerDetails = {
     name: string | undefined,
     email: string | undefined,
     phone: string | undefined,    

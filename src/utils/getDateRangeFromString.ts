@@ -1,9 +1,14 @@
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { openai } from "~/server/services/openai";
 
-type DateRange = {
-    from: Date,
-    to: Date
+export type DateRange = {
+    from: Date | undefined,
+    to: Date | undefined
+}
+
+type DateRangeStrings = {
+    from: string,
+    to: string
 }
 
 export const getDateRangeFromString = async (query: string) : Promise<DateRange | undefined> => {
@@ -13,8 +18,8 @@ export const getDateRangeFromString = async (query: string) : Promise<DateRange 
     const now = new Date();
     const lastWeek = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
     const lastWeekJson = {
-        from: lastWeek.toString(),
-        to: now.toString()
+        from: lastWeek.toLocaleString(),
+        to: now.toLocaleString()
     }
     const lastMonthJson = {
         from: new Date(now.getFullYear(), now.getMonth() - 1, 1).toString(),
@@ -35,7 +40,7 @@ export const getDateRangeFromString = async (query: string) : Promise<DateRange 
     prompt += `Amount for orders placed last month\n${JSON.stringify(lastMonthJson)}\n\n`
     prompt += `What was the number of orders last year\n${JSON.stringify(lastYearJson)}\n\n`
     prompt += `What was the amount paid for orders placed on 5th June by Ganesh\n${JSON.stringify(fifthJuneJson)}\n`
-    prompt += `List of orders by Rakesh\n{}\n`
+    prompt += `List of orders by Rakesh\n{"from": "undefined", "to":"undefined"}\n`
     prompt += query;
     const completion = await openai.createCompletion({
         model: COMPLETIONS_MODEL,
@@ -47,11 +52,12 @@ export const getDateRangeFromString = async (query: string) : Promise<DateRange 
         const text = completion?.data?.choices[0]?.text;
         if(text) {
             try {
-                const dateJson:DateRange = JSON.parse(text) as DateRange;
-                return {
-                    from: new Date(dateJson.from),
-                    to: new Date(dateJson.to)
+                const dateJson = JSON.parse(text) as DateRangeStrings;
+                const dateRange = {
+                    from: dateJson.from !== "undefined" ? new Date(dateJson?.from) : undefined,
+                    to: dateJson.to !== "undefined" ? new Date(dateJson?.to) : undefined
                 }
+                return(dateRange);
             } catch(e) {
                 console.log(e);
                 return undefined;

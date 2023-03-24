@@ -8,10 +8,7 @@ import {
 import { DATABASE_QUERY, GET_DATA } from "~/constants/commandConstants";
 import { runQuery } from "~/server/commands/runQuery";
 import { TRPCClientError } from "@trpc/client";
-import { getDateRangeFromString } from "~/utils/getDateRangeFromString";
-import { getCustomerFromString } from "~/utils/getCustomerFromStrings";
-import { getOrderIdFromString } from "~/utils/getOrderIdFromString";
-import { getEntityFromString } from "~/utils/getEntityFromString";
+import { getRazorpayData } from "~/server/commands/getRazorpayData";
 
 
 export const commandRouter = createTRPCRouter({
@@ -31,22 +28,7 @@ export const commandRouter = createTRPCRouter({
             case DATABASE_QUERY:
                 return await runQuery(query, ctx.session.user.id);
             case GET_DATA:
-                const dateRange = await getDateRangeFromString(query);
-                const customer = await getCustomerFromString(query);
-                const orderId = getOrderIdFromString(query);
-                const entityName = await getEntityFromString(query);
-                return {
-                    type: GET_DATA,
-                    data: [
-                        {
-                            dateRange,
-                            customer,
-                            orderId,
-                            entityName
-                        }, 
-                        undefined
-                    ]
-                };
+                return await getRazorpayData(query, ctx.session.user.id);
 
             default:
                 throw new TRPCClientError('Bad Query');

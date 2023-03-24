@@ -20,7 +20,7 @@ export const runQuery = async (query: string, userId: string) => {
     const databaseResource = databaseResources[0];
     if(!databaseResources || !databaseResource) {
         return {
-            type: "DATABASE_QUERY",
+            type: DATABASE_QUERY,
             data: [
                 undefined, 
                 {

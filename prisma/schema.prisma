@@ -46,6 +46,7 @@ model User {
     accounts         Account[]
     sessions         Session[]
     DatabaseResource DatabaseResource[]
+    RazorpayResource RazorpayResource[]
 }
 
 model VerificationToken {
@@ -72,6 +73,21 @@ model DatabaseResource {
     user                     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
     ResourceSchemaEmbeddings ResourceSchemaEmbeddings[]
     status                   Boolean
+
+    @@index([userId])
+}
+
+model RazorpayResource {
+    id         String    @id @default(cuid())
+    name       String
+    key_id     String
+    key_secret String
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    deletedAt  DateTime?
+    userId     String
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    status     Boolean
 
     @@index([userId])
 }

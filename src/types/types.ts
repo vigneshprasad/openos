@@ -4,10 +4,11 @@ export type CommandResultType = [
 ]
 
 export type JsonData = {
-    dateRange: { from: Date, to: Date },
-    customer: { name: string | undefined , email: string | undefined, phone: string | undefined },
-    orderId: string | undefined,
-    entityName: string,
+    dateRange: { from: Date, to: Date };
+    customer: { name: string | undefined , email: string | undefined, phone: string | undefined };
+    orderId: string | undefined;
+    entityName: string;
+    result: TableRow[];
 }
 
 export type QueryAndResult = {
