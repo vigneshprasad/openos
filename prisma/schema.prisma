@@ -47,6 +47,7 @@ model User {
     sessions         Session[]
     DatabaseResource DatabaseResource[]
     RazorpayResource RazorpayResource[]
+    BankStatement    BankStatement[]
 }
 
 model VerificationToken {
@@ -129,4 +130,17 @@ model ResourceSchemaEmbeddings {
     embeddings         Json
 
     @@index([databaseResourceId])
+}
+
+model BankStatement {
+    id        String    @id @default(cuid())
+    name      String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    url       String
+
+    @@index([userId])
 }

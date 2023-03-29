@@ -29,6 +29,8 @@ export const commandRouter = createTRPCRouter({
                 return await runQuery(query, ctx.session.user.id);
             case GET_DATA:
                 return await getRazorpayData(query, ctx.session.user.id);
+            // case GET_REPORT:
+            //     return await getReport(query, ctx.session.user.id);
 
             default:
                 throw new TRPCClientError('Bad Query');

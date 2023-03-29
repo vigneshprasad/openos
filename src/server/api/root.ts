@@ -4,6 +4,7 @@ import { userTemplateRouter } from "~/server/api/routers/userTemplate";
 import { databaseResourceRouter } from "./routers/databaseResource";
 import { razorpayResourceRouter } from "./routers/razorpayResource";
 import { commandRouter } from "./routers/command";
+import { awsRouter } from "./routers/aws";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   template: templateRouter,
   userTemplate: userTemplateRouter,
   commandRouter: commandRouter,
+  aws: awsRouter,
 });
 
 // export type definition of API
