@@ -2,22 +2,16 @@ import { useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import axios from "axios";
-
 
 export const StatementUploadForm: React.FC = () => {    
     const [name, setName] = useState<string>("");
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [fileUrl, setFileUrl ] = useState<string>("");
     const [fileSelected, setFileSelected] = useState<File | undefined>();
-
-    const response = api.aws.getPresignedUrl.useQuery();
+    const [presignedUrl, setPresignedUrl] = useState("");
     
-    console.log(response.data);
-
-    const createDatabaseResource = api.databaseResource.create.useMutation({
+    const bankStatement = api.aws.create.useMutation({
         onSuccess: () => {
             setSuccess(true);
             setError(false);
@@ -30,22 +24,46 @@ export const StatementUploadForm: React.FC = () => {
         },
     });
 
+    const presignedUrlMutation = api.aws.getPresignedUrl.useMutation({
+        onSuccess: (result) => {
+            setPresignedUrl(result)
+        },
+        onError: () => {
+            setError(true);
+            setLoading(false);
+        },
+    });
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        console.log("HMMMM");
         setLoading(true);
         setSuccess(false);
         setError(false);
-        e.preventDefault();
-        if(!response.data) {
+        if(!name) {
             setError(true);
             setLoading(false);
             return;
         }
-        await axios.put(response.data, fileSelected, {
-            headers: {
-                "Content-Type": fileSelected?.type,
-                "Access-Control-Allow-Origin": "*"
-            }
+        await presignedUrlMutation.mutateAsync({
+            name: name,
+        });
+        if(!fileSelected || !presignedUrl) {
+            setError(true);
+            setLoading(false);
+            return;
+        }
+        const result = await fetch(presignedUrl, {
+            method: 'PUT',
+            body: fileSelected,
         })
+        const url = result.url.split('?')[0];
+        if(result.status === 200 && url) {
+            void bankStatement.mutateAsync({
+                name: name,
+                url: url,
+            });
+        }
     }
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,7 +89,7 @@ export const StatementUploadForm: React.FC = () => {
                     <Dialog.Description className="DialogDescription">
                         Upload your statement in Excel Format.
                     </Dialog.Description>
-                        <form action={response.data} onSubmit={handleSubmit} method="post">
+                        <form onSubmit={handleSubmit}>
                             <fieldset className="Fieldset">
                                 <label className="Label">
                                     <span>Name of Resource</span>
