@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { DatabaseResourceForm } from "~/components/DatabaseResourceForm";
 import Link from "next/link";
 import { RazorpayResourceForm } from "~/components/RazorpayResourceForm";
+import { StatementUploadForm } from "~/components/StatementUploadForm";
 
 const SelectResource: NextPage = () => {
 
@@ -42,7 +43,8 @@ const SelectResource: NextPage = () => {
                         ))}
                         <DatabaseResourceForm />
                         <RazorpayResourceForm />
-]                    </div>
+                        <StatementUploadForm />
+                    </div>
                 </div>
             </main>
         </>
