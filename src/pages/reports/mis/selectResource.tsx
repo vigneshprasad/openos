@@ -42,7 +42,7 @@ const SelectResource: NextPage = () => {
                         ))}
                         <DatabaseResourceForm />
                         <RazorpayResourceForm />
-                    </div>
+]                    </div>
                 </div>
             </main>
         </>

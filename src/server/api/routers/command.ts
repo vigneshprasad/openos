@@ -5,10 +5,11 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-import { DATABASE_QUERY, GET_DATA } from "~/constants/commandConstants";
+import { DATABASE_QUERY, GET_DATA, GET_FINANCIAL_REPORT } from "~/constants/commandConstants";
 import { runQuery } from "~/server/commands/runQuery";
 import { TRPCClientError } from "@trpc/client";
 import { getRazorpayData } from "~/server/commands/getRazorpayData";
+import { getFinancialReport } from "~/server/commands/getFinancialReport";
 
 
 export const commandRouter = createTRPCRouter({
@@ -29,6 +30,8 @@ export const commandRouter = createTRPCRouter({
                 return await runQuery(query, ctx.session.user.id);
             case GET_DATA:
                 return await getRazorpayData(query, ctx.session.user.id);
+            case GET_FINANCIAL_REPORT:
+                return await getFinancialReport(query, ctx.session.user.id);
 
             default:
                 throw new TRPCClientError('Bad Query');
