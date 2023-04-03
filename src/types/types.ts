@@ -1,5 +1,5 @@
 export type CommandResultType = [
-    undefined | QueryAndResult | JsonData,
+    undefined | QueryAndResult | JsonData | ExcelCell[][],
     undefined | Error
 ]
 
@@ -24,4 +24,10 @@ export type Error = {
     message: string;
     cause: string;
     query: string;
+}
+
+export type ExcelCell = {
+    value: number | string;
+    expression?: string;
+    hint?: string;
 }

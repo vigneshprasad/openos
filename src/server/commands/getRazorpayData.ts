@@ -243,7 +243,6 @@ const getRefundResults = async (
     if(orderId) {
         const payments = (await instance.payments.all()).items;
         payments.filter(payment => payment.order_id === orderId)
-        console.log(payments);
         const refunds = [];
         for(const payment of payments) {
             const results = await instance.payments.fetchMultipleRefund(payment.id);
@@ -251,7 +250,6 @@ const getRefundResults = async (
                 refunds.push(result);
             }
         }
-        console.log(refunds);
         return {
             type: GET_DATA,
             data: [

@@ -5,7 +5,7 @@ type Entity = "order" | "payment" | "refund" | "customer"
 
 export const getEntityFromString = async (query: string) : Promise<Entity> => {
     let prompt = "What entity is the user trying to get?.\nExample:\n";
-    prompt += `What was the order purchased by Rakesh Sharma\Entity: order\n\n`
+    prompt += `What was the order purchased by Rakesh Sharma\nEntity: order\n\n`
     prompt += `Number of partial payments made in the last three months\nEntity: payment\n\n`
     prompt += `Refunds processed by Priyanka\nEntity: refund\n\n`
     prompt += `How much did Ashok pay for his last order\nEntity: order\n\n`

@@ -4,9 +4,10 @@ import { useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { DATABASE_QUERY, GET_DATA } from "~/constants/commandConstants";
+import { DATABASE_QUERY, GET_DATA, GET_FINANCIAL_REPORT } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType } from "../types/types";
+import FinancialReport from "~/components/FinancialReport";
 
 type CommandDataType = {
     type: string,
@@ -80,6 +81,10 @@ const Home: NextPage = () => {
                     {
                         data?.type && data?.data && data?.type === GET_DATA && 
                             <RazorpayData props={data?.data} />
+                    }
+                    {
+                        data?.type && data?.data && data?.type === GET_FINANCIAL_REPORT &&
+                            <FinancialReport props={data?.data} />
                     }
                     {error && <div className="text-white">Error</div>}
                 </div>

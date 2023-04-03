@@ -79,16 +79,17 @@ model DatabaseResource {
 }
 
 model RazorpayResource {
-    id         String    @id @default(cuid())
-    name       String
-    key_id     String
-    key_secret String
-    createdAt  DateTime  @default(now())
-    updatedAt  DateTime  @updatedAt
-    deletedAt  DateTime?
-    userId     String
-    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    status     Boolean
+    id             String    @id @default(cuid())
+    name           String
+    key_id         String
+    key_secret     String
+    account_number String?
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+    deletedAt      DateTime?
+    userId         String
+    user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    status         Boolean
 
     @@index([userId])
 }
