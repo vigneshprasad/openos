@@ -2,7 +2,7 @@ import { prisma } from "~/server/db";
 
 import { GET_DATA, GET_FINANCIAL_REPORT } from "~/constants/commandConstants";
 import { getBankTransactionData, getRazorpayTransactionData } from "~/utils/getExpenditureTransactionData";
-import { getExpenseClassification } from "~/utils/getExpenseClassification";
+import { getExpenseClassification, getExpenseClassification2 } from "~/utils/getExpenseClassification";
 import { type RazorpayResource } from "@prisma/client";
 import Razorpay from "razorpay";
 import axios from "axios";
@@ -105,23 +105,48 @@ export const getFinancialReport = async (query: string, userId: string) => {
         }
     }
 
-    const timeSeries = getMonthlyTimeSeries(12);
-
-    // const breakdown = await getExpenditureBreakdown(transactions);
+    const timeSeries = getMonthlyTimeSeries(13);    
+    // const expenditureBreakdown = await getExpenditureBreakdown(transactions);
+    const expenditureBreakdown = getExpenditureBreakdown2(transactions);
+    
     const incomeData = await getIncomeData(razorpayResource, transactions);
 
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
+
     const bankBalance: ExcelCell[] = [{value: 'Bank Balance'}];
     const bankBalanceGrowthPercent: ExcelCell[] = [{value: 'Growth %'}];
     const razorpayBalance: ExcelCell[] = [{value: 'RazorPay Balance'}];
     const razorpayBalanceGrowthPercent: ExcelCell[] = [{value: 'Growth %'}];
+
     const subscriptionRevenue: ExcelCell[] = [{value: 'Subscription Revenue'}];
     const transactionRevenue: ExcelCell[] = [{value: 'Transaction Revenue'}];
     const otherRevenue: ExcelCell[] = [{value: 'Other Revenue'}];
     const totalIncome: ExcelCell[] = [{value: 'Total Income'}];
 
-    for(let i = 0; i < timeSeries.length; i++) {
+    const vendorPayout: ExcelCell[] = [{value: 'Vendor Payout'}];
+    const transactionFee: ExcelCell[] = [{value: 'Transaction Fee'}];
+    const hosting: ExcelCell[] = [{value: 'Hosting'}];
+    const grossProfit: ExcelCell[] = [{value: 'Gross Profit'}];
+
+    const marketingExpenses: ExcelCell[] = [{value: 'Marketing Expenses'}];
+    const contractors: ExcelCell[] = [{value: 'Contractors'}];
+    const professionalServices: ExcelCell[] = [{value: 'Professional Services'}];
+    const salariesAndWages: ExcelCell[] = [{value: 'Salaries and Wages'}];
+    const payrollTaxes: ExcelCell[] = [{value: 'Payroll Taxes'}];
+    const otherPayrollExpenses: ExcelCell[] = [{value: 'Other Payroll Expenses'}];
+    const taxExpenses: ExcelCell[] = [{value: 'Tax Expenses'}];
+    const insurance: ExcelCell[] = [{value: 'Insurance'}];
+    const subscriptionsExpenditure: ExcelCell[] = [{value: 'Subscriptions'}];
+    const otherExpenses: ExcelCell[] = [{value: 'Other Expenses'}];
+    const foodAndDrinks: ExcelCell[] = [{value: 'Food and Drinks'}];
+    const officeSupplies: ExcelCell[] = [{value: 'Office Supplies'}];
+    const officeSpace: ExcelCell[] = [{value: 'Office Space'}];
+    const expensesTotal: ExcelCell[] = [{value: 'Expenses Total'}];
+    const netIncome: ExcelCell[] = [{value: 'Net Income'}];
+
+
+    for(let i = 1; i < timeSeries.length; i++) {
         const time = timeSeries[i];
         if(!time) continue;
         reportHeader.push({
@@ -133,27 +158,6 @@ export const getFinancialReport = async (query: string, userId: string) => {
         razorpayBalance.push({
             value: getBalanceByDate(razorpayTransactions, time)
         });
-        if(i == 0) {
-            bankBalanceGrowthPercent.push({
-                value: 0
-            });
-            razorpayBalanceGrowthPercent.push({
-                value: 0
-            });
-            subscriptionRevenue.push({
-                value: 0
-            });
-            transactionRevenue.push({
-                value: 0
-            });
-            otherRevenue.push({
-                value: 0
-            });
-            totalIncome.push({
-                value: 0
-            });
-            continue;
-        }
         bankBalanceGrowthPercent.push({
             value: ((bankBalance[i+1]?.value as number) / (bankBalance[i]?.value as number) * 100).toFixed(2),
             expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`
@@ -167,13 +171,14 @@ export const getFinancialReport = async (query: string, userId: string) => {
         const filteredSubscriptions = incomeData.subscriptionRevenue.filter((transaction) => {
             return transaction.date >= prevTime && transaction.date <= time;
         });
+
         //SUBSCRIPTION REVENUE
         let subscriptionRevenueAmount = 0;
         for(const subscription of filteredSubscriptions) {
             subscriptionRevenueAmount += subscription.amount;
         }
         subscriptionRevenue.push({
-            value: subscriptionRevenueAmount
+            value: subscriptionRevenueAmount.toFixed(2)
         })
 
         //TRANSACTION REVENUE
@@ -185,7 +190,7 @@ export const getFinancialReport = async (query: string, userId: string) => {
             transactionRevenueAmount+= transaction.amount;
         }
         transactionRevenue.push({
-            value: transactionRevenueAmount
+            value: transactionRevenueAmount.toFixed(2)
         })
 
         //OTHER REVENUE
@@ -197,7 +202,7 @@ export const getFinancialReport = async (query: string, userId: string) => {
             otherRevenueAmount+= transaction.amount;
         }
         otherRevenue.push({
-            value: otherRevenueAmount
+            value: otherRevenueAmount.toFixed(2)
         })
 
         //TOTAL INCOME
@@ -209,11 +214,233 @@ export const getFinancialReport = async (query: string, userId: string) => {
             totalRevenueAmount+= transaction.amount;
         }
         totalIncome.push({
-            value: totalRevenueAmount
+            value: totalRevenueAmount.toFixed(2)
         })
 
+        //VENDOR PAYOUT
+        const filteredVendorPayout = incomeData.vendorPayout.filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let vendorPayoutAmount = 0;
+        for(const transaction of filteredVendorPayout) {
+            vendorPayoutAmount+= transaction.amount;
+        }
+        vendorPayout.push({
+            value: vendorPayoutAmount.toFixed(2)
+        })
 
+        //TRANSACTION FEE
+        const filteredTransactionFee = incomeData.transactionFee.filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let transactionFeeAmount = 0;
+        for(const transaction of filteredTransactionFee) {
+            transactionFeeAmount+= transaction.amount;
+        }
+        transactionFee.push({
+            value: transactionFeeAmount.toFixed(2)
+        })
+
+        //HOSTING
+        const filteredHosting = expenditureBreakdown['Hosting'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let hostingAmount = 0;
+        for(const transaction of filteredHosting) {
+            hostingAmount+= transaction.amount;
+        }
+        hosting.push({
+            value: (hostingAmount * -1).toFixed(2)
+        })
+
+        //GROSS PROFIT
+        const grossProfitAmount = totalRevenueAmount - vendorPayoutAmount - transactionFeeAmount - hostingAmount;
+        grossProfit.push({
+            value: grossProfitAmount.toFixed(2)
+        });
+
+        //MARKETING EXPENSES
+        const filteredMarketingExpenses = expenditureBreakdown['Marketing Expenses'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let marketingExpensesAmount = 0;
+        for(const transaction of filteredMarketingExpenses) {
+            marketingExpensesAmount+= transaction.amount;
+        }
+        marketingExpenses.push({
+            value: (marketingExpensesAmount * -1).toFixed(2)
+        });
+
+        //CONTRACTORS
+        const filteredContractors = expenditureBreakdown['Contractors'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let contractorsAmount = 0;
+        for(const transaction of filteredContractors) {
+            contractorsAmount+= transaction.amount;
+        }
+        contractors.push({
+            value: (contractorsAmount * -1).toFixed(2)
+        });
+
+        //PROFESSIONAL SERVICES
+        const filteredProfessionalServices = expenditureBreakdown['Professional Services'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let professionalServicesAmount = 0;
+        for(const transaction of filteredProfessionalServices) {
+            professionalServicesAmount+= transaction.amount;
+        }
+        professionalServices.push({
+            value: (professionalServicesAmount * -1).toFixed(2)
+        });
+
+        //SALARIES AND WAGES
+        const filteredSalariesAndWages = expenditureBreakdown['Salaries and Wages'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let salariesAndWagesAmount = 0;
+        for(const transaction of filteredSalariesAndWages) {
+            salariesAndWagesAmount+= transaction.amount;
+        }
+        salariesAndWages.push({
+            value: (salariesAndWagesAmount * -1).toFixed(2)
+        });
+
+
+        //PAYROLL TAXES
+        const filteredPayrollTaxes = expenditureBreakdown['Payroll Taxes'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let payrollTaxesAmount = 0;
+        for(const transaction of filteredPayrollTaxes) {
+            payrollTaxesAmount+= transaction.amount;
+        }
+        payrollTaxes.push({
+            value: (payrollTaxesAmount * -1).toFixed(2)
+        });        
+
+        //OTHER PAYROLL EXPENSES
+        const filteredPayrollExpenses = expenditureBreakdown['Payroll Taxes'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let payrollExpensesAmount = 0;
+        for(const transaction of filteredPayrollExpenses) {
+            payrollExpensesAmount+= transaction.amount;
+        }
+        otherPayrollExpenses.push({
+            value: (payrollExpensesAmount * -1).toFixed(2)
+        });
+
+        //TAX EXPENSES
+        const filteredTaxExpenses = expenditureBreakdown['Tax Expenses'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let taxExpensesAmount = 0;
+        for(const transaction of filteredTaxExpenses) {
+            taxExpensesAmount+= transaction.amount;
+        }
+        taxExpenses.push({
+            value: (taxExpensesAmount * -1).toFixed(2)
+        });
+        
+        //INSURANCE
+        const filteredInsurance = expenditureBreakdown['Insurance'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let insuranceAmount = 0;
+        for(const transaction of filteredInsurance) {
+            insuranceAmount+= transaction.amount;
+        }
+        insurance.push({
+            value: (insuranceAmount * -1).toFixed(2)
+        });
+
+        //SUBSCRIPTIONS
+        const filteredSubscriptionsExpenditure = expenditureBreakdown['Subscriptions'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let subscriptionsAmount = 0;
+        for(const transaction of filteredSubscriptionsExpenditure) {
+            subscriptionsAmount+= transaction.amount;
+        }
+        subscriptionsExpenditure.push({
+            value: (subscriptionsAmount * -1).toFixed(2)
+        });
+
+        //OTHER EXPENSES
+        const filteredOtherExpenses = expenditureBreakdown['Other Expenses'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let otherExpensesAmount = 0;
+        for(const transaction of filteredOtherExpenses) {
+            otherExpensesAmount+= transaction.amount;
+        }
+        otherExpenses.push({
+            value: (otherExpensesAmount * -1).toFixed(2)
+        });
+
+        //FOOD AND DRINKS
+        const filteredFoodAndDrinks = expenditureBreakdown['Food and Drinks'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let foodAndDrinksAmount = 0;
+        for(const transaction of filteredFoodAndDrinks) {
+            foodAndDrinksAmount+= transaction.amount;
+        }
+        foodAndDrinks.push({
+            value: (foodAndDrinksAmount * -1).toFixed(2)
+        });
+
+        //OFFICE SUPPLIES
+        const filteredOfficeSupplies = expenditureBreakdown['Office Supplies'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let officeSuppliesAmount = 0;
+        for(const transaction of filteredOfficeSupplies) {
+            officeSuppliesAmount+= transaction.amount;
+        }
+        officeSupplies.push({
+            value: (officeSuppliesAmount * -1).toFixed(2)
+        });
+
+        //OFFICE SPACE
+        const filteredOfficeSpace = expenditureBreakdown['Office Space'].filter((transaction) => {
+            return transaction.date >= prevTime && transaction.date <= time;
+        });
+        let officeSpaceAmount = 0;
+        for(const transaction of filteredOfficeSpace) {
+            officeSpaceAmount+= transaction.amount;
+        }
+        officeSpace.push({
+            value: (officeSpaceAmount * -1).toFixed(2)
+        });
+
+        //EXPENSES TOTAL
+        const totalExpensesAmount = marketingExpensesAmount + 
+            contractorsAmount + 
+            professionalServicesAmount + 
+            salariesAndWagesAmount + 
+            payrollTaxesAmount + 
+            payrollExpensesAmount +
+            taxExpensesAmount + 
+            insuranceAmount + 
+            subscriptionsAmount + 
+            otherExpensesAmount + 
+            foodAndDrinksAmount + 
+            officeSuppliesAmount + 
+            officeSpaceAmount;
+        expensesTotal.push({
+            value: (totalExpensesAmount * -1).toFixed(2)
+        })
+
+        //NET INCOME
+        netIncome.push({
+            value:
+                (grossProfitAmount + totalExpensesAmount).toFixed(2)
+        });
     }
+
     reportTable.push(reportHeader);
     reportTable.push(bankBalance);
     reportTable.push(bankBalanceGrowthPercent);
@@ -223,6 +450,25 @@ export const getFinancialReport = async (query: string, userId: string) => {
     reportTable.push(transactionRevenue);
     reportTable.push(otherRevenue);
     reportTable.push(totalIncome);
+    reportTable.push(vendorPayout);
+    reportTable.push(transactionFee);
+    reportTable.push(hosting);
+    reportTable.push(grossProfit);
+    reportTable.push(marketingExpenses);
+    reportTable.push(contractors);
+    reportTable.push(professionalServices);
+    reportTable.push(salariesAndWages);
+    reportTable.push(payrollTaxes);
+    reportTable.push(otherPayrollExpenses);
+    reportTable.push(taxExpenses);
+    reportTable.push(insurance);
+    reportTable.push(subscriptionsExpenditure);
+    reportTable.push(otherExpenses);
+    reportTable.push(foodAndDrinks);
+    reportTable.push(officeSupplies);
+    reportTable.push(officeSpace);
+    reportTable.push(expensesTotal);
+    reportTable.push(netIncome);
 
     return {
         type: GET_FINANCIAL_REPORT,
@@ -373,7 +619,7 @@ const getExpenditureBreakdown = async (transactionData: Transaction[]) : Promise
     for(let i = 0; i < transactionData.length; i++) {
         const transaction = transactionData[i];
         if(!transaction) continue
-        if(transaction.amount > 0) {
+        if(transaction.amount < 0) {
             const category = await getExpenseClassification(transaction.description);
             if(category) {
                 switch(category) {
@@ -428,9 +674,100 @@ const getExpenditureBreakdown = async (transactionData: Transaction[]) : Promise
                     case "Other":
                         breakdown["Other Expenses"].push(transaction);
                         break;
+                    default:
+                        breakdown["Other Expenses"].push(transaction);
+                        break;
                 }
             } else {
                 breakdown["Other Expenses"].push(transaction);
+            }
+        }
+    }
+    return breakdown;
+}
+
+const getExpenditureBreakdown2 = (transactionData: Transaction[]) : ExpenditureBreakdown => {
+    const breakdown: ExpenditureBreakdown = {
+        "Marketing Expenses": [],
+        "Contractors": [],
+        "Professional Services": [],
+        "Salaries and Wages": [],
+        "Payroll Taxes": [],
+        "Other Payroll Expenses": [],
+        "Tax Expenses": [],
+        "Insurance": [],
+        "Subscriptions": [],
+        "Other Expenses": [],
+        "Food and Drinks": [],
+        "Office Supplies": [],
+        "Office Space": [],
+        "Hosting": [],
+    };
+    const categoryMaps = getExpenseClassification2(transactionData);
+
+    for(let i = 0; i < categoryMaps.length; i++) {
+        const categoryMap = categoryMaps[i]
+        if(!categoryMap) continue
+        if(categoryMap.transaction.amount < 0) {
+            if(categoryMap.category) {
+                switch(categoryMap.category) {
+                    case "Subscriptions":
+                        breakdown["Subscriptions"].push(categoryMap.transaction);
+                        break;
+                    case "Hosting & Infrastructure":
+                        breakdown["Hosting"].push(categoryMap.transaction);
+                        break;
+                    case "Rent & Utilities":
+                        breakdown["Office Space"].push(categoryMap.transaction);
+                        break;
+                    case "Marketing & Advertising":
+                        breakdown["Marketing Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Legal & Professional Services":
+                        breakdown["Professional Services"].push(categoryMap.transaction);
+                        break;
+                    case "Insurance":
+                        breakdown["Insurance"].push(categoryMap.transaction);
+                        break;
+                    case "Travel & Team Expenses":
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Hardware & Equipment":
+                        breakdown["Office Supplies"].push(categoryMap.transaction);
+                        break;
+                    case "Employee Benefits":
+                        breakdown["Other Payroll Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Training & Development":
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Supply Chain Services":
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Customer Support":
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Salary & Wages":
+                        breakdown["Salaries and Wages"].push(categoryMap.transaction);
+                        break;
+                    case "Taxes":
+                        breakdown["Tax Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Professional fees":
+                        breakdown["Professional Services"].push(categoryMap.transaction);
+                        break;
+                    case "Payment Gateway":
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                    case "Other":
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                    default:
+                        breakdown["Other Expenses"].push(categoryMap.transaction);
+                        break;
+                }
+            } else {
+                breakdown["Other Expenses"].push(categoryMap.transaction);
             }
         }
     }
@@ -449,16 +786,7 @@ const getBalanceByDate = (transactionData: Transaction[], date: Date) : number =
              <= date.getTime() - closestDate.getTime()) {
             closestDate = transaction.date;
             balance = transaction.balance;
-            // console.log(transaction.description, transaction.amount, transaction.balance);
-            // console.log(date, date.getTime());
-            // console.log(transaction.date, transaction.date.getTime())
-            // console.log(closestDate, closestDate.getTime())
-            // console.log(date.getTime() - transaction.date.getTime())
-            // console.log(date.getTime() - closestDate.getTime())
-            // console.log("----------")
         }
     }
     return balance;
 }
-
-

@@ -73,8 +73,6 @@ export const StatementUploadForm: React.FC = () => {
         setFileSelected(fileList[0]);
     }
 
-
-
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>

@@ -47,7 +47,7 @@ export const runQuery = async (query: string, userId: string) => {
         });
     
         let prompt = "### Postgres SQL table with their properties\n#\n";
-    
+        
         const schemaString = await createContext(
             query,
             embeddings,
@@ -129,5 +129,4 @@ export const runQuery = async (query: string, userId: string) => {
             ]
         };
     }
-
 }

@@ -1,5 +1,16 @@
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { openai } from "~/server/services/openai";
+import natural from 'natural';
+
+type Transaction = {
+    date: Date
+    description: string
+    amount: number
+    balance?: number
+    purpose?: string
+    fee?: number
+    tax?: number
+}
 
 type Category = 
     "Subscriptions" |
@@ -20,9 +31,13 @@ type Category =
     "Payment Gateway" |
     "Other"
 
+type CategoryMap = {
+    transaction: Transaction,
+    category: Category
+}
 
 export const getExpenseClassification = async (query: string) : Promise<Category> => {
-    let prompt = "Classify the following expenditure based on the description shown in bank statement?.\nExample:\n";
+    let prompt = "Classify the following expenditure based on the description shown in bank statement?.\nExamples:\n";
     prompt += `Communication: Twilio, Slack, Zoom\nClassification: Subscriptions\n\n`
     prompt += `Project Management: Trello, Asana, Basecamp\nClassification: Subscriptions\n\n`
     prompt += `CRM: SalesForce, HubSpot, Zoho, Notion\nClassification: Subscriptions\n\n`
@@ -95,6 +110,79 @@ export const getExpenseClassification = async (query: string) : Promise<Category
     } 
 
     return "Other";
+}
+
+
+export const getExpenseClassification2 = (transactions: Transaction[]) : CategoryMap[] => {
+
+    const classifier = new natural.BayesClassifier()
+
+    classifier.addDocument('Communication: Twilio, Slack, Zoom', 'Subscriptions');
+    classifier.addDocument('Project Management: Trello, Asana, Basecamp', 'Subscriptions');
+    classifier.addDocument('CRM: SalesForce, HubSpot, Zoho, Notion', 'Subscriptions');
+    classifier.addDocument('Marketing Tools: Hootsuite, Buffer', 'Subscriptions');
+    classifier.addDocument('Notification Tools: OneSignal, Customer.io, MailChimp', 'Subscriptions');
+    classifier.addDocument('Development: GitHub, GitLab, Atlassian', 'Subscriptions');
+    classifier.addDocument('Design: Adobe Creative Cloud, Sketch, Figma, InVision', 'Subscriptions');
+    classifier.addDocument('Productivity: Microsoft Office 365, Google Workspace', 'Subscriptions');
+    classifier.addDocument('Web Analytics: Google Analytics, Mixpanel, Amplitude', 'Subscriptions');
+
+    classifier.addDocument('Hosting: AWS, Google Cloud Platform, Microsoft Azure', 'Hosting & Infrastructure');
+    classifier.addDocument('Domain Registration: NameCheap, GoDaddy, Google Domains', 'Hosting & Infrastructure');
+    classifier.addDocument('CDN: Cloudflare, Fastly Akamai', 'Hosting & Infrastructure');
+    
+    classifier.addDocument('Office Space: WeWork, Regus, Co-Works', 'Rent & Utilities');
+    classifier.addDocument('Utilities: Local utility companies for water, electricity and gas', 'Rent & Utilities');
+
+    classifier.addDocument('Online Advertising: Google Ads, Facebook Ads, Twitter Ads', 'Marketing & Advertising');
+    classifier.addDocument('Referral Payments"', 'Marketing & Advertising');
+
+    classifier.addDocument('Lawyers: Local law firms, legal service platforms', 'Legal & Professional Services');
+    classifier.addDocument('Accountants: Local accounting firms', 'Legal & Professional Services');
+    
+    classifier.addDocument('Business Insurance Providers: Hiscox, Chubb, The HartFord, PLUM', 'Insurance');
+
+    classifier.addDocument('Flights: Airline companies, Booking platforms', 'Travel & Team Expenses');
+    classifier.addDocument('Accommodation: Hotel Chains', 'Travel & Team Expenses');
+    classifier.addDocument('Ground Transportation: Uber, Lyft, Car Rental', 'Travel & Team Expenses');
+    classifier.addDocument('Meals and Entertainment: Restaurants, cafes, event tickets', 'Travel & Team Expenses');
+    classifier.addDocument('Networking and Events: Meetup, EventBrite, Local Chambers of Commerce, Trade shows', 'Travel & Team Expenses');
+
+    classifier.addDocument('Computer & Devices: Apple, Dell, HP', 'Hardware & Equipment');
+    classifier.addDocument('Office Furniture: IKEA, Furlenco, Amazon, Flipkart', 'Hardware & Equipment');
+    
+    
+    classifier.addDocument('Health Insurance: UnitedHealthCare, Blue Cross Blue Shield, Cigna, PLUM', 'Employee Benefits');
+    classifier.addDocument('Benefits: Provident Fund (PF), Employee State Insurance (ESI) ', 'Employee Benefits');
+
+
+    classifier.addDocument('Online Learning Platforms: Coursera, Udemy, LinkedIn Learning', 'Training & Development');
+    classifier.addDocument('Workshops & Conferences: Workshops, Webinars', 'Training & Development');
+
+    classifier.addDocument('UPS FedEx, DHL', 'Supply Chain Services');
+
+    classifier.addDocument('ZenDesk, HelpDesk, FreshDesk, Help Scout', 'Customer Support');
+    classifier.addDocument('Live Chat: Intercom, Drift', 'Customer Support');
+
+    classifier.addDocument('Employee salary, wages, employee names', 'Salary and Wages');
+    
+    classifier.addDocument('TDS, GST, Professional Tax, Advance Tax, TCS Collection - Income Tax Department', 'Taxes');
+    
+    classifier.addDocument('Professional Services, Consulting, Freelancer', 'Professional Fees');
+    
+    classifier.addDocument('Razorpay, Stripe, Chargebee', 'Payment Gateway');
+    
+    classifier.train()
+    const categoryMap:CategoryMap[] = []
+    for(const transaction of transactions) {
+        categoryMap.push({
+            transaction,
+            category: classifier.classify(transaction.description) as Category
+        })
+    }
+
+    return categoryMap
+    
 }
 
 
