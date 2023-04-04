@@ -159,11 +159,11 @@ export const getFinancialReport = async (query: string, userId: string) => {
             value: getBalanceByDate(razorpayTransactions, time)
         });
         bankBalanceGrowthPercent.push({
-            value: ((bankBalance[i+1]?.value as number) / (bankBalance[i]?.value as number) * 100).toFixed(2),
+            value: ((bankBalance[i]?.value as number) / (bankBalance[i - 1]?.value as number) * 100).toFixed(2),
             expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`
         });
         razorpayBalanceGrowthPercent.push({
-            value: ((razorpayBalance[i+1]?.value as number) / (razorpayBalance[i]?.value as number) * 100).toFixed(2),
+            value: ((razorpayBalance[i]?.value as number) / (razorpayBalance[i - 1]?.value as number) * 100).toFixed(2),
             expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`
         });
         const prevTime = timeSeries[i - 1];
