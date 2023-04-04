@@ -51,20 +51,19 @@ export const runQuery = async (query: string, userId: string) => {
         const schemaString = await createContext(
             query,
             embeddings,
-            150
+            800
         )
         prompt += schemaString;
         const newPrompt = prompt + `### A query to get ${query}\nSELECT`;
-        console.log("NEW PROMPT:", newPrompt);
         const completion = await openai.createCompletion({
             model: COMPLETIONS_MODEL,
-            prompt: prompt,
-            temperature: 0,
-            max_tokens: 500,
+            prompt: newPrompt,
+            temperature: 0.7,
+            max_tokens: 256,
             stop: ["#", ";"]
         });        
         if(completion?.data?.choices.length > 0) {
-            console.log(completion.data.choices[0]?.text);
+            console.log("TEXT:", completion.data.choices[0]?.text);
             const text = completion?.data?.choices[0]?.text;
             if(text) {
                 sqlQuery = "SELECT " + text;
