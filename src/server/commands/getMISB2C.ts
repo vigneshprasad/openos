@@ -331,12 +331,12 @@ export const getMISB2C = async (query: string, userId: string) => {
             const facebookSpendNumber = marketingSpent.facebook * -1;
             const googleSpendNumber = marketingSpent.google * -1;
 
-            facebookSpend.push({ value: facebookSpendNumber });
+            facebookSpend.push({ value: facebookSpendNumber.toFixed(2) });
             facebookCac.push({
                 value: ((facebookSpendNumber) / (userBySource.facebook) * 100).toFixed(2),
             });
 
-            googleSpend.push({ value: googleSpendNumber });
+            googleSpend.push({ value: googleSpendNumber.toFixed(2) });
             googleCac.push({
                 value: ((googleSpendNumber) / (userBySource.google) * 100).toFixed(2),
             });
@@ -714,9 +714,13 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
         `Get usernames and date joined of users that joined between ${timeSeries0} and ${timeSeries1}`,
         client, embeddings, timeSeries
     );
-
-    const userList = await executeQuery(client, userListQuery);
-
+    
+    let userList;
+    try {
+        userList = await executeQuery(client, userListQuery);
+    } catch (error) {
+        return [];
+    }
 
     let activityQuery = await processPrompt(
         `${activityDescription} by user with username ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
@@ -726,10 +730,6 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
     //@TO DO: This is only required for Crater - Replace id with uuid
     activityQuery = activityQuery.replace('\n', ' ');
     activityQuery = activityQuery.replace('id FROM users', 'uuid FROM users');
-
-    console.log(userListQuery);
-    console.log("-------------");
-    console.log(activityQuery);
 
     const identifierKey = Object.keys(userList[0] as object)[0];
     const dateJoinedKey = Object.keys(userList[0] as object)[1];

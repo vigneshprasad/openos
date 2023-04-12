@@ -10,11 +10,6 @@ const GenerateMIS: NextPage = () => {
     const router = useRouter();
     const { resource, template } = router.query; 
 
-    api.userTemplate.getMIS.useQuery({
-        resource: String(resource),
-        template: String(template)
-    })
-
     return (
         <>
             <Head>
