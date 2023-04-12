@@ -143,10 +143,9 @@ export const getRazorpayTransactionData = async (
     
     const transactions: Transaction[] = [];
     try {
-        //@TODO: REMOVE HARD CODED ACCOUNT NUMBER
         const response = await axios.get('https://api.razorpay.com/v1/payouts', {
             params: {
-                'account_number': '2323230039062652'
+                'account_number': razorpayResource.account_number
             },
             auth: {
                 username: razorpayResource.key_id,

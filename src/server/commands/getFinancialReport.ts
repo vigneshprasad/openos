@@ -475,7 +475,6 @@ export const getFinancialReport = async (userId: string) => {
     }
 }
 
-//@TODO: ERROR HANDLING FOR THIS FUNCTION
 const getIncomeData = async (razorpayResource: RazorpayResource | undefined, transactionData: Transaction[]) : Promise<IncomeData> => {
     const incomeData: IncomeData = {
         subscriptionRevenue: [],
@@ -518,12 +517,11 @@ const getIncomeData = async (razorpayResource: RazorpayResource | undefined, tra
             } catch (error) {
                 console.log("SUBSCRIPTION DATA NOT FOUND", error);
             }
-            //@TODO: REMOVE HARD CODED ACCOUNT NUMBER
             //TRANSACTION REVENUE
             try {
                 const response = await axios.get('https://api.razorpay.com/v1/transactions', {
                     params: {
-                        'account_number': '2323230039062652'
+                        'account_number': razorpayResource.account_number
                     },
                     auth: {
                         username: razorpayResource.key_id,
@@ -577,7 +575,7 @@ const getIncomeData = async (razorpayResource: RazorpayResource | undefined, tra
         }
 
         //OTHER INCOME
-        //TODO: ALSO INCLUDE UNACCOUNTED FOR RAZOR PAY TRANSACTIONS HERE
+        //@TO DO: ALSO INCLUDE UNACCOUNTED FOR RAZOR PAY TRANSACTIONS HERE
         incomeData.otherRevenue.push(
             ...transactionData.filter(transaction => transaction.amount > 0)
         )

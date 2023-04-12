@@ -723,7 +723,7 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
         client, embeddings, timeSeries
     );
 
-    // TODO: This is only required for Crater - Replace id with uuid
+    //@TO DO: This is only required for Crater - Replace id with uuid
     activityQuery = activityQuery.replace('\n', ' ');
     activityQuery = activityQuery.replace('id FROM users', 'uuid FROM users');
 
