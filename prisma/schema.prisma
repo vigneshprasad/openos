@@ -38,16 +38,18 @@ model Session {
 }
 
 model User {
-    id               String             @id @default(cuid())
-    name             String?
-    email            String?            @unique
-    emailVerified    DateTime?
-    image            String?
-    accounts         Account[]
-    sessions         Session[]
-    DatabaseResource DatabaseResource[]
-    RazorpayResource RazorpayResource[]
-    BankStatement    BankStatement[]
+    id                  String                @id @default(cuid())
+    name                String?
+    email               String?               @unique
+    emailVerified       DateTime?
+    image               String?
+    accounts            Account[]
+    sessions            Session[]
+    DatabaseResource    DatabaseResource[]
+    RazorpayResource    RazorpayResource[]
+    BankStatement       BankStatement[]
+    funnelSteps         funnelSteps[]
+    ActivityDescription ActivityDescription[]
 }
 
 model VerificationToken {
@@ -74,6 +76,7 @@ model DatabaseResource {
     user                     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
     ResourceSchemaEmbeddings ResourceSchemaEmbeddings[]
     status                   Boolean
+    SavedQuery               SavedQuery[]
 
     @@index([userId])
 }
@@ -142,6 +145,43 @@ model BankStatement {
     userId    String
     user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     url       String
+
+    @@index([userId])
+}
+
+model SavedQuery {
+    id                 String           @id @default(cuid())
+    name               String
+    query              String           @db.Text
+    createdAt          DateTime         @default(now())
+    updatedAt          DateTime         @updatedAt
+    deletedAt          DateTime?
+    databaseResource   DatabaseResource @relation(fields: [databaseResourceId], references: [id], onDelete: Cascade)
+    databaseResourceId String
+    reportKey          String?
+
+    @@index([databaseResourceId])
+}
+
+model funnelSteps {
+    id     String @id @default(cuid())
+    step1  String
+    step2  String
+    step3  String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+
+    @@index([userId])
+}
+
+model ActivityDescription {
+    id        String    @id @default(cuid())
+    activity  String    @db.Text
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    userId    String    @unique
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
 }

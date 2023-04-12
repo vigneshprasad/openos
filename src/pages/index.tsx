@@ -4,7 +4,7 @@ import { useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { DATABASE_QUERY, GET_DATA, GET_FINANCIAL_REPORT } from "~/constants/commandConstants";
+import { DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType } from "../types/types";
 import FinancialReport from "~/components/FinancialReport";
@@ -83,7 +83,7 @@ const Home: NextPage = () => {
                             <RazorpayData props={data?.data} />
                     }
                     {
-                        data?.type && data?.data && data?.type === GET_FINANCIAL_REPORT &&
+                        data?.type && data?.data && data?.type === GET_REPORT &&
                             <FinancialReport props={data?.data} />
                     }
                     {error && <div className="text-white">Error</div>}

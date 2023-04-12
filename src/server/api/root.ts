@@ -1,6 +1,5 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { templateRouter } from "~/server/api/routers/template";
-import { userTemplateRouter } from "~/server/api/routers/userTemplate";
 import { databaseResourceRouter } from "./routers/databaseResource";
 import { razorpayResourceRouter } from "./routers/razorpayResource";
 import { commandRouter } from "./routers/command";
@@ -15,7 +14,6 @@ export const appRouter = createTRPCRouter({
   databaseResource: databaseResourceRouter,
   razorpayResource: razorpayResourceRouter,
   template: templateRouter,
-  userTemplate: userTemplateRouter,
   commandRouter: commandRouter,
   aws: awsRouter,
 });

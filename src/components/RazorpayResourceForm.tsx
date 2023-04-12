@@ -8,6 +8,7 @@ export const RazorpayResourceForm: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [keyId, setKeyId] = useState<string>("");
     const [keySecret, setKeySecret] = useState<string>("");
+    const [accountNumber, setAccountNumber] = useState<string>("");
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export const RazorpayResourceForm: React.FC = () => {
             name: name,
             keyId: keyId,
             keySecret: keySecret,
+            accountNumber: accountNumber,
         });
     };
 
@@ -82,6 +84,17 @@ export const RazorpayResourceForm: React.FC = () => {
                                     type="text"
                                     value={keySecret}
                                     onChange={(e) => setKeySecret(e.target.value)}
+                                />
+                            </label>
+                        </fieldset>
+                        <fieldset className="Fieldset">
+                            <label className="Label">
+                                <span>Account Number (RazorPay X)</span>
+                                <input
+                                    className="Input"
+                                    type="text"
+                                    value={accountNumber}
+                                    onChange={(e) => setAccountNumber(e.target.value)}
                                 />
                             </label>
                         </fieldset>

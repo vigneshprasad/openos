@@ -14,10 +14,11 @@ interface GridElement extends ReactDataSheet.Cell<GridElement> {
 }
 
 const FinancialReport: React.FC<Props> = ({ props }) => {
-    const [data, error ] = props
+    const [data, error] = props
+    if(error) { console.log("BRUHRUHRHR", error) }
     const dataRaw = data as ExcelCell[][]
-    const tableData = dataRaw.slice(1);
-    const [grid, setGrid] = useState<GridElement[][]>(tableData)
+    const tableData = data && dataRaw.slice(1);
+    const [grid, setGrid] = useState<GridElement[][]>(tableData ? tableData : []) 
     return (
         <>
             { data && 

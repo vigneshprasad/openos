@@ -1,20 +1,9 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 
-import { api } from "~/utils/api";
-import { useRouter } from "next/router";
 import { Navbar } from "~/components/Navbar";
 
 const GenerateMIS: NextPage = () => {
-
-    const router = useRouter();
-    const { resource, template } = router.query; 
-
-    api.userTemplate.getMIS.useQuery({
-        resource: String(resource),
-        template: String(template)
-    })
-
     return (
         <>
             <Head>
