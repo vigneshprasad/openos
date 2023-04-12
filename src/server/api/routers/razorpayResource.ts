@@ -27,6 +27,7 @@ export const razorpayResourceRouter = createTRPCRouter({
         keySecret: z.string({
           required_error: "Key Secret is required"
         }),
+        accountNumber: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
         return await ctx.prisma.razorpayResource.create({
@@ -36,6 +37,7 @@ export const razorpayResourceRouter = createTRPCRouter({
                 key_secret: input.keySecret,
                 status: true,
                 userId: ctx.session.user.id,
+                account_number: input.accountNumber
             },
         });
     })
