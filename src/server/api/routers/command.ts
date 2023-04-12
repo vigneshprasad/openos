@@ -39,12 +39,13 @@ export const commandRouter = createTRPCRouter({
                             return await getFinancialReport(ctx.session.user.id);
                         } catch(e) {
                             console.log(e)
+                            throw new TRPCClientError(`Bad Query BRUHUH, ${e as string}`);
                         }
                     case MIS_B2C:
                         try {
                             return await getMISB2C(query, ctx.session.user.id);
                         } catch(e) {
-                            console.log(e)
+                            throw new TRPCClientError(`Bad Query LOLOL, ${e as string}`);
                         }
                 }
                 break;
