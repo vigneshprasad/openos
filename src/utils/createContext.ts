@@ -18,7 +18,6 @@ export const createContext = async (
         input: question,
     });
 
-
     const scores: Score[] = [];
 
     for(let i = 0; i < embeddingObjects.length; i++) {
@@ -40,7 +39,6 @@ export const createContext = async (
         }
         schemaString += `# ${embeddingName}`
     }
-
     return schemaString
     
 }

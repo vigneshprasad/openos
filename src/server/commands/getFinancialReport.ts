@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
-
-import { GET_DATA, GET_FINANCIAL_REPORT } from "~/constants/commandConstants";
+import { GET_REPORT } from "~/constants/commandConstants";
 import { getBankTransactionData, getRazorpayTransactionData } from "~/utils/getExpenditureTransactionData";
 import { getExpenseClassification, getExpenseClassification2 } from "~/utils/getExpenseClassification";
 import { type RazorpayResource } from "@prisma/client";
@@ -57,7 +56,7 @@ type RazorpayTransactionEntity = {
     credit: number,
 }
 
-export const getFinancialReport = async (query: string, userId: string) => {
+export const getFinancialReport = async (userId: string) => {
     const razorpayResources = await prisma.razorpayResource.findMany({
         where: {
             userId: userId
@@ -73,7 +72,7 @@ export const getFinancialReport = async (query: string, userId: string) => {
     const bankStatement = bankStatements[bankStatements.length - 1];
     if(!bankStatement) {
         return {
-            type: GET_DATA,
+            type: GET_REPORT,
             data: [
                 undefined, 
                 {
@@ -93,7 +92,7 @@ export const getFinancialReport = async (query: string, userId: string) => {
     }
     if(transactions.length === 0) {
         return {
-            type: GET_DATA,
+            type: GET_REPORT,
             data: [
                 undefined,
                 {
@@ -105,12 +104,10 @@ export const getFinancialReport = async (query: string, userId: string) => {
         }
     }
 
-    const timeSeries = getMonthlyTimeSeries(13);    
-    // const expenditureBreakdown = await getExpenditureBreakdown(transactions);
-    const expenditureBreakdown = getExpenditureBreakdown2(transactions);
-    
+    const expenditureBreakdown = await getExpenditureBreakdown(transactions);
     const incomeData = await getIncomeData(razorpayResource, transactions);
-
+    const timeSeries = getMonthlyTimeSeries(13);
+    
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
@@ -144,7 +141,6 @@ export const getFinancialReport = async (query: string, userId: string) => {
     const officeSpace: ExcelCell[] = [{value: 'Office Space'}];
     const expensesTotal: ExcelCell[] = [{value: 'Expenses Total'}];
     const netIncome: ExcelCell[] = [{value: 'Net Income'}];
-
 
     for(let i = 1; i < timeSeries.length; i++) {
         const time = timeSeries[i];
@@ -471,7 +467,7 @@ export const getFinancialReport = async (query: string, userId: string) => {
     reportTable.push(netIncome);
 
     return {
-        type: GET_FINANCIAL_REPORT,
+        type: GET_REPORT,
         data: [
             reportTable,
             undefined
