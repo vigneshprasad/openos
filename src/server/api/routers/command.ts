@@ -35,9 +35,17 @@ export const commandRouter = createTRPCRouter({
             case GET_REPORT:
                 switch(query) {
                     case FINANCIAL_REPORT:
-                        return await getFinancialReport(ctx.session.user.id);
+                        try { 
+                            return await getFinancialReport(ctx.session.user.id);
+                        } catch(e) {
+                            console.log(e)
+                        }
                     case MIS_B2C:
-                        return await getMISB2C(query, ctx.session.user.id);
+                        try {
+                            return await getMISB2C(query, ctx.session.user.id);
+                        } catch(e) {
+                            console.log(e)
+                        }
                 }
                 break;
 
