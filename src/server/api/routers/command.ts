@@ -35,18 +35,9 @@ export const commandRouter = createTRPCRouter({
             case GET_REPORT:
                 switch(query) {
                     case FINANCIAL_REPORT:
-                        try { 
-                            return await getFinancialReport(ctx.session.user.id);
-                        } catch(e) {
-                            console.log(e)
-                            throw new TRPCClientError(`Bad Query BRUHUH, ${e as string}`);
-                        }
+                        return await getFinancialReport(ctx.session.user.id);                        
                     case MIS_B2C:
-                        try {
-                            return await getMISB2C(query, ctx.session.user.id);
-                        } catch(e) {
-                            throw new TRPCClientError(`Bad Query LOLOL, ${e as string}`);
-                        }
+                        return await getMISB2C(query, ctx.session.user.id);
                 }
                 break;
 
