@@ -4,7 +4,7 @@ import { useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType } from "../types/types";
 import FinancialReport from "~/components/FinancialReport";
@@ -17,15 +17,44 @@ type CommandDataType = {
 const Home: NextPage = () => {
 
     const [command, setCommand] = useState<string>("");
-    const [data, setData] = useState<CommandDataType>();
+    const [data, setData] = useState<CommandDataType[]>([]);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const runQuery = api.commandRouter.runCommand.useMutation({
+    const runSimpleQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: (data) => {
-            const dataResult = data as CommandDataType;
-            setData(dataResult);
-            setLoading(false);
+            return data;
+        },
+        onError: () => {
+            return null;
+        }
+    })
+
+    const runQuery = api.commandRouter.runCommand.useMutation({
+        onSuccess: async (res) => {
+            const dataResult = res as CommandDataType;
+            if(dataResult.type === COMPLEX_REPORT) {
+                if(!dataResult.data[0]) {
+                    setLoading(false);
+                    setError(true);
+                    return;
+                }
+                const commands:string[] = dataResult.data[0] as unknown as string[];
+                const dataState = data;
+                for(let i = 0; i < commands.length; i++) {
+                    const command = commands[i] as string;
+                    if(!commands[i]) continue;
+                    const simpleResult = await runSimpleQuery.mutateAsync({ query: command });
+                    const simpleResultData = simpleResult as CommandDataType;
+                    if(!simpleResultData) continue;
+                    dataState.push(simpleResultData);
+                    setData(dataState);
+                }
+                setLoading(false);
+            } else {
+                setData([dataResult]);
+                setLoading(false);
+            }
         },
         onError: () => {
             setLoading(false);
@@ -37,7 +66,7 @@ const Home: NextPage = () => {
         e.preventDefault();
         setLoading(true);
         setError(false);
-        setData(undefined);
+        setData([]);
         runQuery.mutate({ query: command });        
     };
 
@@ -73,19 +102,18 @@ const Home: NextPage = () => {
                             </div>
                         </form>
                     </div>
+                    {
+                        data?.map((item, index) => {
+                            if(item.type === DATABASE_QUERY) {
+                                return <QueryResult key={index} props={item.data} />
+                            } else if(item.type === GET_DATA) {
+                                return <RazorpayData key={index} props={item.data} />
+                            } else if(item.type === GET_REPORT) {
+                                return <FinancialReport key={index} props={item.data} />
+                            }
+                        })
+                    }
                     {loading && <div className="text-white">Loading...</div>}
-                    {
-                        data?.type && data?.data && data?.type === DATABASE_QUERY && 
-                            <QueryResult props={data?.data} />
-                    }
-                    {
-                        data?.type && data?.data && data?.type === GET_DATA && 
-                            <RazorpayData props={data?.data} />
-                    }
-                    {
-                        data?.type && data?.data && data?.type === GET_REPORT &&
-                            <FinancialReport props={data?.data} />
-                    }
                     {error && <div className="text-white">Error</div>}
                 </div>
             </div>

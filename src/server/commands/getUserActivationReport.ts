@@ -18,7 +18,7 @@ type UsersByFunnelStep = {
     total: number,
 }
 
-export const getUserFunnelReport = async (query: string, userId: string) => {
+export const getUserActivationReport = async (query: string, userId: string) => {
     const databaseResources = await prisma.databaseResource.findMany({
         where: {
             userId: userId
@@ -115,6 +115,7 @@ export const getUserFunnelReport = async (query: string, userId: string) => {
         }
     }
 
+    reportTable.push(reportHeader);
     reportTable.push(funnelStep1);
     reportTable.push(funnelStep2);
     reportTable.push(funnelStep3);

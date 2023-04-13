@@ -5,7 +5,7 @@ import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { Client } from "pg";
 import { getUserBySource } from "./getUserAcquisitionReport";
-import { Transaction } from "@prisma/client";
+import { type Transaction } from "@prisma/client";
 
 type UsersBySource = {
     date: Date,
@@ -21,7 +21,7 @@ type MarketingSpent = {
     google: number,
 }
 
-export const getMarketingSpentReport = async (query: string, userId: string) => {
+export const getMarketingSpendReport = async (query: string, userId: string) => {
     const databaseResources = await prisma.databaseResource.findMany({
         where: {
             userId: userId

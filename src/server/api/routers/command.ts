@@ -5,13 +5,18 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-import { DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
 import { runQuery } from "~/server/commands/runQuery";
 import { TRPCClientError } from "@trpc/client";
 import { getRazorpayData } from "~/server/commands/getRazorpayData";
 import { getFinancialReport } from "~/server/commands/getFinancialReport";
-import { FINANCIAL_REPORT, MIS_B2C } from "~/constants/reportConstants";
+import { ACTIVE_USERS, FINANCIAL_REPORT, MARKETING_SPEND, MIS_B2C, USER_ACQUISITION, USER_ACTIVATION, USER_RETENTION } from "~/constants/reportConstants";
 import { getMISB2C } from "~/server/commands/getMISB2C";
+import { getUserAcquisitionReport } from "~/server/commands/getUserAcquisitionReport";
+import { getUserActivationReport } from "~/server/commands/getUserActivationReport";
+import { getActiveUserReport } from "~/server/commands/getActiveUserReport";
+import { getRetentionReport } from "~/server/commands/getRetentionReport";
+import { getMarketingSpendReport } from "~/server/commands/getMarketingSpendReport";
 
 
 export const commandRouter = createTRPCRouter({
@@ -37,7 +42,29 @@ export const commandRouter = createTRPCRouter({
                     case FINANCIAL_REPORT:
                         return await getFinancialReport(ctx.session.user.id);                        
                     case MIS_B2C:
-                        return await getMISB2C(query, ctx.session.user.id);
+                        return {
+                            type: COMPLEX_REPORT,
+                            data: [
+                                [
+                                    `${GET_REPORT}: ${USER_ACQUISITION}`,
+                                    `${GET_REPORT}: ${USER_ACTIVATION}`,
+                                    `${GET_REPORT}: ${ACTIVE_USERS}`,
+                                    `${GET_REPORT}: ${USER_RETENTION}`,
+                                    `${GET_REPORT}: ${MARKETING_SPEND}`,
+                                ],
+                                undefined
+                            ]
+                        }
+                    case USER_ACQUISITION:
+                        return await getUserAcquisitionReport(query, ctx.session.user.id);
+                    case USER_ACTIVATION:
+                        return await getUserActivationReport(query, ctx.session.user.id);
+                    case ACTIVE_USERS:
+                        return await getActiveUserReport(query, ctx.session.user.id);
+                    case USER_RETENTION:
+                        return await getRetentionReport(query, ctx.session.user.id);
+                    case MARKETING_SPEND:
+                        return await getMarketingSpendReport(query, ctx.session.user.id);
                 }
             default:
                 throw new TRPCClientError('Bad Query');

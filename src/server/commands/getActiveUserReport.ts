@@ -17,7 +17,7 @@ type ActiveUsers = {
     mau: number,
 }
 
-export const getUserActivityReport = async (query: string, userId: string) => {
+export const getActiveUserReport = async (query: string, userId: string) => {
     const databaseResources = await prisma.databaseResource.findMany({
         where: {
             userId: userId

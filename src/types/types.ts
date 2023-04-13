@@ -1,5 +1,5 @@
 export type CommandResultType = [
-    undefined | QueryAndResult | JsonData | ExcelCell[][],
+    undefined | QueryAndResult | JsonData | ExcelCell[][] | string[],
     undefined | Error
 ]
 
