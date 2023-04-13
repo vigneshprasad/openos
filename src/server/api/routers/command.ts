@@ -39,22 +39,6 @@ export const commandRouter = createTRPCRouter({
                     case MIS_B2C:
                         return await getMISB2C(query, ctx.session.user.id);
                 }
-                break;
-            case 'help':
-                return setTimeout(()=> {
-                    return {
-                        type: DATABASE_QUERY,
-                        data: [
-                            undefined, 
-                            {
-                                query: 'HELP CHECK',
-                                message: 'HELP CHECK',
-                                cause: 'CHECKING HELP'
-                            }
-                        ]
-                    };
-                }, Number(query))                    
-
             default:
                 throw new TRPCClientError('Bad Query');
         }
