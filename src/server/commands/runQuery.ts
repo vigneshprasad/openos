@@ -18,6 +18,7 @@ export const runQuery = async (query: string, userId: string) => {
         }
     })
     const databaseResource = databaseResources[0];
+    console.log("DB RESOURCE", databaseResource);
     if(!databaseResources || !databaseResource) {
         return {
             type: DATABASE_QUERY,
@@ -38,14 +39,17 @@ export const runQuery = async (query: string, userId: string) => {
             connectionString: dbUrl,
             ssl: { rejectUnauthorized: false, }
         });
+        console.log("CLIENT", client.port);
         await client.connect();
+        console.log("CLIENT CONNECTED");
     
         const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
             where: {
                 databaseResourceId: databaseResource.id
             }
         });
-    
+        console.log("Embeddings", embeddings.length);
+
         let prompt = "### Postgres SQL table with their properties\n#\n";
         
         const schemaString = await createContext(
@@ -55,6 +59,7 @@ export const runQuery = async (query: string, userId: string) => {
         )
         prompt += schemaString;
         const newPrompt = prompt + `### A query to get ${query}\nSELECT`;
+        console.log("Prompt", newPrompt);
         const completion = await openai.createCompletion({
             model: COMPLETIONS_MODEL,
             prompt: newPrompt,
@@ -62,6 +67,7 @@ export const runQuery = async (query: string, userId: string) => {
             max_tokens: 256,
             stop: ["#", ";"]
         });        
+        console.log("Completion", completion)
         if(completion?.data?.choices.length > 0) {
             console.log("TEXT:", completion.data.choices[0]?.text);
             const text = completion?.data?.choices[0]?.text;
@@ -116,6 +122,7 @@ export const runQuery = async (query: string, userId: string) => {
             };
         }
     } catch(e) {
+        console.log("Error", e);
         return {
             type: DATABASE_QUERY,
             data: [
