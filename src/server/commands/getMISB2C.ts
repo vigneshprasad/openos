@@ -1,10 +1,9 @@
 import { prisma } from "~/server/db";
 
 import { GET_REPORT } from "~/constants/commandConstants";
-import { getBankTransactionData } from "~/utils/getExpenditureTransactionData";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type ResourceSchemaEmbeddings, type funnelSteps } from "@prisma/client";
+import { type Transaction, type ResourceSchemaEmbeddings, type funnelSteps } from "@prisma/client";
 import { Client, type QueryResult } from "pg";
 import { createContext } from "~/utils/createContext";
 import { openai } from "../services/openai";
@@ -12,16 +11,6 @@ import { COMPLETIONS_MODEL } from "~/constants/openAi";
 
 import { type TableRow } from "~/types/types";
 import moment from "moment";
-
-type Transaction = {
-    date: Date
-    description: string
-    amount: number
-    balance?: number
-    purpose?: string
-    fee?: number
-    tax?: number
-}
 
 type UsersBySource = {
     date: Date,
@@ -66,15 +55,14 @@ export const getMISB2C = async (query: string, userId: string) => {
             userId: userId
         }
     })
-    const bankStatements = await prisma.bankStatement.findMany({
+    const transactions = await prisma.transaction.findMany({
         where: {
             userId: userId
         }
     })
 
     const databaseResource = databaseResources[0];
-    const bankStatement = bankStatements[bankStatements.length - 1];
-    if(!databaseResource || !bankStatement) {
+    if(!databaseResource) {
         return {
             type: GET_REPORT,
             data: [
@@ -87,20 +75,7 @@ export const getMISB2C = async (query: string, userId: string) => {
             ]
         };
     }
-    if(!databaseResource || !bankStatement) {
-        return {
-            type: GET_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Bank statement not found found',
-                    cause: 'Please add a bank stament to your account to get MIS B2C report.'
-                }
-            ]
-        };
-    }
-    const transactions = await getBankTransactionData(bankStatement);
+
     if(transactions.length === 0) {
         return {
             type: GET_REPORT,
@@ -679,10 +654,10 @@ const getMarketingSpent = (transactions:Transaction[], timeSeries: Date[]) : Mar
         if(!date || !prevDate) continue
         const facebookSpent = facebookTransactions.filter(
             transaction => transaction.date >= prevDate && transaction.date < date
-        ).reduce((acc, transaction) => acc + transaction.amount, 0);
+        ).reduce((acc, transaction) => acc + transaction.amount.toNumber(), 0);
         const googleSpent = googleTransactions.filter(
             transaction => transaction.date >= prevDate && transaction.date < date
-        ).reduce((acc, transaction) => acc + transaction.amount, 0);
+        ).reduce((acc, transaction) => acc + transaction.amount.toNumber(), 0);
         result.push({
             date: timeSeries[i] as Date,
             facebook: facebookSpent,

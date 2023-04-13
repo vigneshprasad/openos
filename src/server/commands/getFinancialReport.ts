@@ -1,7 +1,6 @@
 import { prisma } from "~/server/db";
 import { GET_REPORT } from "~/constants/commandConstants";
-import { getBankTransactionData, getRazorpayTransactionData } from "~/utils/getExpenditureTransactionData";
-import { getExpenseClassification, getExpenseClassification2 } from "~/utils/getExpenseClassification";
+import { getRazorpayTransactionData } from "~/utils/getExpenditureTransactionData";
 import { type RazorpayResource } from "@prisma/client";
 import Razorpay from "razorpay";
 import axios from "axios";
@@ -25,6 +24,7 @@ type Transaction = {
     purpose?: string
     fee?: number
     tax?: number
+    category?: string
 }
 
 type ExpenditureBreakdown = {
@@ -62,28 +62,21 @@ export const getFinancialReport = async (userId: string) => {
             userId: userId
         }
     })
-    const bankStatements = await prisma.bankStatement.findMany({
-        where: {
-            userId: userId
-        }
-    })
 
     const razorpayResource = razorpayResources[0];
-    const bankStatement = bankStatements[bankStatements.length - 1];
-    if(!bankStatement) {
-        return {
-            type: GET_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'No bank statement found',
-                    cause: 'Please add a bank stament to your account to get financial report.'
-                }
-            ]
-        };
-    }
-    const bankTransactions = await getBankTransactionData(bankStatement);
+    const bankTransactionsRaw = await prisma.transaction.findMany({
+        where: {
+            userId: userId
+            }
+    });
+    const bankTransactions:Transaction[] = bankTransactionsRaw.map((transaction) => ({
+        date: transaction.date,
+        description: transaction.description,
+        amount: transaction.amount.toNumber() || 0,
+        balance: transaction.balance.toNumber(),
+        category: transaction.category
+    }))
+
     let transactions = [...bankTransactions];
     let razorpayTransactions:Transaction[] = []
     if(razorpayResource) {
@@ -98,13 +91,13 @@ export const getFinancialReport = async (userId: string) => {
                 {
                     query: 'Request unprocessed',
                     message: 'No transactions found',
-                    cause: 'Could not process bank statement'
+                    cause: 'No bank transactions or RazorPay not found'
                 }
             ]
         }
     }
 
-    const expenditureBreakdown = await getExpenditureBreakdown(transactions);
+    const expenditureBreakdown = getExpenditureBreakdown(transactions);
     const incomeData = await getIncomeData(razorpayResource, transactions);
     const timeSeries = getMonthlyTimeSeries(13);
     
@@ -593,7 +586,7 @@ const getIncomeData = async (razorpayResource: RazorpayResource | undefined, tra
 
 }
 
-const getExpenditureBreakdown = async (transactionData: Transaction[]) : Promise<ExpenditureBreakdown> => {
+const getExpenditureBreakdown = (transactionData: Transaction[]) : ExpenditureBreakdown => {
     const breakdown: ExpenditureBreakdown = {
         "Marketing Expenses": [],
         "Contractors": [],
@@ -614,9 +607,8 @@ const getExpenditureBreakdown = async (transactionData: Transaction[]) : Promise
         const transaction = transactionData[i];
         if(!transaction) continue
         if(transaction.amount < 0) {
-            const category = await getExpenseClassification(transaction.description);
-            if(category) {
-                switch(category) {
+            if(transaction.category) {
+                switch(transaction.category) {
                     case "Subscriptions":
                         breakdown["Subscriptions"].push(transaction);
                         break;
@@ -674,94 +666,6 @@ const getExpenditureBreakdown = async (transactionData: Transaction[]) : Promise
                 }
             } else {
                 breakdown["Other Expenses"].push(transaction);
-            }
-        }
-    }
-    return breakdown;
-}
-
-const getExpenditureBreakdown2 = (transactionData: Transaction[]) : ExpenditureBreakdown => {
-    const breakdown: ExpenditureBreakdown = {
-        "Marketing Expenses": [],
-        "Contractors": [],
-        "Professional Services": [],
-        "Salaries and Wages": [],
-        "Payroll Taxes": [],
-        "Other Payroll Expenses": [],
-        "Tax Expenses": [],
-        "Insurance": [],
-        "Subscriptions": [],
-        "Other Expenses": [],
-        "Food and Drinks": [],
-        "Office Supplies": [],
-        "Office Space": [],
-        "Hosting": [],
-    };
-    const categoryMaps = getExpenseClassification2(transactionData);
-
-    for(let i = 0; i < categoryMaps.length; i++) {
-        const categoryMap = categoryMaps[i]
-        if(!categoryMap) continue
-        if(categoryMap.transaction.amount < 0) {
-            if(categoryMap.category) {
-                switch(categoryMap.category) {
-                    case "Subscriptions":
-                        breakdown["Subscriptions"].push(categoryMap.transaction);
-                        break;
-                    case "Hosting & Infrastructure":
-                        breakdown["Hosting"].push(categoryMap.transaction);
-                        break;
-                    case "Rent & Utilities":
-                        breakdown["Office Space"].push(categoryMap.transaction);
-                        break;
-                    case "Marketing & Advertising":
-                        breakdown["Marketing Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Legal & Professional Services":
-                        breakdown["Professional Services"].push(categoryMap.transaction);
-                        break;
-                    case "Insurance":
-                        breakdown["Insurance"].push(categoryMap.transaction);
-                        break;
-                    case "Travel & Team Expenses":
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Hardware & Equipment":
-                        breakdown["Office Supplies"].push(categoryMap.transaction);
-                        break;
-                    case "Employee Benefits":
-                        breakdown["Other Payroll Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Training & Development":
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Supply Chain Services":
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Customer Support":
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Salary & Wages":
-                        breakdown["Salaries and Wages"].push(categoryMap.transaction);
-                        break;
-                    case "Taxes":
-                        breakdown["Tax Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Professional fees":
-                        breakdown["Professional Services"].push(categoryMap.transaction);
-                        break;
-                    case "Payment Gateway":
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                    case "Other":
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                    default:
-                        breakdown["Other Expenses"].push(categoryMap.transaction);
-                        break;
-                }
-            } else {
-                breakdown["Other Expenses"].push(categoryMap.transaction);
             }
         }
     }

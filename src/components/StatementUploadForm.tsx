@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { type Transaction } from "@prisma/client";
 
 export const StatementUploadForm: React.FC = () => {    
     const [name, setName] = useState<string>("");
@@ -10,8 +11,9 @@ export const StatementUploadForm: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [fileSelected, setFileSelected] = useState<File | undefined>();
     const [presignedUrl, setPresignedUrl] = useState("");
+    const [transactionData, setTransactionData] = useState<Transaction[]>([]);
     
-    const bankStatement = api.aws.create.useMutation({
+    const bankStatement = api.bankStatement.create.useMutation({
         onSuccess: () => {
             setSuccess(true);
             setError(false);
@@ -36,7 +38,6 @@ export const StatementUploadForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("HMMMM");
         setLoading(true);
         setSuccess(false);
         setError(false);
@@ -59,10 +60,11 @@ export const StatementUploadForm: React.FC = () => {
         })
         const url = result.url.split('?')[0];
         if(result.status === 200 && url) {
-            void bankStatement.mutateAsync({
+            const transactions = await bankStatement.mutateAsync({
                 name: name,
                 url: url,
             });
+            setTransactionData(transactions);
         }
     }
 
@@ -112,6 +114,15 @@ export const StatementUploadForm: React.FC = () => {
                         <div className="flex justify-content-end mt-8">
                             {success && <p className="text-green-500">Success</p>}
                             {error && <p className="text-red-500">Error</p>}
+                        </div>
+                        <div>
+                            {transactionData.map((transaction) => {
+                                return (
+                                    <div key={transaction.id}>
+                                        {transaction.description}
+                                    </div>
+                                )
+                            })}
                         </div>
                     <Dialog.Close asChild>
                         <button className="IconButton" aria-label="Close">

@@ -50,6 +50,7 @@ model User {
     BankStatement       BankStatement[]
     funnelSteps         funnelSteps[]
     ActivityDescription ActivityDescription[]
+    Transaction         Transaction[]
 }
 
 model VerificationToken {
@@ -137,14 +138,15 @@ model ResourceSchemaEmbeddings {
 }
 
 model BankStatement {
-    id        String    @id @default(cuid())
-    name      String
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
-    userId    String
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    url       String
+    id          String        @id @default(cuid())
+    name        String
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    deletedAt   DateTime?
+    userId      String
+    user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    url         String
+    Transaction Transaction[]
 
     @@index([userId])
 }
@@ -184,4 +186,25 @@ model ActivityDescription {
     user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
+}
+
+model Transaction {
+    id        String    @id @default(cuid())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    date            DateTime
+    amount          Decimal
+    category        String
+    description     String
+    balance         Decimal
+    bankStatementId String
+    bankStatement   BankStatement @relation(fields: [bankStatementId], references: [id], onDelete: Cascade)
+
+    @@unique([amount, userId, date, description], name: "transaction")
+    @@index([userId])
+    @@index([bankStatementId])
 }
