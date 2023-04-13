@@ -1,6 +1,5 @@
 import { Client } from "pg";
 import type { QueryResult } from "pg";
-import { logger } from "~/utils/logger"; 
 
 import { prisma } from "~/server/db";
 import { openai } from "../services/openai";
@@ -19,7 +18,7 @@ export const runQuery = async (query: string, userId: string) => {
         }
     })
     const databaseResource = databaseResources[0];
-    logger.info({databaseResource: databaseResource, message: 'DB Resource'})
+    console.log("DB RESOURCE", databaseResource);
     if(!databaseResources || !databaseResource) {
         return {
             type: DATABASE_QUERY,
@@ -41,16 +40,15 @@ export const runQuery = async (query: string, userId: string) => {
             ssl: { rejectUnauthorized: false, }
         });
         console.log("CLIENT", client.port);
-        logger.info({port: client.port, message: 'Client'})
         await client.connect();
-        logger.info({message: "Client Connected"});
+        console.log("CLIENT CONNECTED");
     
         const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
             where: {
                 databaseResourceId: databaseResource.id
             }
         });
-        logger.info({embeddings: embeddings.length, message: 'Embeddings Done'})
+        console.log("Embeddings", embeddings.length);
 
         let prompt = "### Postgres SQL table with their properties\n#\n";
         
@@ -61,7 +59,7 @@ export const runQuery = async (query: string, userId: string) => {
         )
         prompt += schemaString;
         const newPrompt = prompt + `### A query to get ${query}\nSELECT`;
-        logger.info({prompt: newPrompt, message: 'Prompt'})
+        console.log("Prompt", newPrompt);
         const completion = await openai.createCompletion({
             model: COMPLETIONS_MODEL,
             prompt: newPrompt,
@@ -69,11 +67,10 @@ export const runQuery = async (query: string, userId: string) => {
             max_tokens: 256,
             stop: ["#", ";"]
         });        
-        logger.info({completion: completion, message: 'Completion'})
-
+        console.log("Completion", completion)
         if(completion?.data?.choices.length > 0) {
+            console.log("TEXT:", completion.data.choices[0]?.text);
             const text = completion?.data?.choices[0]?.text;
-            logger.info({text: text, message: 'Open AI Text'})
             if(text) {
                 sqlQuery = "SELECT " + text;
                 try {
@@ -125,7 +122,7 @@ export const runQuery = async (query: string, userId: string) => {
             };
         }
     } catch(e) {
-        logger.info({error: e, message: 'Error'})
+        console.log("Error", e);
         return {
             type: DATABASE_QUERY,
             data: [
