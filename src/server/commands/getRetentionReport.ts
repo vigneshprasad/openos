@@ -73,20 +73,24 @@ export const getRetentionReport = async (query: string, userId: string) => {
     }
 
     const timeSeries = getMonthlyTimeSeries(13);    
-    
+
+    const {
+        data: retentionData,
+        query: retentionDataQuery
+    } = await getRetentionData(client, embeddings, timeSeries, activityDescription.activity);
+
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
-    const d0Retention: ExcelCell[] = [{value: 'D0 Retention'}];
-    const d1Retention: ExcelCell[] = [{value: 'D1 Retention'}];
-    const d7Retention: ExcelCell[] = [{value: 'D7 Retention'}];
-    const d14Retention: ExcelCell[] = [{value: 'D14 Retention'}];
-    const d30Retention: ExcelCell[] = [{value: 'D30 Retention'}];
-
-    const retentionData = await getRetentionData(client, embeddings, timeSeries, activityDescription.activity);
+    const d0Retention: ExcelCell[] = [{value: 'D0 Retention', hint: retentionDataQuery}];
+    const d1Retention: ExcelCell[] = [{value: 'D1 Retention', hint: retentionDataQuery}];
+    const d7Retention: ExcelCell[] = [{value: 'D7 Retention', hint: retentionDataQuery}];
+    const d14Retention: ExcelCell[] = [{value: 'D14 Retention', hint: retentionDataQuery}];
+    const d30Retention: ExcelCell[] = [{value: 'D30 Retention', hint: retentionDataQuery}];
 
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
+        date?.setDate(date.getDate() - 1);
         if(!date) continue;
         reportHeader.push({
             value: date.toDateString()
@@ -96,7 +100,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
         if(retentionData[i]) {
             const retentionDataPerMonth = retentionData[i] as RetentionData;
 
-            d0Retention.push({ value: retentionDataPerMonth.d0.toFixed(2) });
+            d0Retention.push({ value: retentionDataPerMonth.d0.toFixed(2)});
             d1Retention.push({ value: retentionDataPerMonth.d1.toFixed(2) });
             d7Retention.push({ value: retentionDataPerMonth.d7.toFixed(2) });
             d14Retention.push({ value: retentionDataPerMonth.d14.toFixed(2) });
@@ -124,7 +128,10 @@ export const getRetentionReport = async (query: string, userId: string) => {
     }
 }
 
-const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[], activityDescription: string) : Promise<RetentionData[]> => {
+const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[], activityDescription: string) : Promise<{
+    data: RetentionData[],
+    query: string 
+}> => {
     const result = [
         {
             date: timeSeries[0] as Date,
@@ -138,24 +145,32 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
 
     const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
     const timeSeries1 = moment(timeSeries[1]).format("YYYY-MM-DD");
-    const dummyIdentifier = "+91123412341234"
+    const dummyIdentifier = "dummytest@gmail.com"
 
     const userListQuery = await processPrompt(
-        `Get usernames and date joined of users that joined between ${timeSeries0} and ${timeSeries1}`,
+        `Get emails and date joined of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
         client, embeddings, timeSeries
     );
+
+    console.log(userListQuery);
     
     let userList;
     try {
         userList = await executeQuery(client, userListQuery);
     } catch (error) {
-        return [];
+        console.log(error);
+        return {
+            data: [],
+            query: ''
+        };
     }
 
     let activityQuery = await processPrompt(
-        `${activityDescription} by user with username ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
+        `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
         client, embeddings, timeSeries
     );
+
+    console.log(activityQuery);
 
     //@TO DO: This is only required for Crater - Replace id with uuid
     activityQuery = activityQuery.replace('\n', ' ');
@@ -166,7 +181,10 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
     
     if(!userListQuery || !userListQuery.includes(timeSeries0) || !userListQuery.includes(timeSeries1) 
         || !dateJoinedKey ||!identifierKey || !activityQuery || !activityQuery.includes(timeSeries0) || !activityQuery.includes(timeSeries1)) {
-        return [];
+        return {
+            data: [],
+            query: activityQuery
+        };
     }
 
 
@@ -189,6 +207,7 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
         for(let j = 0; j < userList.length; j++) {
             const user = userList[j];
             if(!user) continue;
+            console.log(user);
             const identifier = user[identifierKey] as string;
             const dateJoined = user[dateJoinedKey] as string;
 
@@ -236,7 +255,10 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
         });
     }
 
-    return result;
+    return {
+        data: result,
+        query: activityQuery
+    };
 };
 
 

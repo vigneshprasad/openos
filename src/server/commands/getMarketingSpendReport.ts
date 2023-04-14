@@ -85,11 +85,14 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
     const googleSpend: ExcelCell[] = [{value: 'Google Spend'}];
     const googleCac: ExcelCell[] = [{value: 'Google CAC'}];
     
-    const usersBySource:UsersBySource[] =  await getUserBySource(client, embeddings, timeSeries);
+    const {
+        data: usersBySource
+    } =  await getUserBySource(client, embeddings, timeSeries);
     const marketingSpents: MarketingSpent[] = getMarketingSpent(transactions, timeSeries);
 
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
+        date?.setDate(date.getDate() - 1);
         if(!date) continue;
         reportHeader.push({
             value: date.toDateString()

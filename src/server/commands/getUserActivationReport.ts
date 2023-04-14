@@ -18,6 +18,12 @@ type UsersByFunnelStep = {
     total: number,
 }
 
+type FunnelQuery = {
+    step1: string,
+    step2: string,
+    step3: string,
+}
+
 export const getUserActivationReport = async (query: string, userId: string) => {
     const databaseResources = await prisma.databaseResource.findMany({
         where: {
@@ -78,19 +84,25 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
-    const funnelStep1: ExcelCell[] = [{value: 'Funnel Step 1'}];
-    const funnelStep2: ExcelCell[] = [{value: 'Funnel Step 2'}];
-    const funnelStep3: ExcelCell[] = [{value: 'Funnel Step 3'}];
+    const funnelTotal: ExcelCell[] = [{value: 'Total'}];
+
+    const {
+        data: usersByFunnelStep,
+        query: funnelQuery,
+    } = await getUserByFunnelStep(funnelSteps[0], client, embeddings, timeSeries);
+
+    const funnelStep1: ExcelCell[] = [{value: 'Funnel Step 1', hint: funnelQuery.step1}];
+    const funnelStep2: ExcelCell[] = [{value: 'Funnel Step 2', hint: funnelQuery.step2}];
+    const funnelStep3: ExcelCell[] = [{value: 'Funnel Step 3', hint: funnelQuery.step3}];
 
     const signedUpToStep1: ExcelCell[] = [{value: 'Signed up Step 1%'}];
     const funnelStep1toStep2: ExcelCell[] = [{value: 'Funnel Step 1 to Step 2%'}];
     const funnelStep2toStep3: ExcelCell[] = [{value: 'Funnel Step 2 to Step 3%'}];
 
-    const usersByFunnelStep: UsersByFunnelStep[] = await getUserByFunnelStep(funnelSteps[0], client, embeddings, timeSeries);
-
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
         if(!date) continue;
+        date?.setDate(date.getDate() - 1);
         reportHeader.push({
             value: date.toDateString()
         })
@@ -99,6 +111,7 @@ export const getUserActivationReport = async (query: string, userId: string) => 
         const funnelStep = usersByFunnelStep[i] as UsersByFunnelStep;
         if(funnelStep) {
 
+            funnelTotal.push({ value: funnelStep?.total})
             funnelStep1.push({ value: funnelStep?.step1 });
             funnelStep2.push({ value: funnelStep?.step2 });
             funnelStep3.push({ value: funnelStep?.step3 });
@@ -134,7 +147,10 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     }
 }
 
-const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<UsersByFunnelStep[]> => {
+const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<{
+    data: UsersByFunnelStep[],
+    query: FunnelQuery
+}> => {
     
     const result: UsersByFunnelStep[] = [{
         date: timeSeries[0] as Date,
@@ -159,7 +175,14 @@ const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embed
         !queryStep2.includes(timeSeries0) || !queryStep2.includes(timeSeries1) ||
         !queryStep3.includes(timeSeries0) || !queryStep3.includes(timeSeries1) ||
         !queryTotal.includes(timeSeries0) || !queryTotal.includes(timeSeries1)) {
-        return [];
+        return {
+            data: result,
+            query: {
+                step1: '',
+                step2: '',
+                step3: '',
+            }
+        };
     }
 
     try {
@@ -210,5 +233,12 @@ const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embed
     }
 
     console.log(result);
-    return result;
+    return {
+        data: result,
+        query: {
+            step1: queryStep1,
+            step2: queryStep2,
+            step3: queryStep3,
+        }
+    };
 }

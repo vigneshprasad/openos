@@ -77,19 +77,20 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
-    const dailyActiveUsers: ExcelCell[] = [{value: 'Daily Active Users (DAUs)'}];
-    const dailyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const weeklyActiveUsers: ExcelCell[] = [{value: 'Weekly Active Users (WAUs)'}];
-    const weeklyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const monthlyActiveUsers: ExcelCell[] = [{value: 'Monthly Active Users (MAUs)'}];
-    const monthlyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
-
     const activityString = `Number of distinct users with ${activityDescription.activity}`;
     const activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries);
     const activeUsers: ActiveUsers[] = await getActiveUsers(client, embeddings, timeSeries, activityPrompt);
 
+    const dailyActiveUsers: ExcelCell[] = [{value: 'Daily Active Users (DAUs)', hint: activityPrompt}];
+    const dailyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
+    const weeklyActiveUsers: ExcelCell[] = [{value: 'Weekly Active Users (WAUs)', hint: activityPrompt}];
+    const weeklyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
+    const monthlyActiveUsers: ExcelCell[] = [{value: 'Monthly Active Users (MAUs)', hint: activityPrompt}];
+    const monthlyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
+
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
+        date?.setDate(date.getDate() - 1);
         if(!date) continue;
         reportHeader.push({
             value: date.toDateString()

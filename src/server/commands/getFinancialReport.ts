@@ -137,6 +137,7 @@ export const getFinancialReport = async (userId: string) => {
 
     for(let i = 1; i < timeSeries.length; i++) {
         const time = timeSeries[i];
+        time?.setDate(time.getDate() - 1);
         if(!time) continue;
         reportHeader.push({
             value: time.toDateString()

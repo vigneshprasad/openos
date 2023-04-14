@@ -18,6 +18,13 @@ type UsersBySource = {
     total: number
 }
 
+type UsersBySourceQuery = {
+    facebook: string,
+    google: string,
+    organic: string,
+    total: string
+}
+
 export const getUserAcquisitionReport = async (query: string, userId: string) => {
     const databaseResources = await prisma.databaseResource.findMany({
         where: {
@@ -53,25 +60,29 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     });
 
     const timeSeries = getMonthlyTimeSeries(13);    
+
+    const {
+        data: usersBySource,
+        query: usersBySourceQuery 
+    } = await getUserBySource(client, embeddings, timeSeries);
     
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
-    const organicAcquisition: ExcelCell[] = [{value: 'Organic Acquisition'}];
+    const organicAcquisition: ExcelCell[] = [{value: 'Organic Acquisition', hint: usersBySourceQuery.organic}];
     const organicAcquisitionGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const facebookAcquisition: ExcelCell[] = [{value: 'Facebook Acquisition'}];
+    const facebookAcquisition: ExcelCell[] = [{value: 'Facebook Acquisition', hint: usersBySourceQuery.facebook}];
     const facebookAcquisitionGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const googleAcquisition: ExcelCell[] = [{value: 'Google Acquisition'}];
+    const googleAcquisition: ExcelCell[] = [{value: 'Google Acquisition', hint: usersBySourceQuery.google}];
     const googleAcquisitionGrowth: ExcelCell[] = [{value: 'Growth %'}];
     const otherAcquisition: ExcelCell[] = [{value: 'Other Acquisition'}];
     const otherAcquisitionGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const totalAcquisition: ExcelCell[] = [{value: 'Total Acquisition'}];
+    const totalAcquisition: ExcelCell[] = [{value: 'Total Acquisition', hint: usersBySourceQuery.total}];
     const percentOrganicUsers: ExcelCell[] = [{value: 'Organic as a % of total'}];
-
-    const usersBySource:UsersBySource[] =  await getUserBySource(client, embeddings, timeSeries);
     
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
+        date?.setDate(date.getDate() - 1);
         if(!date) continue;
         reportHeader.push({
             value: date.toDateString()
@@ -137,7 +148,10 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     }
 }
 
-export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<UsersBySource[]> => {
+export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<{
+    data: UsersBySource[],
+    query: UsersBySourceQuery
+}> => {
     
     const userBySource:UsersBySource[] = [{
         date: timeSeries[0] as Date,
@@ -157,11 +171,27 @@ export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEm
     const totalSqlQuery = await getQuery(client, embeddings, totalPrompt);
 
     if(!fbSqlQuery || !googleSqlQuery || !totalSqlQuery || !organicSqlQuery) {
-        return []
+        return {
+            data: [],
+            query: {
+                facebook: fbSqlQuery,
+                google: googleSqlQuery,
+                organic: organicSqlQuery,
+                total: totalSqlQuery
+            }
+        }
     }
     if(!fbSqlQuery.includes(timeSeries0) || !googleSqlQuery.includes(timeSeries1) || !totalSqlQuery.includes(timeSeries0) || !organicSqlQuery.includes(timeSeries0)
         || !fbSqlQuery.includes(timeSeries1) || !googleSqlQuery.includes(timeSeries1) || !totalSqlQuery.includes(timeSeries1) || !organicSqlQuery.includes(timeSeries1)) {
-            return [];
+            return {
+                data: [],
+                query: {
+                    facebook: fbSqlQuery,
+                    google: googleSqlQuery,
+                    organic: organicSqlQuery,
+                    total: totalSqlQuery
+                }
+            };
     }
 
     try {
@@ -211,7 +241,15 @@ export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEm
         console.log(error);
     }
 
-    return userBySource;
+    return {
+        data: userBySource,
+        query: {
+            facebook: fbSqlQuery,
+            google: googleSqlQuery,
+            organic: organicSqlQuery,
+            total: totalSqlQuery
+        }
+    };
 }
 
 

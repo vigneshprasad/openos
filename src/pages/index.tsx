@@ -35,6 +35,7 @@ const Home: NextPage = () => {
             const dataResult = res as CommandDataType;
             if(dataResult.type === COMPLEX_REPORT) {
                 if(!dataResult.data[0]) {
+                    setData([]);
                     setLoading(false);
                     setError(true);
                     return;

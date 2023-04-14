@@ -15,55 +15,45 @@ interface GridElement extends ReactDataSheet.Cell<GridElement> {
 
 const FinancialReport: React.FC<Props> = ({ props }) => {
     const [data, error] = props
-    if(error) { console.log("BRUHRUHRHR", error) }
     const dataRaw = data as ExcelCell[][]
-    const tableData = data && dataRaw.slice(1);
-    const [grid, setGrid] = useState<GridElement[][]>(tableData ? tableData : []) 
+    const tableData = data && dataRaw.slice(1) as GridElement[][];
+    const grid = tableData ? tableData : [];
     return (
         <>
             { data && 
                 <>
                     <div className="flex flex-col text-white w-full text-center max-w-full overflow-x-scroll">
-                        <ReactDataSheet
-                            data={grid}
-                            valueRenderer={cell => cell.value}
-                            dataRenderer={cell => cell.expression}
-                            sheetRenderer={(props: { children: React.ReactElement }) => (
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            {dataRaw[0] && dataRaw[0].map(
-                                                (_cell, index) => (
-                                                    <th key={index}>{String.fromCharCode(65 + index)}</th>
-                                                ))
-                                            }
+                        {
+                            <table>
+                                <thead>
+                                    <tr>
+                                        {dataRaw[0] && dataRaw[0].map(
+                                            (cell, index) => (
+                                                <th key={index}>{cell.value}</th>
+                                            ))
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {grid.map((row, i) => (
+                                        <tr key={i}>
+                                            {row.map((cell, j) => {
+                                                if(cell.hint) {
+                                                    return (
+                                                        <td key={j} className="CellWithComment">
+                                                            {cell.value}
+                                                            <span className="CellComment">{cell.hint}</span>
+                                                        </td>
+                                                    )
+                                                } else {
+                                                   return <td key={j}>{cell.value}</td> 
+                                                }
+                                            })}
                                         </tr>
-                                    </thead>
-                                    <thead>
-                                        <tr>
-                                            {dataRaw[0] && dataRaw[0].map(
-                                                (cell, index) => (
-                                                    <th key={index}>{cell.value}</th>
-                                                ))
-                                            }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {props.children}
-                                    </tbody>
-                                </table>
-                                )}
-                            onCellsChanged={changes => {
-                                const gridCopy:GridElement[][] = grid.map(row => [...row])
-                                changes.forEach(({ cell, row, col, value }) => {
-                                    const rowCopy = gridCopy[row] as GridElement[]
-                                    if(value) {
-                                        rowCopy[col] = { ...cell, value }
-                                    }
-                                })
-                                setGrid(gridCopy);
-                            }}
-                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        }
                     </div>
                 </>
             }
