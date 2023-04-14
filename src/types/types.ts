@@ -1,3 +1,5 @@
+import { type SavedQuery } from "@prisma/client";
+
 export type CommandResultType = [
     undefined | QueryAndResult | JsonData | ExcelCell[][] | string[] | TransactionClassification[],
     undefined | Error
@@ -30,6 +32,7 @@ export type ExcelCell = {
     value: number | string;
     expression?: string;
     hint?: string;
+    query?: SavedQuery
 }
 
 export type TransactionClassification = {

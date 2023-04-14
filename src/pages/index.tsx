@@ -7,7 +7,7 @@ import QueryResult from "~/components/QueryResult";
 import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType, TransactionClassification } from "../types/types";
-import FinancialReport from "~/components/FinancialReport";
+import Report from "~/components/Report";
 
 type CommandDataType = {
     type: string,
@@ -110,7 +110,7 @@ const Home: NextPage = () => {
                             } else if(item.type === GET_DATA) {
                                 return <RazorpayData key={index} props={item.data} />
                             } else if(item.type === GET_REPORT) {
-                                return <FinancialReport key={index} props={item.data} />
+                                return <Report key={index} props={item.data} />
                             } else if(item.type === EXPENSE_CLASSIFIER) {
                                 { (item.data[0] as TransactionClassification[])?.length > 0 && 
                                     <div className="h-72 overflow-scroll">

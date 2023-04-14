@@ -65,6 +65,7 @@ export const commandRouter = createTRPCRouter({
                     case MARKETING_SPEND:
                         return await getMarketingSpendReport(query, ctx.session.user.id);
                 }
+                break;
             case EXPENSE_CLASSIFIER: 
                 return await getExpenseClassificationTest();
             default:

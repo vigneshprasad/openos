@@ -2,7 +2,7 @@ import { prisma } from "~/server/db";
 import { GET_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type ResourceSchemaEmbeddings } from "@prisma/client";
+import { type SavedQuery, type ResourceSchemaEmbeddings } from "@prisma/client";
 import { Client } from "pg";
 import moment from "moment";
 import { processPrompt } from "~/utils/processPrompt";
@@ -77,16 +77,16 @@ export const getRetentionReport = async (query: string, userId: string) => {
     const {
         data: retentionData,
         query: retentionDataQuery
-    } = await getRetentionData(client, embeddings, timeSeries, activityDescription.activity);
+    } = await getRetentionData(client, embeddings, timeSeries, activityDescription.activity, databaseResource.id);
 
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
-    const d0Retention: ExcelCell[] = [{value: 'D0 Retention', hint: retentionDataQuery}];
-    const d1Retention: ExcelCell[] = [{value: 'D1 Retention', hint: retentionDataQuery}];
-    const d7Retention: ExcelCell[] = [{value: 'D7 Retention', hint: retentionDataQuery}];
-    const d14Retention: ExcelCell[] = [{value: 'D14 Retention', hint: retentionDataQuery}];
-    const d30Retention: ExcelCell[] = [{value: 'D30 Retention', hint: retentionDataQuery}];
+    const d0Retention: ExcelCell[] = [{value: 'D0 Retention', query: retentionDataQuery}];
+    const d1Retention: ExcelCell[] = [{value: 'D1 Retention'}];
+    const d7Retention: ExcelCell[] = [{value: 'D7 Retention'}];
+    const d14Retention: ExcelCell[] = [{value: 'D14 Retention'}];
+    const d30Retention: ExcelCell[] = [{value: 'D30 Retention'}];
 
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
@@ -128,9 +128,14 @@ export const getRetentionReport = async (query: string, userId: string) => {
     }
 }
 
-const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[], activityDescription: string) : Promise<{
+const getRetentionData = async (
+    client:Client, 
+    embeddings:ResourceSchemaEmbeddings[], 
+    timeSeries: Date[], 
+    activityDescription: string,
+    databaseResourceId: string) : Promise<{
     data: RetentionData[],
-    query: string 
+    query?: SavedQuery
 }> => {
     const result = [
         {
@@ -151,8 +156,6 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
         `Get emails and date joined of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
         client, embeddings, timeSeries
     );
-
-    console.log(userListQuery);
     
     let userList;
     try {
@@ -161,29 +164,62 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
         console.log(error);
         return {
             data: [],
-            query: ''
+            query: undefined
         };
     }
 
-    let activityQuery = await processPrompt(
-        `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
-        client, embeddings, timeSeries
-    );
 
-    console.log(activityQuery);
 
-    //@TO DO: This is only required for Crater - Replace id with uuid
-    activityQuery = activityQuery.replace('\n', ' ');
-    activityQuery = activityQuery.replace('id FROM users', 'uuid FROM users');
+    let retentionActivityPrompt, retentionActivitySavedQuery;
+    retentionActivitySavedQuery = await prisma.savedQuery.findFirst({
+        where: {
+            databaseResourceId: databaseResourceId,
+            reportKey: 'Retention Activity'
+        }
+    });
+    
+    if(retentionActivitySavedQuery) {
+        if(retentionActivitySavedQuery.feedback === 1) {
+            retentionActivityPrompt = retentionActivitySavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+        } else {
+            retentionActivityPrompt = await processPrompt(
+                `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
+                client, embeddings, timeSeries
+            );
+            retentionActivitySavedQuery = await prisma.savedQuery.update({
+                where: {
+                    id: retentionActivitySavedQuery.id
+                },
+                data: {
+                    query: retentionActivityPrompt.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                }
+            });
+        }
+    } else {
+        retentionActivityPrompt = await processPrompt(
+            `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
+            client, embeddings, timeSeries
+        );
+        retentionActivitySavedQuery = await prisma.savedQuery.create({
+            data: {
+                databaseResourceId: databaseResourceId,
+                reportKey: 'Retention Activity',
+                query: retentionActivityPrompt.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                feedback: 0
+            }
+        });
+    }
+
+    console.log(retentionActivityPrompt);
 
     const identifierKey = Object.keys(userList[0] as object)[0];
     const dateJoinedKey = Object.keys(userList[0] as object)[1];
     
     if(!userListQuery || !userListQuery.includes(timeSeries0) || !userListQuery.includes(timeSeries1) 
-        || !dateJoinedKey ||!identifierKey || !activityQuery || !activityQuery.includes(timeSeries0) || !activityQuery.includes(timeSeries1)) {
+        || !dateJoinedKey ||!identifierKey || !retentionActivityPrompt || !retentionActivityPrompt.includes(timeSeries0) || !retentionActivityPrompt.includes(timeSeries1)) {
         return {
             data: [],
-            query: activityQuery
+            query: retentionActivitySavedQuery
         };
     }
 
@@ -218,11 +254,11 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
             const d14End = moment(dateJoined).add(15, 'days').format("YYYY-MM-DD");
             const d30End = moment(dateJoined).add(31, 'days').format("YYYY-MM-DD");
 
-            const activityQueryD0 = activityQuery.replace(timeSeries0, start).replace(timeSeries1, d0End).replace(dummyIdentifier, identifier);
-            const activityQueryD1 = activityQuery.replace(timeSeries0, d0End).replace(timeSeries1, d1End).replace(dummyIdentifier, identifier);
-            const activityQueryD7 = activityQuery.replace(timeSeries0, start).replace(timeSeries1, d7End).replace(dummyIdentifier, identifier);
-            const activityQueryD14 = activityQuery.replace(timeSeries0, start).replace(timeSeries1, d14End).replace(dummyIdentifier, identifier);
-            const activityQueryD30 = activityQuery.replace(timeSeries0, start).replace(timeSeries1, d30End).replace(dummyIdentifier, identifier);
+            const activityQueryD0 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d0End).replace(dummyIdentifier, identifier);
+            const activityQueryD1 = retentionActivityPrompt.replace(timeSeries0, d0End).replace(timeSeries1, d1End).replace(dummyIdentifier, identifier);
+            const activityQueryD7 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d7End).replace(dummyIdentifier, identifier);
+            const activityQueryD14 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d14End).replace(dummyIdentifier, identifier);
+            const activityQueryD30 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d30End).replace(dummyIdentifier, identifier);
 
             try {
                 const activityCountD0 = await executeQuery(client, activityQueryD0);
@@ -257,7 +293,7 @@ const getRetentionData = async (client:Client, embeddings:ResourceSchemaEmbeddin
 
     return {
         data: result,
-        query: activityQuery
+        query: retentionActivitySavedQuery
     };
 };
 

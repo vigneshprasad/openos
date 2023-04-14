@@ -51,6 +51,7 @@ model User {
     funnelSteps         funnelSteps[]
     ActivityDescription ActivityDescription[]
     Transaction         Transaction[]
+    role                String?
 }
 
 model VerificationToken {
@@ -127,7 +128,7 @@ model BankStatement {
 
 model SavedQuery {
     id                 String           @id @default(cuid())
-    name               String
+    name               String?
     query              String           @db.Text
     createdAt          DateTime         @default(now())
     updatedAt          DateTime         @updatedAt
@@ -135,7 +136,9 @@ model SavedQuery {
     databaseResource   DatabaseResource @relation(fields: [databaseResourceId], references: [id], onDelete: Cascade)
     databaseResourceId String
     reportKey          String?
+    feedback           Int              @default(0)
 
+    @@unique([databaseResourceId, reportKey], name: "ReportKeyForDB")
     @@index([databaseResourceId])
 }
 

@@ -3,7 +3,7 @@ import { prisma } from "~/server/db";
 import { GET_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type ResourceSchemaEmbeddings, type funnelSteps } from "@prisma/client";
+import { type SavedQuery, type ResourceSchemaEmbeddings, type funnelSteps } from "@prisma/client";
 import { Client } from "pg";
 
 import moment from "moment";
@@ -19,9 +19,9 @@ type UsersByFunnelStep = {
 }
 
 type FunnelQuery = {
-    step1: string,
-    step2: string,
-    step3: string,
+    step1: SavedQuery,
+    step2: SavedQuery,
+    step3: SavedQuery,
 }
 
 export const getUserActivationReport = async (query: string, userId: string) => {
@@ -89,11 +89,11 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     const {
         data: usersByFunnelStep,
         query: funnelQuery,
-    } = await getUserByFunnelStep(funnelSteps[0], client, embeddings, timeSeries);
+    } = await getUserByFunnelStep(funnelSteps[0], client, embeddings, timeSeries, databaseResource.id);
 
-    const funnelStep1: ExcelCell[] = [{value: 'Funnel Step 1', hint: funnelQuery.step1}];
-    const funnelStep2: ExcelCell[] = [{value: 'Funnel Step 2', hint: funnelQuery.step2}];
-    const funnelStep3: ExcelCell[] = [{value: 'Funnel Step 3', hint: funnelQuery.step3}];
+    const funnelStep1: ExcelCell[] = [{value: 'Funnel Step 1', query: funnelQuery.step1}];
+    const funnelStep2: ExcelCell[] = [{value: 'Funnel Step 2', query: funnelQuery.step2}];
+    const funnelStep3: ExcelCell[] = [{value: 'Funnel Step 3', query: funnelQuery.step3}];
 
     const signedUpToStep1: ExcelCell[] = [{value: 'Signed up Step 1%'}];
     const funnelStep1toStep2: ExcelCell[] = [{value: 'Funnel Step 1 to Step 2%'}];
@@ -147,7 +147,13 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     }
 }
 
-const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<{
+const getUserByFunnelStep = async (
+    funnelSteps:funnelSteps, 
+    client:Client, 
+    embeddings:ResourceSchemaEmbeddings[], 
+    timeSeries: Date[],
+    databaseResourceId: string,
+) : Promise<{
     data: UsersByFunnelStep[],
     query: FunnelQuery
 }> => {
@@ -163,9 +169,107 @@ const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embed
     const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
     const timeSeries1 = moment(timeSeries[1]).format("YYYY-MM-DD");
 
-    const queryStep1 = await processPrompt(funnelSteps.step1, client, embeddings, timeSeries);
-    const queryStep2 = await processPrompt(funnelSteps.step2, client, embeddings, timeSeries);
-    const queryStep3 = await processPrompt(funnelSteps.step3, client, embeddings, timeSeries);
+    let queryStep1, queryStep2, queryStep3, funnelStep1SavedQuery, funnelStep2SavedQuery, funnelStep3SavedQuery;
+
+    funnelStep1SavedQuery = await prisma.savedQuery.findFirst({
+        where: {
+            databaseResourceId: databaseResourceId,
+            reportKey: 'Funnel Step 1'
+        }
+    });
+
+    funnelStep2SavedQuery = await prisma.savedQuery.findFirst({
+        where: {
+            databaseResourceId: databaseResourceId,
+            reportKey: 'Funnel Step 2'
+        }
+    });
+
+    funnelStep3SavedQuery = await prisma.savedQuery.findFirst({
+        where: {
+            databaseResourceId: databaseResourceId,
+            reportKey: 'Funnel Step 3'
+        }
+    });
+
+    if(!funnelStep1SavedQuery) {
+        queryStep1 = await processPrompt(funnelSteps.step1, client, embeddings, timeSeries);
+        funnelStep1SavedQuery = await prisma.savedQuery.create({
+            data: {
+                databaseResourceId: databaseResourceId,
+                reportKey: 'Funnel Step 1',
+                query: queryStep1.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                feedback: 0
+            }
+        });
+    } else {
+        if(funnelStep1SavedQuery.feedback === 1) {
+            queryStep1 = funnelStep1SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+        } else {
+            queryStep1 = await processPrompt(funnelSteps.step1, client, embeddings, timeSeries);
+            funnelStep1SavedQuery = await prisma.savedQuery.update({
+                where: {
+                    id: funnelStep1SavedQuery.id
+                },
+                data: {
+                    query: queryStep1.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                }
+            });
+        } 
+    }
+
+    if(!funnelStep2SavedQuery) {
+        queryStep2 = await processPrompt(funnelSteps.step2, client, embeddings, timeSeries);
+        funnelStep2SavedQuery = await prisma.savedQuery.create({
+            data: {
+                databaseResourceId: databaseResourceId,
+                reportKey: 'Funnel Step 2',
+                query: queryStep2.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                feedback: 0
+            }
+        });
+    } else {
+        if(funnelStep2SavedQuery.feedback === 1) {
+            queryStep2 = funnelStep2SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+        } else {
+            queryStep2 = await processPrompt(funnelSteps.step2, client, embeddings, timeSeries);
+            funnelStep2SavedQuery = await prisma.savedQuery.update({
+                where: {
+                    id: funnelStep2SavedQuery.id
+                },
+                data: {
+                    query: queryStep2.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                }
+            });
+        }
+    }
+
+    if(!funnelStep3SavedQuery) {
+        queryStep3 = await processPrompt(funnelSteps.step3, client, embeddings, timeSeries);
+        funnelStep3SavedQuery = await prisma.savedQuery.create({
+            data: {
+                databaseResourceId: databaseResourceId,
+                reportKey: 'Funnel Step 3',
+                query: queryStep3.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                feedback: 0
+            }
+        });
+    } else {
+        if(funnelStep3SavedQuery.feedback === 1) {
+            queryStep3 = funnelStep3SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+        } else {
+            queryStep3 = await processPrompt(funnelSteps.step3, client, embeddings, timeSeries);
+            funnelStep3SavedQuery = await prisma.savedQuery.update({
+                where: {
+                    id: funnelStep3SavedQuery.id
+                },
+                data: {
+                    query: queryStep3.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                }
+            });
+        }
+    }
+        
     const queryTotal = await processPrompt(
         'Get number of users that joined', client, embeddings, timeSeries
     )
@@ -178,9 +282,9 @@ const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embed
         return {
             data: result,
             query: {
-                step1: '',
-                step2: '',
-                step3: '',
+                step1: funnelStep1SavedQuery,
+                step2: funnelStep2SavedQuery,
+                step3: funnelStep3SavedQuery,
             }
         };
     }
@@ -236,9 +340,9 @@ const getUserByFunnelStep = async (funnelSteps:funnelSteps, client:Client, embed
     return {
         data: result,
         query: {
-            step1: queryStep1,
-            step2: queryStep2,
-            step3: queryStep3,
+            step1: funnelStep1SavedQuery,
+            step2: funnelStep2SavedQuery,
+            step3: funnelStep3SavedQuery,
         }
     };
 }

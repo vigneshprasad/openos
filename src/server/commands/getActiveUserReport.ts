@@ -72,20 +72,57 @@ export const getActiveUserReport = async (query: string, userId: string) => {
         };
     }
 
-    const timeSeries = getMonthlyTimeSeries(13);    
+    const timeSeries = getMonthlyTimeSeries(13);
+    
+    const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
+    const timeSeries1 = moment(timeSeries[1]).format("YYYY-MM-DD");
     
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
     const activityString = `Number of distinct users with ${activityDescription.activity}`;
-    const activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries);
+
+    let activitySavedQuery, activityPrompt;
+    activitySavedQuery = await prisma.savedQuery.findFirst({
+        where: {
+            databaseResourceId: databaseResource.id,
+            reportKey: 'User Activity'
+        }
+    });
+
+    if(activitySavedQuery) {
+        if(activitySavedQuery.feedback === 1) {
+            activityPrompt = activitySavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+        } else {
+            activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries);
+            activitySavedQuery = await prisma.savedQuery.update({
+                where: {
+                    id: activitySavedQuery.id
+                },
+                data: {
+                    query: activityPrompt.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                }
+            });
+        }
+    } else {
+        activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries);
+        activitySavedQuery = await prisma.savedQuery.create({
+            data: {
+                databaseResourceId: databaseResource.id,
+                reportKey: 'User Activity',
+                query: activityPrompt.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                feedback: 0
+            }
+        });
+    }
+
     const activeUsers: ActiveUsers[] = await getActiveUsers(client, embeddings, timeSeries, activityPrompt);
 
-    const dailyActiveUsers: ExcelCell[] = [{value: 'Daily Active Users (DAUs)', hint: activityPrompt}];
+    const dailyActiveUsers: ExcelCell[] = [{value: 'Daily Active Users (DAUs)', query: activitySavedQuery}];
     const dailyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const weeklyActiveUsers: ExcelCell[] = [{value: 'Weekly Active Users (WAUs)', hint: activityPrompt}];
+    const weeklyActiveUsers: ExcelCell[] = [{value: 'Weekly Active Users (WAUs)'}];
     const weeklyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
-    const monthlyActiveUsers: ExcelCell[] = [{value: 'Monthly Active Users (MAUs)', hint: activityPrompt}];
+    const monthlyActiveUsers: ExcelCell[] = [{value: 'Monthly Active Users (MAUs)'}];
     const monthlyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
 
     for(let i = 1; i < timeSeries.length; i++) {

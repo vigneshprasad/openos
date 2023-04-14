@@ -1,4 +1,6 @@
+import { type SavedQuery } from "@prisma/client";
 import type { CommandResultType, ExcelCell } from "~/types/types";
+import { QueryFeedback } from "./QueryFeedback";
 
 interface Props {
     props: CommandResultType
@@ -8,14 +10,14 @@ interface GridElement {
     value: number | string;
     expression?: string;
     hint?: string;
+    query?: SavedQuery;
 }
 
-const FinancialReport: React.FC<Props> = ({ props }) => {
+const Report: React.FC<Props> = ({ props }) => {
     const [data, error] = props
     const dataRaw = data as ExcelCell[][]
     const tableData = data && dataRaw.slice(1) as GridElement[][];
     const grid = tableData ? tableData : [];
-    console.log(grid);
     return (
         <>
             { data && 
@@ -36,12 +38,15 @@ const FinancialReport: React.FC<Props> = ({ props }) => {
                                     {grid.map((row, i) => (
                                         <tr key={i}>
                                             {row.map((cell, j) => {
-                                                if(cell.hint) {
+                                                if(cell.query) {
                                                     return (
-                                                        <td key={j} className="CellWithComment">
-                                                            {cell.value}
-                                                            <span className="CellComment">{cell.hint}</span>
-                                                        </td>
+                                                        <div key={j}>
+                                                            <td><QueryFeedback queryProp={cell.query}/></td>
+                                                            <td className="CellWithComment">
+                                                                {cell.value}
+                                                                <span className="CellComment">{cell.query.query}</span>
+                                                            </td>
+                                                        </div>
                                                     )
                                                 } else {
                                                    return <td key={j}>{
@@ -78,4 +83,4 @@ const FinancialReport: React.FC<Props> = ({ props }) => {
     );
 };
 
-export default FinancialReport;
+export default Report;

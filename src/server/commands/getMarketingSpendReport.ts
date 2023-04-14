@@ -15,7 +15,7 @@ type UsersBySource = {
     total: number
 }
 
-type MarketingSpent = {
+type MarketingSpend = {
     date: Date,
     facebook: number,
     google: number,
@@ -88,7 +88,7 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
     const {
         data: usersBySource
     } =  await getUserBySource(client, embeddings, timeSeries);
-    const marketingSpents: MarketingSpent[] = getMarketingSpent(transactions, timeSeries);
+    const marketingSpents: MarketingSpend[] = getMarketingSpend(transactions, timeSeries);
 
     for(let i = 1; i < timeSeries.length; i++) {
         const date = timeSeries[i];
@@ -101,7 +101,7 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
         // Marketing Spent
         if(marketingSpents[i] && usersBySource[i]) {
             const userBySource = usersBySource[i] as UsersBySource;
-            const marketingSpent = marketingSpents[i] as MarketingSpent;
+            const marketingSpent = marketingSpents[i] as MarketingSpend;
             const facebookSpendNumber = marketingSpent.facebook * -1;
             const googleSpendNumber = marketingSpent.google * -1;
 
@@ -135,7 +135,7 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
     }
 }
 
-const getMarketingSpent = (transactions:Transaction[], timeSeries: Date[]) : MarketingSpent[] => {
+const getMarketingSpend = (transactions:Transaction[], timeSeries: Date[]) : MarketingSpend[] => {
     const result = [
         {
             date: timeSeries[0] as Date,
