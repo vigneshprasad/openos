@@ -98,32 +98,6 @@ model RazorpayResource {
     @@index([userId])
 }
 
-model ReportTemplate {
-    id        String                    @id @default(cuid())
-    name      String
-    fields    ReportTemplatesOnFields[]
-    createdAt DateTime                  @default(now())
-}
-
-model ReportField {
-    id        String                    @id @default(cuid())
-    name      String
-    createdAt DateTime                  @default(now())
-    templates ReportTemplatesOnFields[]
-}
-
-model ReportTemplatesOnFields {
-    id               String         @id @default(cuid())
-    reportTemplate   ReportTemplate @relation(fields: [reportTemplateId], references: [id])
-    reportTemplateId String
-    reportField      ReportField    @relation(fields: [reportFieldId], references: [id])
-    reportFieldId    String
-    createdAt        DateTime       @default(now())
-
-    @@index([reportTemplateId])
-    @@index([reportFieldId])
-}
-
 model ResourceSchemaEmbeddings {
     id                 String           @id @default(cuid())
     name               String           @db.Text

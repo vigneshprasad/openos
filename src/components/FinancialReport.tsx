@@ -15,6 +15,7 @@ const FinancialReport: React.FC<Props> = ({ props }) => {
     const dataRaw = data as ExcelCell[][]
     const tableData = data && dataRaw.slice(1) as GridElement[][];
     const grid = tableData ? tableData : [];
+    console.log(grid);
     return (
         <>
             { data && 
@@ -38,19 +39,22 @@ const FinancialReport: React.FC<Props> = ({ props }) => {
                                                 if(cell.hint) {
                                                     return (
                                                         <td key={j} className="CellWithComment">
-                                                            <td>{
-                                                                cell.value === "0" ||
-                                                                cell.value === 0 ||
-                                                                cell.value === "0.00" ||
-                                                                cell.value === "NaN" || 
-                                                                cell.value === Infinity ?
-                                                                "-" : cell.value
-                                                            }</td>
+                                                            {cell.value}
                                                             <span className="CellComment">{cell.hint}</span>
                                                         </td>
                                                     )
                                                 } else {
-                                                   return <td key={j}>{cell.value}</td> 
+                                                   return <td key={j}>{
+                                                        cell.value == '0' ||
+                                                        cell.value == 0 ||
+                                                        cell.value == "0.00" ||
+                                                        cell.value == "NaN" ||
+                                                        cell.value == "-Infinity" || 
+                                                        cell.value == Infinity ||
+                                                        cell.value == -Infinity ?
+
+                                                        "-" : cell.value
+                                                   }</td> 
                                                 }
                                             })}
                                         </tr>
