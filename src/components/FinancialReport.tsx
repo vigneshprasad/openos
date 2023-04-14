@@ -38,7 +38,14 @@ const FinancialReport: React.FC<Props> = ({ props }) => {
                                                 if(cell.hint) {
                                                     return (
                                                         <td key={j} className="CellWithComment">
-                                                            {cell.value}
+                                                            <td>{
+                                                                cell.value === "0" ||
+                                                                cell.value === 0 ||
+                                                                cell.value === "0.00" ||
+                                                                cell.value === "NaN" || 
+                                                                cell.value === Infinity ?
+                                                                "-" : cell.value
+                                                            }</td>
                                                             <span className="CellComment">{cell.hint}</span>
                                                         </td>
                                                     )
