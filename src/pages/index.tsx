@@ -4,9 +4,9 @@ import { useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { COMPLEX_REPORT, DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { CommandResultType } from "../types/types";
+import type { CommandResultType, TransactionClassification } from "../types/types";
 import FinancialReport from "~/components/FinancialReport";
 
 type CommandDataType = {
@@ -111,6 +111,28 @@ const Home: NextPage = () => {
                                 return <RazorpayData key={index} props={item.data} />
                             } else if(item.type === GET_REPORT) {
                                 return <FinancialReport key={index} props={item.data} />
+                            } else if(item.type === EXPENSE_CLASSIFIER) {
+                                { (item.data[0] as TransactionClassification[])?.length > 0 && 
+                                    <div className="h-72 overflow-scroll">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Transaction</th>
+                                                <th>Category</th>
+                                            </tr>
+                                        </thead>
+                                        {(item.data[0] as TransactionClassification[]).map((transaction, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <td>{transaction.input}</td>
+                                                    <td>{transaction.category}</td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </table>
+                                </div>}
+
+                                
                             }
                         })
                     }

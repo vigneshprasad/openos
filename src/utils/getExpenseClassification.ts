@@ -1,6 +1,7 @@
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { openai } from "~/server/services/openai";
 import natural from 'natural';
+import { EXPENSE_CLASSIFIER } from "~/constants/commandConstants";
 
 type Transaction = {
     date: Date
@@ -37,63 +38,41 @@ type CategoryMap = {
 }
 
 export const getExpenseClassification = async (query: string) : Promise<Category> => {
-    let prompt = "Classify the following expenditure based on the description shown in bank statement?.\nExamples:\n";
-    prompt += `Communication: Twilio, Slack, Zoom\nClassification: Subscriptions\n\n`
-    prompt += `Project Management: Trello, Asana, Basecamp\nClassification: Subscriptions\n\n`
-    prompt += `CRM: SalesForce, HubSpot, Zoho, Notion\nClassification: Subscriptions\n\n`
-    prompt += `Marketing Tools: Hootsuite, Buffer\nClassification: Subscriptions\n\n`
-    prompt += `Notification Tools: OneSignal, Customer.io, MailChimp\nClassification: Subscriptions\n\n`
-    prompt += `Development: GitHub, GitLab, Atlassian\nClassification: Subscriptions\n\n`
-    prompt += `Design: Adobe Creative Cloud, Sketch, Figma, InVision\nClassification: Subscriptions\n\n`
-    prompt += `Productivity: Microsoft Office 365, Google Workspace\nClassification: Subscriptions\n\n`
-    prompt += `Web Analytics: Google Analytics, Mixpanel, Amplitude\nClassification: Subscriptions\n\n`
-
-    prompt += `Hosting: AWS, Google Cloud Platform, Microsoft Azure\nClassification: Hosting & Infrastructure\n\n`
-    prompt += `Domain Registration: NameCheap, GoDaddy, Google Domains\nClassification: Hosting & Infrastructure\n\n`
-    prompt += `CDN: Cloudflare, Fastly Akamai\nClassification: Hosting & Infrastructure\n\n`
-    
-    prompt += `Office Space: WeWork, Regus, Co-Works\nClassification: Rent & Utilities\n\n`
-    prompt += `Utilities: Local utility companies for water, electricity and gas\nClassification: Rent & Utilities\n\n`
-
-    prompt += `Online Advertising: Google Ads, Facebook Ads, Twitter Ads\nClassification: Marketing & Advertising\n\n`
-    prompt += `Referral Payments"\nClassification: Marketing & Advertising\n\n`
-
-    prompt += `Lawyers: Local law firms, legal service platforms\nClassification: Legal & Professional Services\n\n`
-    prompt += `Accountants: Local accounting firms\nClassification: Legal & Professional Services\n\n`
-    
-    prompt += `Business Insurance Providers: Hiscox, Chubb, The HartFord, PLUM\nClassification: Insurance\n\n`
-
-    prompt += `Flights: Airline companies, Booking platforms\nClassification: Travel & Team Expenses\n\n`
-    prompt += `Accommodation: Hotel Chains\nClassification: Travel & Team Expenses\n\n`
-    prompt += `Ground Transportation: Uber, Lyft, Car Rental\nClassification: Travel & Team Expenses\n\n`
-    prompt += `Meals and Entertainment: Restaurants, cafes, event tickets\nClassification: Travel & Team Expenses\n\n`
-    prompt += `Networking and Events: Meetup, EventBrite, Local Chambers of Commerce, Trade shows\nClassification: Travel & Team Expenses\n\n`
-
-    prompt += `Computer & Devices: Apple, Dell, HP\nClassification: Hardware & Equipment\n\n`
-    prompt += `Office Furniture: IKEA, Furlenco, Amazon, Flipkart\nClassification: Hardware & Equipment\n\n`
-    
-    
-    prompt += `Health Insurance: UnitedHealthCare, Blue Cross Blue Shield, Cigna, PLUM\nClassification: Employee Benefits\n\n`
-    prompt += `Benefits: Provident Fund (PF), Employee State Insurance (ESI) \nClassification: Employee Benefits\n\n`
-
-
-    prompt += `Online Learning Platforms: Coursera, Udemy, LinkedIn Learning\nClassification: Training & Development\n\n`
-    prompt += `Workshops & Conferences: Workshops, Webinars\nClassification: Training & Development\n\n`
-
-    prompt += `UPS FedEx, DHL\nClassification: Supply Chain Services\n\n`
-
-    prompt += `ZenDesk, HelpDesk, FreshDesk, Help Scout\nClassification: Customer Support\n\n`
-    prompt += `Live Chat: Intercom, Drift\nClassification: Customer Support\n\n`
-
-    prompt += `Employee salary, wages, employee names\nClassification: Salary and Wages\n\n`
-    
-    prompt += `TDS, GST, Professional Tax, Advance Tax, TCS Collection - Income Tax Department\nClassification: Taxes\n\n`
-    
-    prompt += `Professional Services, Consulting, Freelancer\nClassification: Professional Fees\n\n`
-    
-    prompt += `Razorpay, Stripe, Chargebee\nClassification: Payment Gateway\n\n`
+    let prompt = "Prompt: I am going to give you transactions from a bank statement. Along side that I am giving you a list of 15 categories. Based on these categories, I want you to classify the transactions into the 15 categories. Along side the categories I am giving you a list of example for a type of transaction that would fall into the category.\n\n";
+    prompt += "Classifications:\n"
+    prompt += "1. Classification: Subscriptions\n"
+    prompt += "Examples: Twilio, Slack, Zoom, Trello, Asana, Basecamp, SalesForce, HubSpot, Zoho, Notion, Hootsuite, Buffer, OneSignal, Customer.io, MailChimp, GitHub, GitLab, Atlassian, Adobe Creative Cloud, Sketch, Figma, InVision, Microsoft Office 365, Google Workspace, Google Analytics, Mixpanel, Amplitude, ZenDesk, HelpDesk, FreshDesk, Help Scout, Intercom, Drift, Freshworks, FRESHWORKS INC\n"
+    prompt += "2.Classification: Hosting & Infrastructure\n"
+    prompt += "Examples: AWS, Google Cloud Platform, Microsoft Azure, NameCheap, GoDaddy, Google Domains, Cloudflare, Fastly Akamai, Google Playstore, Apple App store, GOOGL\n"
+    prompt += "3.Classification: Rent\n"
+    prompt += "Examples: WeWork, Regus, Co-Works\n"
+    prompt += "4. Classification: Utilities\n"
+    prompt += "Examples: Local utility companies for water, electricity. gas, Internet or broadband providers, phone bill, internet bill, Airtel, ACT, Hathway, Vodafone\n"
+    prompt += "5. Classification: Marketing & Advertising\n"
+    prompt += "Examples: Google Ads, Facebook Ads, Anything contains word Facebook, Twitter Ads, Linkedin, Referral Payments, PAYUFACEBOOK, LINKEDIN\n"
+    prompt += "6. Professional Services\n"
+    prompt += "Examples: Legal or Law Services, Accounting services, Freelance Services, Consulting, Freelance engineers, Freelance designers, Contracts, third party transactions (TPT)\n"
+    prompt += "7. Classification: Travel & Team Expenses\n"
+    prompt += "Examples: Flights, Airline companies, Booking platforms, Uber, Ola, Hotel Expenses, Lyft, Car Rental, Meals and Entertainment, event tickets, Meetup, EventBrite, Trade shows, Dunzo,\n"
+    prompt += "8.Classification: Hardware & Equipment\n"
+    prompt += "Examples: Computer & Devices, Apple, Dell, HP, Amazon orders, Flipkart orders, IKEA\n"
+    prompt += "9. Classification: Employee Benefits\n"
+    prompt += "Examples: Hiscox, Chubb, The HartFord, PLUM, Health Insurance, UnitedHealthCare, Blue Cross Blue Shield, Cigna, PLUM, Provident Fund (PF), Employee State Insurance (ESI)\n"
+    prompt += "10.Classification: Training & Development\n"
+    prompt += "Examples: Coursera, Udemy, Workshops, Webinars\n"
+    prompt += "11.Classification: Salary and Wages\n"
+    prompt += "Examples: Employee salary, wages, remuneration, stipend, reimbursement, petty cash\n"
+    prompt += "12.Classification: Taxes\n"
+    prompt += "Examples: TDS, GST, Professional Tax, Advance Tax, TCS Collection - Income Tax Department, Markup charged by bank, TXN, Any fee paid to government eg SBIEPYMAHARASHTRASAL\n"
+    prompt += "13. Classification: Payment Gateway\n"
+    prompt += "Examples: Transaction fee charged by gateways like Razorpay, Stripe, Chargebee, Paypal, Paytm\n"
+    prompt += "14. Classification: Credit Card\n"
+    prompt += "Examples: Autopay CC, Credit Card, CC\n"
+    prompt += "15. Classification: Food & Beverages\n"
+    prompt += "Examples: Swiggy, Zomato, Zepto, Uber Eats, Restaurants, Cafes\n"
     
     prompt += query + "\nClassification: ";
+
     const completion = await openai.createCompletion({
         model: COMPLETIONS_MODEL,
         prompt: prompt,
@@ -261,4 +240,120 @@ export const getExpenseClassification2 = (transactions: Transaction[]) : Categor
 
     return categoryMap
     
+}
+
+export const getExpenseClassificationTest = async () => {
+    let prompt = "Prompt: I am going to give you transactions from a bank statement. Along side that I am giving you a list of 15 categories. Based on these categories, I want you to classify the transactions into the 15 categories. Along side the categories I am giving you a list of example for a type of transaction that would fall into the category.\n\n";
+    prompt += "Classifications:\n"
+    prompt += "1. Classification: Subscriptions\n"
+    prompt += "Examples: Twilio, Slack, Zoom,Trello, Asana, Basecamp,SalesForce, HubSpot, Zoho, Notion,Hootsuite, Buffer,OneSignal, Customer.io, MailChimp,GitHub, GitLab, Atlassian,Adobe Creative Cloud, Sketch, Figma, InVision,Microsoft Office 365, Google Workspace,Google Analytics, Mixpanel, Amplitude,ZenDesk, HelpDesk, FreshDesk, Help Scout,Intercom, Drift, Freshworks, FRESHWORKS INC\n"
+    prompt += "2.Classification: Hosting & Infrastructure\n"
+    prompt += "Examples: AWS, Google Cloud Platform, Microsoft Azure,NameCheap, GoDaddy, Google Domains,Cloudflare, Fastly Akamai, Google Playstore, Apple App store,GOOGL\n"
+    prompt += "3.Classification: Rent\n"
+    prompt += "Examples: WeWork, Regus, Co-Works\n"
+    prompt += "4. Classification: Utilities\n"
+    prompt += "Examples: Local utility companies for water, electricity. gas, Internet or broadband providers, phone bill, internet bill, Airtel, ACT, Hatway, Vodafone\n"
+    prompt += "5. Classification: Marketing & Advertising\n"
+    prompt += "Examples: Google Ads, Facebook Ads, Anything contains word Facebook, Twitter Ads, Linkedin,Referral Payments, PAYUFACEBOOK, LINKEDIN\n"
+    prompt += "6. Professional Services\n"
+    prompt += "Examples: Legal or Law Services, Announting services, Freelance Services,Consulting, Freelance engineers, Freelance designers, Contracts, third party transactions (TPT)\n"
+    prompt += "7. Classification: Travel & Team Expenses\n"
+    prompt += "Examples: Flights, Airline companies, Booking platforms, Uber, Ola, Hotel Expenses,Lyft, Car Rental, Meals and Entertainment,event tickets,Meetup, EventBrite, Trade shows, Dunzo,\n"
+    prompt += "8.Classification: Hardware & Equipment\n"
+    prompt += "Examples: Computer & Devices, Apple, Dell, HP, Amazon orders, Flipkard orders, IKEA\n"
+    prompt += "9. Classification: Employee Benefits\n"
+    prompt += "Examples: Hiscox, Chubb, The HartFord, PLUM, Health Insurance, UnitedHealthCare, Blue Cross Blue Shield, Cigna, PLUM,Provident Fund (PF), Employee State Insurance (ESI)\n"
+    prompt += "10.Classification: Training & Development Examples: Coursera, Udemy,Workshops, Webinars\n"
+    prompt += "11.Classification: Salary and Wages\n"
+    prompt += "Examples: Employee salary, wages, remuneration, stipend,reimbursement,petty cash\n"
+    prompt += "12.Classification: Taxes\n"
+    prompt += "Examples: TDS, GST, Professional Tax, Advance Tax, TCS Collection - Income Tax Department, Markup charged by bank, TXN, Any fee paid to government eg SBIEPYMAHARASHTRASAL\n"
+    prompt += "13. Classification: Payment Gateway\n"
+    prompt += "Examples: Transaction fee charged by gateways like Razorpay, Stripe, Chargebee, Paypal, Paytm\n"
+    prompt += "14. Classification: Credit Card\n"
+    prompt += "Examples: Autopay CC, Credit Card, CC\n"
+    prompt += "15. Classification: Food & Beverages\n"
+    prompt += "Examples: Swiggy, Zomato, Zepto, Uber Eats,Restaurants, Cafes\n"
+
+    console.log(prompt);
+
+    const inputs = [
+        "POS 416021XXXXXX8504 GOOGLE *TEMPORAR",
+        "POS 416021XXXXXX8504 GOOGLE *TEMPORAR",
+        "KQSXI44OANZ2FOO3CA/PAYUFACEBOOK",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "NEFT CR-SCBL0036001-SCB NODAL ACCOUNT --WURKNET PRIVATE LIMITED-SSG17413Q0624069",
+        "KQSXI4EKBN4KBP6UCU/PAYUFACEBOOK",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "1025806274917279/TOMGOOGLEINDIA",
+        "ME DC SI 416021XXXXXX8504 GOOGLE CLOUD",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "50200057895641-TPT-SOFTWARE DEV-VIZKR",
+        "50200051557236-TPT-PROF FEES-R K DESAI AND CO",
+        "KQSXI4MKAF72DPWSCA/PAYUFACEBOOK",
+        "POS 416021******8504 RVSL DT - 28/03/22",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "NEFT DR-UBIN0816965-P YASHWANTH SAI-NETBANK, MUM-N097221908311107-SALARY MAR22",
+        "KQSXI7UPAR6KHP6WCA/PAYUFACEBOOK",
+        "NEFT CR-SCBL0036001-SCB NODAL ACCOUNT --WURKNET PRIVATE LIMITED-SSG17413Q0631237",
+        "0801762199412/SBIEPYMAHARASHTRASAL",
+        "3781945764022/SBIEPYMAHARASHTRASAL",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "JHAGQBASS2YGQ0/RAZPSWIGGY",
+        "KQSXI74LAF6KFNG2CY/PAYUFACEBOOK",
+        "POS 416021XXXXXX8504 FRESHWORKS INC",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "IB BILLPAY DR-HDFCRM-555153XXXXXX1471",
+        "NEFT CR-SCBL0036001-SCB NODAL ACCOUNT --WURKNET PRIVATE LIMITED-SSG17413Q0636371",
+        "KQSH25UFAZ525PG2CQ/PAYUFACEBOOK",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "NEFT CR-SCBL0036001-SCB NODAL ACCOUNT --WURKNET PRIVATE LIMITED-SSG17413Q0638979",
+        "NEFT DR-KKBK0000286-TARUN SINGH-NETBANK, MUM-N103221917097201-SALARY MAR22",
+        "NEFT DR-KKBK0000286-TARUN SINGH-NETBANK, MUM-N103221917107813-SALARY APR22",
+        "NEFT DR-SBIN0015474-VAIBHAV SITARAM CHAVAN-NETBANK, MUM-N103221917108904-CONTENT CREATION",
+        "5201361044128/SBIEPYMAHARASHTRASAL",
+        "KQSH254IAF52BOOTD4/PAYUFACEBOOK",
+        "ME DC SI 416021XXXXXX8504 FACEBOOK",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "CRV POS-416021******8504-    -GOOGLE CLO",
+        "CRV POS-416021******8504-    -FRESHWORKS",
+        "POS 416021XXXXXX8504 PAYU-PAYUINDIA.A",
+        "POS 416021XXXXXX8504 TWILIO INC",
+        "IMPS-210520523433-AC VALIDATION GPAY-K-IDFB-XXXXXXX6979-BANKACCOUNTVERIFICATIONTRANSACTIONBANKACCOUNTVALID",
+        "KQSH25EPA5Z2HNGUCA/PAYUFACEBOOK",
+        "CC 000555153XXXXXX1471 AUTOPAY SI-TAD",
+        "POS 416021XXXXXX8504 ACTBANGALORE",
+        "CRV POS-416021******8504-    -FACEBOOK",
+    ]
+
+    const classification = []
+
+    for(const input of inputs) {
+        const newPrompt = prompt + input + "\nClassification: ";
+        const completion = await openai.createCompletion({
+            model: COMPLETIONS_MODEL,
+            prompt: newPrompt,
+            stop: "\n",
+            temperature: 0.6,
+            max_tokens: 150
+        });
+        if(completion?.data?.choices.length > 0) {
+            const text = completion?.data?.choices[0]?.text?.trim();
+            if(text) {
+                const category = text as Category;
+                classification.push({
+                    input,
+                    category
+                })
+                console.log(input, "###", category)
+            }
+        } 
+    }
+    return {
+        type: EXPENSE_CLASSIFIER,
+        data: [
+            classification,
+            undefined
+        ]
+    }
 }

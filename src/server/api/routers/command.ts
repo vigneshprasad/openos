@@ -5,7 +5,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-import { COMPLEX_REPORT, DATABASE_QUERY, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
 import { runQuery } from "~/server/commands/runQuery";
 import { TRPCClientError } from "@trpc/client";
 import { getRazorpayData } from "~/server/commands/getRazorpayData";
@@ -16,7 +16,7 @@ import { getUserActivationReport } from "~/server/commands/getUserActivationRepo
 import { getActiveUserReport } from "~/server/commands/getActiveUserReport";
 import { getRetentionReport } from "~/server/commands/getRetentionReport";
 import { getMarketingSpendReport } from "~/server/commands/getMarketingSpendReport";
-
+import { getExpenseClassificationTest } from "~/utils/getExpenseClassification";
 
 export const commandRouter = createTRPCRouter({
   runCommand: protectedProcedure
@@ -65,6 +65,8 @@ export const commandRouter = createTRPCRouter({
                     case MARKETING_SPEND:
                         return await getMarketingSpendReport(query, ctx.session.user.id);
                 }
+            case EXPENSE_CLASSIFIER: 
+                return await getExpenseClassificationTest();
             default:
                 throw new TRPCClientError('Bad Query');
         }
