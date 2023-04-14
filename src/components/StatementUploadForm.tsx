@@ -115,15 +115,28 @@ export const StatementUploadForm: React.FC = () => {
                             {success && <p className="text-green-500">Success</p>}
                             {error && <p className="text-red-500">Error</p>}
                         </div>
-                        <div>
-                            {transactionData.map((transaction) => {
-                                return (
-                                    <div key={transaction.id}>
-                                        {transaction.description}
-                                    </div>
-                                )
-                            })}
-                        </div>
+                        { transactionData.length > 0 && <div className="h-72 overflow-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Transaction</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                {transactionData.map((transaction) => {
+                                    return (
+                                        <tr key={transaction.id}>
+                                            <td>{transaction.description}</td>
+                                            <td>{transaction.amount.toString()}</td>
+                                            <td>{transaction.date.toDateString()}</td>
+                                            <td>{transaction.category}</td>
+                                        </tr>
+                                    )
+                                })}
+                            </table>
+                        </div>}
                     <Dialog.Close asChild>
                         <button className="IconButton" aria-label="Close">
                             <Cross2Icon />

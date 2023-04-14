@@ -6,6 +6,7 @@ import Razorpay from "razorpay";
 import axios from "axios";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
+import { TrackNextIcon } from "@radix-ui/react-icons";
 
 type IncomeData = {
     subscriptionRevenue: Transaction[]; 
@@ -607,6 +608,7 @@ const getExpenditureBreakdown = (transactionData: Transaction[]) : ExpenditureBr
     for(let i = 0; i < transactionData.length; i++) {
         const transaction = transactionData[i];
         if(!transaction) continue
+        console.log(transaction.description, transaction.category, transaction.amount);
         if(transaction.amount < 0) {
             if(transaction.category) {
                 switch(transaction.category) {
@@ -652,7 +654,7 @@ const getExpenditureBreakdown = (transactionData: Transaction[]) : ExpenditureBr
                     case "Taxes":
                         breakdown["Tax Expenses"].push(transaction);
                         break;
-                    case "Professional fees":
+                    case "Professional Fees":
                         breakdown["Professional Services"].push(transaction);
                         break;
                     case "Payment Gateway":

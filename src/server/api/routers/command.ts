@@ -11,7 +11,6 @@ import { TRPCClientError } from "@trpc/client";
 import { getRazorpayData } from "~/server/commands/getRazorpayData";
 import { getFinancialReport } from "~/server/commands/getFinancialReport";
 import { ACTIVE_USERS, FINANCIAL_REPORT, MARKETING_SPEND, MIS_B2C, USER_ACQUISITION, USER_ACTIVATION, USER_RETENTION } from "~/constants/reportConstants";
-import { getMISB2C } from "~/server/commands/getMISB2C";
 import { getUserAcquisitionReport } from "~/server/commands/getUserAcquisitionReport";
 import { getUserActivationReport } from "~/server/commands/getUserActivationReport";
 import { getActiveUserReport } from "~/server/commands/getActiveUserReport";

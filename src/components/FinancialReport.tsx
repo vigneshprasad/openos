@@ -1,13 +1,10 @@
 import type { CommandResultType, ExcelCell } from "~/types/types";
-import React, { useState } from "react";
-import ReactDataSheet from 'react-datasheet';
-
 
 interface Props {
     props: CommandResultType
 }
 
-interface GridElement extends ReactDataSheet.Cell<GridElement> {
+interface GridElement {
     value: number | string;
     expression?: string;
     hint?: string;
