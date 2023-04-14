@@ -624,7 +624,7 @@ const getExpenditureBreakdown = (transactionData: Transaction[]) : ExpenditureBr
                     case "Marketing & Advertising":
                         breakdown["Marketing Expenses"].push(transaction);
                         break;
-                    case "Legal & Professional Services":
+                    case "Professional Services":
                         breakdown["Professional Services"].push(transaction);
                         break;
                     case "Insurance":
@@ -648,7 +648,7 @@ const getExpenditureBreakdown = (transactionData: Transaction[]) : ExpenditureBr
                     case "Customer Support":
                         breakdown["Other Expenses"].push(transaction);
                         break;
-                    case "Salary & Wages":
+                    case "Salary and Wages":
                         breakdown["Salaries and Wages"].push(transaction);
                         break;
                     case "Taxes":
