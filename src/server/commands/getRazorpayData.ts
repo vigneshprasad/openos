@@ -1,6 +1,6 @@
 import { prisma } from "~/server/db";
 
-import { GET_DATA } from "~/constants/commandConstants";
+import { FINANCIAL_DATA } from "~/constants/commandConstants";
 import Razorpay from "razorpay";
 import { type DateRange, getDateRangeFromString } from "~/utils/getDateRangeFromString";
 import { type CustomerDetails, getCustomerFromString } from "~/utils/getCustomerFromStrings";
@@ -26,7 +26,7 @@ export const getRazorpayData = async (query: string, userId: string) => {
     const razorpayResource = razorpayResources[0];
     if(!razorpayResources || !razorpayResource) {
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 undefined, 
                 {
@@ -56,7 +56,7 @@ export const getRazorpayData = async (query: string, userId: string) => {
         }
     } catch (error) {
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 undefined, 
                 {
@@ -80,7 +80,7 @@ const getOrderResults = async (
         const orders = []
         orders.push(await instance.orders.fetch(orderId));
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -118,7 +118,7 @@ const getOrderResults = async (
             })
         } 
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -140,7 +140,7 @@ const getOrderResults = async (
         });
         console.log(orders);
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -165,7 +165,7 @@ const getPaymentResults = async (
         const payments = (await instance.payments.all()).items;
         payments.filter(payment => payment.order_id === orderId)
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -198,7 +198,7 @@ const getPaymentResults = async (
             })
         } 
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -219,7 +219,7 @@ const getPaymentResults = async (
             to: toMilliseconds
         });
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -251,7 +251,7 @@ const getRefundResults = async (
             }
         }
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -291,7 +291,7 @@ const getRefundResults = async (
             })
         } 
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -312,7 +312,7 @@ const getRefundResults = async (
             to: toMilliseconds
         });
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -372,7 +372,7 @@ const getCustomerResults = async (
             }
         }
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -431,7 +431,7 @@ const getCustomerResults = async (
         }
 
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
@@ -474,7 +474,7 @@ const getCustomerResults = async (
             })
         }
         return {
-            type: GET_DATA,
+            type: FINANCIAL_DATA,
             data: [
                 {
                     dateRange,
