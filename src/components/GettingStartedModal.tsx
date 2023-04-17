@@ -52,7 +52,7 @@ export const GettingStartedModal: React.FC = () => {
             {activeStage == formStages.UserDetails && (
               <div className="w-[50%] mx-auto py-[48px] grid grid-cols-1 grid-rows-[max-content_1fr] gap-[40px]">
                 <div>
-                  <h1 className="text-2xl leading-400 text-[#fff]">Welcome to Halo!</h1>
+                  <h1 className="text-2xl leading-400 text-[#fff]">Welcome to Open OS!</h1>
                   <p className="pt-2 text-sm text-[#616161]">Tell us a little about yourself. 
                   This helps us customize the product for you</p>
                 </div>
