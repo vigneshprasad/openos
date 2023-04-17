@@ -18,57 +18,71 @@ const Report: React.FC<Props> = ({ props }) => {
     const dataRaw = data as ExcelCell[][]
     const tableData = data && dataRaw.slice(1) as GridElement[][];
     const grid = tableData ? tableData : [];
+
     return (
         <>
-            { data && 
-                <>
-                    <div className="flex flex-col text-white w-full text-center max-w-full overflow-x-scroll">
-                        {
-                            <table>
-                                <thead>
-                                    <tr>
-                                        {dataRaw[0] && dataRaw[0].map(
-                                            (cell, index) => (
-                                                <th key={index}>{cell.value}</th>
-                                            ))
-                                        }
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {grid.map((row, i) => (
-                                        <tr key={i}>
-                                            {row.map((cell, j) => {
-                                                if(cell.query) {
-                                                    return (
-                                                        <div key={j}>
-                                                            <td><QueryFeedback queryProp={cell.query}/></td>
-                                                            <td className="CellWithComment">
-                                                                {cell.value}
-                                                                <span className="CellComment">{cell.query.query}</span>
-                                                            </td>
+            {data && 
+                <div className="tableDiv">
+                    <table>
+                        <thead>
+                            <tr>
+                                {dataRaw[0] && dataRaw[0].map(
+                                    (cell, index) => (
+                                        <th 
+                                            // colSpan={index === 0 ? 2 : undefined}
+                                            key={index}
+                                        >
+                                            {cell.value}
+                                        </th>
+                                    ))
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {grid.map((row, i) => (
+                                <tr key={i}>
+                                    {/* <td>{i+1}</td> */}
+                                    {row.map((cell, j) => {
+                                        if(cell.query) {
+                                            return (
+                                                <div key={j}>
+                                                    <td>
+                                                        <div>
+                                                            <QueryFeedback queryProp={cell.query}/>
                                                         </div>
-                                                    )
-                                                } else {
-                                                   return <td key={j}>{
-                                                        cell.value == '0' ||
-                                                        cell.value == 0 ||
-                                                        cell.value == "0.00" ||
-                                                        cell.value == "NaN" ||
-                                                        cell.value == "-Infinity" || 
-                                                        cell.value == Infinity ||
-                                                        cell.value == -Infinity ?
-
-                                                        "-" : cell.value
-                                                   }</td> 
-                                                }
-                                            })}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        }
-                    </div>
-                </>
+                                                    </td>
+                                                    <td className="CellWithComment">
+                                                        <div>
+                                                            {cell.value}
+                                                            <span className="CellComment">{cell.query.query}</span>
+                                                        </div>
+                                                    </td>
+                                                </div>
+                                            )
+                                        } else {
+                                            return (
+                                                <td key={j}>
+                                                    <div>
+                                                        {
+                                                            cell.value == '0' ||
+                                                            cell.value == 0 ||
+                                                            cell.value == "0.00" ||
+                                                            cell.value == "NaN" ||
+                                                            cell.value == "-Infinity" || 
+                                                            cell.value == Infinity ||
+                                                            cell.value == -Infinity ?
+                                                            "-" : cell.value
+                                                        }
+                                                    </div>
+                                                </td>
+                                            )
+                                        }
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             }
             {error && 
                 <div className="justify-content-end mt-8">

@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { SignInWithGoogle } from "~/components/SignInWithGoogle";
 
-const Home: NextPage = () => {
+const Auth: NextPage = () => {
   return (
     <>
       <Head>
@@ -31,7 +31,7 @@ const Home: NextPage = () => {
             <div className="flex flex-col gap-[48px]">
               <Image src="/halo_logo.png" alt="Halo logo" width={42} height={42} />
               <div className="pt-[22px]">
-                <h2 className="text-2xl font-medium text-[#fff]">Login to Halo</h2>
+                <h2 className="text-2xl font-medium text-[#fff]">Login to Open OS</h2>
                 <p className="pt-[8px] text-sm font-medium text-[#747474]">
                   Use your work email, we&apos;ll send you a login link. Simple.
                 </p>
@@ -63,4 +63,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Auth;

@@ -1,26 +1,34 @@
 import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 
 export const Navbar: React.FC = () => {
     const { data: sessionData } = useSession();
 
+    const src = sessionData?.user?.image ?? ""
+
     return (
-        <div className="navbar flex p-2">
-            <div className="flex-1 m-auto font-bold text-white">
+        <div className="navbar pl-2.5 py-2 pr-[18px] flex justify-between items-center bg-[#1C1B1D]">
+            <Image src="/halo_logo.png" alt="Logo" width={24} height={24} />
+            
+            <text className="font-bold text-[#fff]">
                 {sessionData?.user?.name ? `${sessionData.user.name}'s Dashboard` : ""} 
-            </div> 
-            <div className="flex-2 dropdown text-white">
+            </text> 
+            <div className="dropdown text-[#fff]">
                 {sessionData?.user ? (
                     <label 
-                        tabIndex={0} 
+                        tabIndex={0}
                         className="btn-ghost btn-circle avatar btn"
                         onClick={() => void signOut({ callbackUrl: '/auth/signin'})}
                     >
-                        <div className="w-10">
-                            <img className="rounded-full"
-                                src={sessionData?.user?.image ?? ""}
+                        {sessionData?.user?.image && <div className="w-7">
+                            <Image className="rounded-full"
+                                loader={() => src}
+                                src={src}
                                 alt={sessionData?.user?.name ?? ""}
+                                width={28}
+                                height={28}
                             />
-                        </div>
+                        </div>}
                     </label>
                 ) :  (
                     <button 

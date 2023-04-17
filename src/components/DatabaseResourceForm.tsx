@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
-import { Cross2Icon } from '@radix-ui/react-icons';
+import { CrossCircledIcon } from '@radix-ui/react-icons';
+import Image from "next/image";
 
 export const DatabaseResourceForm: React.FC = () => {
 
@@ -47,17 +48,23 @@ export const DatabaseResourceForm: React.FC = () => {
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>
-                <button className="Button violet"> Add Postgres Database Resource </button>
+                {success ? 
+                    <button className="Button bg-[#262626] mt-1 h-9 flex text-[#49C179]" disabled>
+                        <Image src="/svg/green_tick.svg" alt="Green Tick" width={16} height={16} />
+                        Connected
+                    </button> :
+                    <button className="Button secondary mt-1 h-9">Connect</button>
+                }
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
-                <Dialog.Content className="DialogContent">
-                    <Dialog.Title className="DialogTitle"> 
-                        Add Database Resource 
-                    </Dialog.Title>
-                    <Dialog.Description className="DialogDescription">
-                        Add a new database resource here. Click save when you are done.
-                    </Dialog.Description>
+                <Dialog.Content className="DialogContent p-4">
+                    <div className="pb-4 flex flex-row justify-between items-center">
+                        <text className="text-md text-[#fff]">Connect to PostgreSQL</text>
+                        <Dialog.Close asChild>
+                            <CrossCircledIcon color="#C4C4C4" className="cursor-pointer" />
+                        </Dialog.Close>
+                    </div>
                     <form onSubmit={handleSubmit}>
                         <fieldset className="Fieldset">
                             <label className="Label">
@@ -125,23 +132,18 @@ export const DatabaseResourceForm: React.FC = () => {
                                 />
                             </label>
                         </fieldset>
-                        <div className="flex justify-content-end mt-25">
+                        <div className="flex justify-center">
                             {loading ?
-                                <button type="submit" disabled className="Button grey">Loading...</button>
+                                <button type="submit" disabled className="Button secondary">Loading...</button>
                                 :
-                                <button type="submit" className="Button green">Generate</button>
+                                <button type="submit" className="Button primary">Connect</button>
                             }
                         </div>
-                        <div className="flex justify-content-end mt-8">
+                        {/* <div className="flex justify-content-end mt-8">
                             {success && <p className="text-green-500">Success</p>}
                             {error && <p className="text-red-500">Error</p>}
-                        </div>
-                    </form>                    
-                    <Dialog.Close asChild>
-                        <button className="IconButton" aria-label="Close">
-                            <Cross2Icon />
-                        </button>
-                    </Dialog.Close>
+                        </div> */}
+                    </form>
                 </Dialog.Content>
             </Dialog.Portal>
         </Dialog.Root>
