@@ -1,11 +1,13 @@
 import { prisma } from "~/server/db";
 
-import { GET_REPORT } from "~/constants/commandConstants";
+import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { Client } from "pg";
 import { getUserBySource } from "./getUserAcquisitionReport";
 import { type Transaction } from "@prisma/client";
+import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
+import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
 
 type UsersBySource = {
     date: Date,
@@ -36,7 +38,7 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined, 
                 {
@@ -50,7 +52,7 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
 
     if(transactions.length === 0) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined,
                 {
@@ -126,10 +128,17 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
 
     await client.end();
 
+    const reportTableWithProjections = await getProphetProjectionsReport(
+        reportTable,
+        REPORT_PROJECTIONS,
+        'M'
+    );
+
+
     return {
-        type: GET_REPORT,
+        type: CREATE_REPORT,
         data: [
-            reportTable,
+            reportTableWithProjections,
             undefined
         ]
     }

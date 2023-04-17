@@ -4,7 +4,7 @@ import { useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, FINANCIAL_DATA, CREATE_REPORT } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType, TransactionClassification } from "../types/types";
 import Report from "~/components/Report";
@@ -98,7 +98,7 @@ const Home: NextPage = () => {
                             <div className="pt-8">
                                 <h3 className="text-[#fff] text-sm font-medium text-center">Start by writing your first command</h3>
                                 <p className="pt-1 text-xs text-[#838383] text-center">
-                                    Halo lets you write exactly like you speak, in natural English. But if you wish to write commands, 
+                                    Open OS lets you write exactly like you speak, in natural English. But if you wish to write commands, 
                                     try the command palette.
                                 </p>
                             </div>
@@ -107,9 +107,9 @@ const Home: NextPage = () => {
                                 {data.map((item, index) => {
                                     if(item.type === DATABASE_QUERY) {
                                         return <QueryResult key={index} props={item.data} />
-                                    } else if(item.type === GET_DATA) {
+                                    } else if(item.type === FINANCIAL_DATA) {
                                         return <RazorpayData key={index} props={item.data} />
-                                    } else if(item.type === GET_REPORT) {
+                                    } else if(item.type === CREATE_REPORT) {
                                         return <Report key={index} props={item.data} />
                                     }
                                 })}

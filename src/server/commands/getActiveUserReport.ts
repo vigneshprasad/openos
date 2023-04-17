@@ -1,6 +1,6 @@
 import { prisma } from "~/server/db";
 
-import { GET_REPORT } from "~/constants/commandConstants";
+import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type ResourceSchemaEmbeddings } from "@prisma/client";
@@ -9,6 +9,8 @@ import { Client } from "pg";
 import moment from "moment";
 import { executeQuery } from "~/utils/executeQuery";
 import { processPrompt } from "~/utils/processPrompt";
+import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
+import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
 
 type ActiveUsers = {
     date: Date,
@@ -27,7 +29,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined, 
                 {
@@ -60,7 +62,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
 
     if(!activityDescription) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined, 
                 {
@@ -173,10 +175,17 @@ export const getActiveUserReport = async (query: string, userId: string) => {
 
     await client.end();
 
+    const reportTableWithProjections = await getProphetProjectionsReport(
+        reportTable,
+        REPORT_PROJECTIONS,
+        'M'
+    );
+
+
     return {
-        type: GET_REPORT,
+        type: CREATE_REPORT,
         data: [
-            reportTable,
+            reportTableWithProjections,
             undefined
         ]
     }
@@ -247,7 +256,6 @@ const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings
         console.log(error);
     }
 
-    console.log(result);
     return result;
 }
 
