@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { SignInWithGoogle } from "~/components/SignInWithGoogle";
 
-const Home: NextPage = () => {
+const Auth: NextPage = () => {
   return (
     <>
       <Head>
@@ -63,4 +63,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Auth;
