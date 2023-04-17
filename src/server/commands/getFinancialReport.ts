@@ -1,12 +1,13 @@
 import { prisma } from "~/server/db";
-import { GET_REPORT } from "~/constants/commandConstants";
+import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getRazorpayTransactionData } from "~/utils/getExpenditureTransactionData";
 import { type RazorpayResource } from "@prisma/client";
 import Razorpay from "razorpay";
 import axios from "axios";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { TrackNextIcon } from "@radix-ui/react-icons";
+import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
+import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
 
 type IncomeData = {
     subscriptionRevenue: Transaction[]; 
@@ -86,7 +87,7 @@ export const getFinancialReport = async (userId: string) => {
     }
     if(transactions.length === 0) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined,
                 {
@@ -461,10 +462,16 @@ export const getFinancialReport = async (userId: string) => {
     reportTable.push(expensesTotal);
     reportTable.push(netIncome);
 
+    const reportTableWithProjections = await getProphetProjectionsReport(
+        reportTable,
+        REPORT_PROJECTIONS,
+        'M'
+    );
+
     return {
-        type: GET_REPORT,
+        type: CREATE_REPORT,
         data: [
-            reportTable,
+            reportTableWithProjections,
             undefined
         ]
     }

@@ -5,7 +5,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, GET_DATA, GET_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, EXPENSE_CLASSIFIER, FINANCIAL_DATA, CREATE_REPORT } from "~/constants/commandConstants";
 import { runQuery } from "~/server/commands/runQuery";
 import { TRPCClientError } from "@trpc/client";
 import { getRazorpayData } from "~/server/commands/getRazorpayData";
@@ -34,9 +34,9 @@ export const commandRouter = createTRPCRouter({
         switch(command) {
             case DATABASE_QUERY:
                 return await runQuery(query, ctx.session.user.id);
-            case GET_DATA:
+            case FINANCIAL_DATA:
                 return await getRazorpayData(query, ctx.session.user.id);
-            case GET_REPORT:
+            case CREATE_REPORT:
                 switch(query) {
                     case FINANCIAL_REPORT:
                         return await getFinancialReport(ctx.session.user.id);                        
@@ -45,11 +45,11 @@ export const commandRouter = createTRPCRouter({
                             type: COMPLEX_REPORT,
                             data: [
                                 [
-                                    `${GET_REPORT}: ${USER_ACQUISITION}`,
-                                    `${GET_REPORT}: ${USER_ACTIVATION}`,
-                                    `${GET_REPORT}: ${ACTIVE_USERS}`,
-                                    `${GET_REPORT}: ${USER_RETENTION}`,
-                                    `${GET_REPORT}: ${MARKETING_SPEND}`,
+                                    `${CREATE_REPORT}: ${USER_ACQUISITION}`,
+                                    `${CREATE_REPORT}: ${USER_ACTIVATION}`,
+                                    `${CREATE_REPORT}: ${ACTIVE_USERS}`,
+                                    `${CREATE_REPORT}: ${USER_RETENTION}`,
+                                    `${CREATE_REPORT}: ${MARKETING_SPEND}`,
                                 ],
                                 undefined
                             ]

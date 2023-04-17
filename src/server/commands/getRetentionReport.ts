@@ -1,5 +1,5 @@
 import { prisma } from "~/server/db";
-import { GET_REPORT } from "~/constants/commandConstants";
+import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type SavedQuery, type ResourceSchemaEmbeddings } from "@prisma/client";
@@ -7,6 +7,8 @@ import { Client } from "pg";
 import moment from "moment";
 import { processPrompt } from "~/utils/processPrompt";
 import { executeQuery } from "~/utils/executeQuery";
+import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
+import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
 
 type RetentionData = {
     date: Date,
@@ -27,7 +29,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined, 
                 {
@@ -60,7 +62,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
 
     if(!activityDescription) {
         return {
-            type: GET_REPORT,
+            type: CREATE_REPORT,
             data: [
                 undefined, 
                 {
@@ -119,10 +121,16 @@ export const getRetentionReport = async (query: string, userId: string) => {
 
     await client.end();
 
+    const reportTableWithProjections = await getProphetProjectionsReport(
+        reportTable,
+        REPORT_PROJECTIONS,
+        'M'
+    );
+
     return {
-        type: GET_REPORT,
+        type: CREATE_REPORT,
         data: [
-            reportTable,
+            reportTableWithProjections,
             undefined
         ]
     }
