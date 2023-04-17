@@ -20,8 +20,6 @@ export const GettingStartedModal: React.FC = () => {
 
   const {data: user} = api.user.getById.useQuery();
 
-  console.log("user: ", user)
-
   const next = useCallback(
     (event: SyntheticEvent) => {
       event.preventDefault()

@@ -18,12 +18,12 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                             <br />
                         </div>
                     }
-                    <div className="flex flex-col text-white w-full text-center">
+                    <div>
                         { data?.result && data.result.length === 0 && <h1>No results</h1>}
                         {
                             data?.result && data.result.length > 0 &&
-                            <div className="w-full max-w-screen overflow-x-auto">
-                                <table className="w-full max-w-screen overflow-x-auto">
+                            <div className="tableDiv">
+                                <table>
                                     <thead>
                                         {
                                             data?.result && 
@@ -42,7 +42,11 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                                         <tr key={index}>
                                             {Object.keys(row).map((key: string) => {
                                                 return (      
-                                                    <td key={key}>{row[key]?.toString()}</td>
+                                                    <td key={key}>
+                                                        <div>
+                                                            {row[key]?.toString()}
+                                                        </div>
+                                                    </td>
                                                 )}
                                             )}
                                         </tr>

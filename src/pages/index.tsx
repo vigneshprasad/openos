@@ -35,9 +35,9 @@ const Home: NextPage = () => {
     const runQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: async (res) => {
             const dataResult = res as CommandDataType;
+            setData([]);
             if(dataResult.type === COMPLEX_REPORT) {
                 if(!dataResult.data[0]) {
-                    setData([]);
                     setLoading(false);
                     setError(true);
                     return;
@@ -72,7 +72,7 @@ const Home: NextPage = () => {
         setLoading(true);
         setError(false);
         setData([]);
-        runQuery.mutate({ query: command });  
+        runQuery.mutate({ query: command });
     };
 
     return (
@@ -92,7 +92,7 @@ const Home: NextPage = () => {
                             <text className="text-sm font-normal text-[#fff]">Terminal</text>
                         </div>
                     </div>
-                    <div className="p-5 bg-[#0A0A0A] grid grid-rows-[1fr_max-content] grid-cols-1 overflow-hidden">
+                    <div className="p-5 bg-[#0A0A0A] grid grid-rows-[1fr_max-content] grid-cols-1 gap-5 overflow-hidden">
                         {data.length === 0 ? <div className="w-[30%] h-max mx-auto pt-20">
                             <Image src="/terminal_empty.png" alt="Terminal" width={300} height={100} className="mx-auto" />
                             <div className="pt-8">
@@ -103,7 +103,7 @@ const Home: NextPage = () => {
                                 </p>
                             </div>
                         </div> : (
-                            <div className="overflow-auto">
+                            <div className="overflow-auto p-4 bg-[#111] rounded-md">
                                 {data.map((item, index) => {
                                     if(item.type === DATABASE_QUERY) {
                                         return <QueryResult key={index} props={item.data} />
