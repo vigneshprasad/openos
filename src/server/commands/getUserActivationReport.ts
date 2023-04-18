@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
 
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type SavedQuery, type ResourceSchemaEmbeddings, type funnelSteps } from "@prisma/client";
@@ -35,17 +34,14 @@ export const getUserActivationReport = async (query: string, userId: string) => 
 
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database not found',
-                    cause: 'Please add a database resource to your account to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database not found',
+                cause: 'Please add a database resource to your account to get your report.'
+            }
+        ]
     }
 
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -68,17 +64,14 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     });
 
     if(funnelSteps.length === 0 || !funnelSteps[0]) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Funnel statements not found',
-                    cause: 'Please add funnel steps to your database to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Funnel statements not found',
+                cause: 'Please add funnel steps to your database to get your report.'
+            }
+        ]
     }
 
     const timeSeries = getMonthlyTimeSeries(13);    
@@ -112,7 +105,6 @@ export const getUserActivationReport = async (query: string, userId: string) => 
         //Funnel Steps
         const funnelStep = usersByFunnelStep[i] as UsersByFunnelStep;
         if(funnelStep) {
-
             funnelTotal.push({ value: funnelStep?.total})
             funnelStep1.push({ value: funnelStep?.step1 });
             funnelStep2.push({ value: funnelStep?.step2 });
@@ -146,13 +138,10 @@ export const getUserActivationReport = async (query: string, userId: string) => 
         'M'
     );
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        reportTableWithProjections,
+        undefined
+    ]
 }
 
 const getUserByFunnelStep = async (

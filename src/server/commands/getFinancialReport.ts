@@ -1,5 +1,4 @@
 import { prisma } from "~/server/db";
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getRazorpayTransactionData } from "~/utils/getExpenditureTransactionData";
 import { type RazorpayResource } from "@prisma/client";
 import Razorpay from "razorpay";
@@ -86,17 +85,14 @@ export const getFinancialReport = async (userId: string) => {
         transactions = [...bankTransactions, ...razorpayTransactions];
     }
     if(transactions.length === 0) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined,
-                {
-                    query: 'Request unprocessed',
-                    message: 'No transactions found',
-                    cause: 'No bank transactions or RazorPay not found'
-                }
-            ]
-        }
+        return [
+            undefined,
+            {
+                query: 'Request unprocessed',
+                message: 'No transactions found',
+                cause: 'No bank transactions or RazorPay not found'
+            }
+        ]
     }
 
     const expenditureBreakdown = getExpenditureBreakdown(transactions);
@@ -468,13 +464,10 @@ export const getFinancialReport = async (userId: string) => {
         'M'
     );
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        reportTableWithProjections,
+        undefined
+    ]
 }
 
 const getIncomeData = async (razorpayResource: RazorpayResource | undefined, transactionData: Transaction[]) : Promise<IncomeData> => {
@@ -615,7 +608,6 @@ const getExpenditureBreakdown = (transactionData: Transaction[]) : ExpenditureBr
     for(let i = 0; i < transactionData.length; i++) {
         const transaction = transactionData[i];
         if(!transaction) continue
-        console.log(transaction.description, transaction.category, transaction.amount);
         if(transaction.amount < 0) {
             if(transaction.category) {
                 switch(transaction.category) {

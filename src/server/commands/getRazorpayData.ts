@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
 
-import { FINANCIAL_DATA } from "~/constants/commandConstants";
 import Razorpay from "razorpay";
 import { type DateRange, getDateRangeFromString } from "~/utils/getDateRangeFromString";
 import { type CustomerDetails, getCustomerFromString } from "~/utils/getCustomerFromStrings";
@@ -25,17 +24,14 @@ export const getRazorpayData = async (query: string, userId: string) => {
     })
     const razorpayResource = razorpayResources[0];
     if(!razorpayResources || !razorpayResource) {
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'No Razorpay resource found',
-                    cause: 'Please add a Razorpay resource to your account to run queries.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'No Razorpay resource found',
+                cause: 'Please add a Razorpay resource to your account to run queries.'
+            }
+        ]
     }
 
     try {
@@ -55,19 +51,15 @@ export const getRazorpayData = async (query: string, userId: string) => {
                 return await getCustomerResults(instance, dateRange, customer, orderId);
         }
     } catch (error) {
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Error while processing request',
-                    cause: error
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Error while processing request',
+                cause: error
+            }
+        ]
     }
-
 }
 
 const getOrderResults = async (
@@ -79,19 +71,16 @@ const getOrderResults = async (
     if(orderId) {
         const orders = []
         orders.push(await instance.orders.fetch(orderId));
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'order',
-                    result: orders
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'order',
+                result: orders
+            },
+            undefined
+        ]
     }
     if(customer.name || customer.email || customer.phone) {
         let payments = (await instance.payments.all()).items;
@@ -117,19 +106,16 @@ const getOrderResults = async (
                 order.created_at <= toMilliseconds
             })
         } 
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'order',
-                    result: orders
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'order',
+                result: orders
+            },
+            undefined
+        ]
 
     } else {
         const fromMilliseconds = dateRange?.from && Math.floor(dateRange.from.getTime() / 1000)
@@ -139,19 +125,16 @@ const getOrderResults = async (
             to: toMilliseconds
         });
         console.log(orders);
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'order',
-                    result: orders.items
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'order',
+                result: orders.items
+            },
+            undefined
+        ]
     }
 }
 
@@ -164,19 +147,16 @@ const getPaymentResults = async (
     if(orderId) {
         const payments = (await instance.payments.all()).items;
         payments.filter(payment => payment.order_id === orderId)
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'payment',
-                    result: payments
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'payment',
+                result: payments
+            },
+            undefined
+        ]
     }
     if(customer.name || customer.email || customer.phone) {
         let payments = (await instance.payments.all()).items;
@@ -197,20 +177,16 @@ const getPaymentResults = async (
                 payment.created_at <= toMilliseconds
             })
         } 
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'payment',
-                    result: payments
-                },
-                undefined
-            ]
-        };
-
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'payment',
+                result: payments
+            },
+            undefined
+        ]
     } else {
         const fromMilliseconds = dateRange?.from && Math.floor(dateRange.from.getTime() / 1000)
         const toMilliseconds = dateRange?.to && Math.floor(dateRange.to.getTime() / 1000)
@@ -218,19 +194,16 @@ const getPaymentResults = async (
             from: fromMilliseconds,
             to: toMilliseconds
         });
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'payment',
-                    result: payments.items
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'payment',
+                result: payments.items
+            },
+            undefined
+        ]
     }
 }
 
@@ -250,19 +223,16 @@ const getRefundResults = async (
                 refunds.push(result);
             }
         }
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'refund',
-                    result: refunds
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'refund',
+                result: refunds
+            },
+            undefined
+        ]
     }
     if(customer.name || customer.email || customer.phone) {
         let payments = (await instance.payments.all()).items;
@@ -290,20 +260,16 @@ const getRefundResults = async (
                 refund.created_at <= toMilliseconds
             })
         } 
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'refund',
-                    result: refunds
-                },
-                undefined
-            ]
-        };
-
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'refund',
+                result: refunds
+            },
+            undefined
+        ]
     } else {
         const fromMilliseconds = dateRange?.from && Math.floor(dateRange.from.getTime() / 1000)
         const toMilliseconds = dateRange?.to && Math.floor(dateRange.to.getTime() / 1000)
@@ -311,19 +277,16 @@ const getRefundResults = async (
             from: fromMilliseconds,
             to: toMilliseconds
         });
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'refund',
-                    result: refunds.items
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'refund',
+                result: refunds.items
+            },
+            undefined
+        ]
     }
 }
 
@@ -371,19 +334,16 @@ const getCustomerResults = async (
                 })
             }
         }
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'customer',
-                    result: customers
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'customer',
+                result: customers
+            },
+            undefined
+        ]
     }
     if(customer.name || customer.email || customer.phone) {
         let payments = (await instance.payments.all()).items;
@@ -430,20 +390,16 @@ const getCustomerResults = async (
             }
         }
 
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'customer',
-                    result: customers
-                },
-                undefined
-            ]
-        };
-
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'customer',
+                result: customers
+            },
+            undefined
+        ]
     } else {
         const fromMilliseconds = dateRange?.from && Math.floor(dateRange.from.getTime() / 1000)
         const toMilliseconds = dateRange?.to && Math.floor(dateRange.to.getTime() / 1000)
@@ -473,18 +429,15 @@ const getCustomerResults = async (
                 amount
             })
         }
-        return {
-            type: FINANCIAL_DATA,
-            data: [
-                {
-                    dateRange,
-                    customer,
-                    orderId,
-                    entityName: 'customer',
-                    result: customers
-                },
-                undefined
-            ]
-        };
+        return [
+            {
+                dateRange,
+                customer,
+                orderId,
+                entityName: 'customer',
+                result: customers
+            },
+            undefined
+        ]
     }
 }

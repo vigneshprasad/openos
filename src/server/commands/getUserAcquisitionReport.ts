@@ -35,17 +35,14 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     })
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database resource not found',
-                    cause: 'Please add a database resource to your account to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database resource not found',
+                cause: 'Please add a database resource to your account to get your report.'
+            }
+        ]
     }
     
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -147,13 +144,10 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
         'M'
     );
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        reportTableWithProjections,
+        undefined
+    ]
 }
 
 export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<{

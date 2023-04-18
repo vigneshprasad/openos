@@ -1,17 +1,7 @@
-import { prisma } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {z} from "zod";
 
 export const userRouter = createTRPCRouter({
-  getById: protectedProcedure
-    .query(async ({ctx}) => {
-      const user = await prisma.user.findFirst({
-        where: {
-          id: ctx.session.user.id
-        }
-      })
-      console.log("role: ", user?.role)
-    }),
   
   update: protectedProcedure
     .input(z.object({

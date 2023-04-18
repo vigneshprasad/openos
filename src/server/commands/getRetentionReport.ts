@@ -1,5 +1,4 @@
 import { prisma } from "~/server/db";
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type SavedQuery, type ResourceSchemaEmbeddings } from "@prisma/client";
@@ -28,17 +27,14 @@ export const getRetentionReport = async (query: string, userId: string) => {
 
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database not found',
-                    cause: 'Please add a database resource to your account to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database not found',
+                cause: 'Please add a database resource to your account to get your report.'
+            }
+        ]
     }
 
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -61,17 +57,14 @@ export const getRetentionReport = async (query: string, userId: string) => {
     })
 
     if(!activityDescription) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'User activity description not found',
-                    cause: 'Please add user activity to your database to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'User activity description not found',
+                cause: 'Please add user activity to your database to get your report.'
+            }
+        ]
     }
 
     const timeSeries = getMonthlyTimeSeries(13);    
@@ -127,13 +120,10 @@ export const getRetentionReport = async (query: string, userId: string) => {
         'M'
     );
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        reportTableWithProjections,
+        undefined
+    ]
 }
 
 const getRetentionData = async (
@@ -218,8 +208,6 @@ const getRetentionData = async (
         });
     }
 
-    console.log(retentionActivityPrompt);
-
     const identifierKey = Object.keys(userList[0] as object)[0];
     const dateJoinedKey = Object.keys(userList[0] as object)[1];
     
@@ -251,7 +239,6 @@ const getRetentionData = async (
         for(let j = 0; j < userList.length; j++) {
             const user = userList[j];
             if(!user) continue;
-            console.log(user);
             const identifier = user[identifierKey] as string;
             const dateJoined = user[dateJoinedKey] as string;
 

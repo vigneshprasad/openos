@@ -1,8 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { UserForm } from './UserForm'
-import { type SyntheticEvent, useCallback, useRef, useState, useEffect } from 'react'
+import { type SyntheticEvent, useCallback, useRef, useState } from 'react'
 import Integrations from './Integrations'
-import { api } from '~/utils/api'
 
 enum formStages {
   UserDetails = 1,
@@ -17,8 +16,6 @@ const steps = [
 export const GettingStartedModal: React.FC = () => {
   const submitRef = useRef<HTMLFormElement>(null);
   const [activeStage, setActiveStage] = useState<number>(1)
-
-  const {data: user} = api.user.getById.useQuery();
 
   const next = useCallback(
     (event: SyntheticEvent) => {

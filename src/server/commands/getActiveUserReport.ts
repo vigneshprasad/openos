@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
 
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type ResourceSchemaEmbeddings } from "@prisma/client";
@@ -28,17 +27,14 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database not found',
-                    cause: 'Please add a database resource to your account to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database not found',
+                cause: 'Please add a database resource to your account to get your report.'
+            }
+        ]
     }
     
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -61,17 +57,14 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     })
 
     if(!activityDescription) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'User activity description not found',
-                    cause: 'Please add user activity to your database to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'User activity description not found',
+                cause: 'Please add user activity to your database to get your report.'
+            }
+        ]
     }
 
     const timeSeries = getMonthlyTimeSeries(13);
@@ -182,13 +175,10 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     );
 
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        reportTableWithProjections,
+        undefined
+    ]
 }
 
 const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[], query: string) : Promise<ActiveUsers[]> => {

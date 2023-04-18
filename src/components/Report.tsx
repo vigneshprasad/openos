@@ -32,7 +32,7 @@ const Report: React.FC<Props> = ({ props }) => {
                                             // colSpan={index === 0 ? 2 : undefined}
                                             key={index}
                                         >
-                                            {cell.value}
+                                            <div>{cell.value}</div>
                                         </th>
                                     ))
                                 }
