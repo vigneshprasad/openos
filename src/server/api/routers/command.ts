@@ -138,7 +138,7 @@ export const commandRouter = createTRPCRouter({
                 //     input.query,
                 //     ctx.session.user,
                 // );
-                void sendHelpMessage(
+                const message = await sendHelpMessage(
                     input.query,
                     ctx.session.user,
                 )

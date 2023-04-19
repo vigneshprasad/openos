@@ -1,10 +1,10 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import { type User } from "next-auth";
 
 export const sendHelpMessage = async (query: string, user: User) => {
 
     const url =  "https://slack.com/api/chat.postMessage";
-    const res = await axios.post(url, {
+    const res:AxiosResponse = await axios.post(url, {
         channel: "#help",
         text: 
             `User has asked for help with the following query: \n 
@@ -18,7 +18,9 @@ export const sendHelpMessage = async (query: string, user: User) => {
         }
     });
 
-    console.log(res);
-    console.log(res.data);
+    const message = res.status == 200 ? 
+        "Your query has been sent to our analysts. We will get back to you shortly."
+        : "Unfortunately an error occured and we were not able to send your query. Please try again later."
+    return message;
 
 }
