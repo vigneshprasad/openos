@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { UserForm } from './UserForm'
-import { type SyntheticEvent, useCallback, useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Integrations from './Integrations'
 import { api } from '~/utils/api'
 
@@ -15,32 +15,28 @@ const steps = [
 ]
 
 export const GettingStartedModal: React.FC = () => {
-  const submitRef = useRef<HTMLFormElement>(null);
   const [activeStage, setActiveStage] = useState<number>(1)
+  const [isNewUser, setIsNewUser] = useState(false)
 
-  const {data: user} = api.user.getById.useQuery();
+  const userMutation = api.user.isNewUser.useMutation({
+    onSuccess: (data) => {
+      if (data.stage1) {
+        setActiveStage(formStages.UserDetails)
+        setIsNewUser(true)
+      } else if (data.stage2) {
+        setActiveStage(formStages.Integrations)
+        setIsNewUser(true)
+      } else {
+        setIsNewUser(false)
+      }
+    }
+  })
 
-  const next = useCallback(
-    (event: SyntheticEvent) => {
-      event.preventDefault()
-
-      if (steps[activeStage - 1] === steps.length) return;
-
-      setActiveStage((prevValue) => prevValue + 1)
-  }, [activeStage, setActiveStage])
-
-  const previous = useCallback(
-    (event: SyntheticEvent) => {
-      event.preventDefault()
-
-      if (steps[activeStage - 1] === 1) return;
-
-      setActiveStage((prevValue) => prevValue - 1)
-  }, [activeStage, setActiveStage])
+  useEffect(() => void userMutation.mutate(), [activeStage, isNewUser])
 
   return (
     <div>
-      <Dialog.Root>
+      <Dialog.Root open={isNewUser}>
         <Dialog.Portal>
           <Dialog.Overlay className="DialogOverlay" />
           <Dialog.Content className="DialogContent w-[90vw] max-w-[800px]">
@@ -50,19 +46,23 @@ export const GettingStartedModal: React.FC = () => {
             </div>
 
             {activeStage == formStages.UserDetails && (
-              <div className="w-[50%] mx-auto py-[48px] grid grid-cols-1 grid-rows-[max-content_1fr] gap-[40px]">
+              <div className="w-[50%] mx-auto pt-[48px] pb-4 grid grid-cols-1 grid-rows-[max-content_1fr] gap-[40px]">
                 <div>
                   <h1 className="text-2xl leading-400 text-[#fff]">Welcome to Open OS!</h1>
                   <p className="pt-2 text-sm text-[#616161]">Tell us a little about yourself. 
                   This helps us customize the product for you</p>
                 </div>
 
-                <UserForm submitFormRef={submitRef} />
+                <UserForm 
+                  onSuccessCallback={userMutation.mutate} 
+                  userName={userMutation.data?.user?.name ?? undefined} 
+                  userRole={userMutation.data?.user?.role ?? undefined}
+                />
               </div>
             )}
 
             {activeStage == formStages.Integrations && (
-              <div className="w-[70%] mx-auto pt-[48px] grid grid-cols-1 grid-rows-[max-content_1fr] gap-6">
+              <div className="w-[70%] mx-auto pt-[48px] pb-4 grid grid-cols-1 grid-rows-[max-content_1fr] gap-6">
                 <div>
                   <h1 className="text-2xl leading-400 text-[#fff]">Connect your tools 🛠️</h1>
                   <p className="pt-2 text-sm text-[#616161]">
@@ -73,28 +73,6 @@ export const GettingStartedModal: React.FC = () => {
                 <Integrations />
               </div>
             )}
-
-            <div className="p-[12px] border-t-[1px] border-solid border-[#373737] flex justify-end gap-5">
-              {activeStage !== 1 && 
-                <button className="Button secondary w-[92px]" 
-                  onClick={(e) => previous(e)}
-                >
-                  Back
-                </button>
-              }
-              {activeStage !== steps.length ?
-                <button className="Button primary w-[92px]" 
-                  onClick={(e) => next(e)}
-                >
-                  Next
-                </button> :
-                <button className="Button primary w-[92px]" 
-                  // onClick={() => submitRef.current?.requestSubmit()}
-                >
-                  Done
-                </button>
-              }
-            </div>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

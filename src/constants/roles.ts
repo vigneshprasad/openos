@@ -1,0 +1,15 @@
+export const ROLES = [
+  "Analyst",
+  "CEO",
+  "CFO",
+  "CTO",
+  "COO",
+  "Customer Success",
+  "Designer",
+  "Engineer",
+  "Founder/Co-founder",
+  "Marketing",
+  "Other",
+  "PM",
+  "Sales",
+]

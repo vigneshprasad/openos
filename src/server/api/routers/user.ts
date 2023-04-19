@@ -1,16 +1,37 @@
-import { prisma } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {z} from "zod";
 
 export const userRouter = createTRPCRouter({
   getById: protectedProcedure
     .query(async ({ctx}) => {
-      const user = await prisma.user.findFirst({
+      return ctx.prisma.user.findFirst({
         where: {
           id: ctx.session.user.id
         }
       })
-      console.log("role: ", user?.role)
+    }),
+  
+  isNewUser: protectedProcedure
+    .mutation(async ({ctx}) => {
+      const user = await ctx.prisma.user.findFirst({
+        where: {
+          id: ctx.session.user.id
+        },
+        include: {
+          DatabaseResource: true,
+          RazorpayResource: true,
+          BankStatement: true
+        }
+      })
+
+      const stage1 = !user?.name || !user.role
+      const stage2 = !user?.BankStatement && !user?.DatabaseResource && !user?.RazorpayResource
+
+      return {
+        stage1,
+        stage2,
+        user,
+      }
     }),
   
   update: protectedProcedure
@@ -29,7 +50,7 @@ export const userRouter = createTRPCRouter({
         },
         data: {
           name: input.name,
-          // role: input.role,
+          role: input.role,
         }
       })
     })

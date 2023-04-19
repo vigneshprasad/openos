@@ -1,25 +1,31 @@
-import { type MutableRefObject, useState } from "react"
+import { useState } from "react"
 import React from "react";
 import { api } from "~/utils/api";
 import * as Select from '@radix-ui/react-select';
-import { CheckCircledIcon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 import { useSession } from "next-auth/react";
+import { ROLES } from "~/constants/roles";
+import { User } from "@prisma/client";
 
 interface IProps {
-  submitFormRef: MutableRefObject<HTMLFormElement | null>
+  userName?: string,
+  userRole?: string,
+  onSuccessCallback?: () => void
 }
 
-export const UserForm: React.FC<IProps> = ({submitFormRef}: IProps) => {
+export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
+  onSuccessCallback, userName, userRole}, ref) => {
   const {data: sessionData} = useSession()
 
-  const [name, setName] = useState<string>("")
-  const [role, setRole] = useState<string>("")
+  const [name, setName] = useState<string>(userName || "")
+  const [role, setRole] = useState<string>(userRole || "")
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const userResource = api.user.update.useMutation({
     onSuccess: () => {
+      onSuccessCallback && onSuccessCallback()
       setSuccess(true);
       setError(false);
       setLoading(false);
@@ -33,6 +39,7 @@ export const UserForm: React.FC<IProps> = ({submitFormRef}: IProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setLoading(true);
     setSuccess(false);
     setError(false);
@@ -44,12 +51,15 @@ export const UserForm: React.FC<IProps> = ({submitFormRef}: IProps) => {
   }
 
   return (
-    <form className="grid gap-[28px]" ref={submitFormRef}>
+    <form className="grid gap-[28px]" ref={ref} onSubmit={handleSubmit}>
       <label className="block">
-        <span className="block text-sm font-medium text-[#C4C4C4]">Name</span>
+        <span className="block text-sm font-medium text-[#C4C4C4]">
+          Name{" "}
+          <span className="text-red-500">*</span>
+        </span>
         <input
           type="text"
-          defaultValue={sessionData?.user.name ?? undefined}
+          value={name}
           placeholder="What do we call you?"
           className="block w-full mt-1 px-3 py-2 bg-[#0B0B0B] rounded-md border border-solid 
           border-[#0B0B0B] focus:border-solid focus:border-[#373737] text-sm font-medium
@@ -58,8 +68,14 @@ export const UserForm: React.FC<IProps> = ({submitFormRef}: IProps) => {
         />
       </label>
       <label className="block relative">
-        <span className="block text-sm font-medium text-[#C4C4C4]">Role</span>
-        <Select.Root onValueChange={(value) => setRole(value)}>
+        <span className="block text-sm font-medium text-[#C4C4C4]">
+          Role{" "}
+          <span className="text-red-500">*</span>
+        </span>
+        <Select.Root 
+          value={role}
+          onValueChange={(value) => setRole(value)} required
+        >
           <Select.Trigger
             className="w-full mt-1 px-3 py-2 inline-flex items-center justify-between bg-[#0B0B0B] 
             rounded-md border border-solid border-[#0B0B0B] focus:border-solid focus:border-[#373737] 
@@ -76,33 +92,35 @@ export const UserForm: React.FC<IProps> = ({submitFormRef}: IProps) => {
               className="overflow-hidden bg-[#1A1A1A] rounded-md border border-solid border-[#373737]
                 shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
               >
-                <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-[#1A1A1A] 
-                  text-[#fff] cursor-default">
-                  <ChevronUpIcon />
-                </Select.ScrollUpButton>
-                <Select.Viewport className="px-1 py-2">
-                    {["Designer", "Developer", "Product Manager", 
-                    "Graphic Designer", "Engineering Manager", 
-                    "CEO"].map((role, i) => (
-                      <SelectItem 
-                        key={i} 
+                <Select.Viewport>
+                  <div className="h-[225px] px-1 py-2 overflow-auto">
+                    {ROLES.map((role, i) => (
+                      <SelectItem
+                        key={i}
                         value={role.toLowerCase()}
                         className="px-2 py-1 text-[#fff] hover:bg-[#373737] rounded-md cursor-pointer">
                           {role}
                       </SelectItem>
                     ))}
+                  </div>
                 </Select.Viewport>
-                <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-[#1A1A1A] 
-                  text-[#fff] cursor-default">
-                  <ChevronDownIcon />
-                </Select.ScrollUpButton>
             </Select.Content>
           </Select.Portal>
         </Select.Root>
       </label>
+
+      <div className="flex justify-center">
+        <button className="Button primary w-[92px]" type="submit">
+          Done
+        </button>
+      </div>
+
+      {error && 
+        <text className="text-xs text-red-500">Please complete the required fields.</text>
+      }
     </form>
   )
-}
+})
 
 const SelectItem = React.forwardRef<HTMLDivElement, React.PropsWithChildren & Select.SelectItemProps>(
   ({ children, ...props }, forwardedRef) => {
@@ -120,6 +138,8 @@ const SelectItem = React.forwardRef<HTMLDivElement, React.PropsWithChildren & Se
       </Select.Item>
     );
 });
+
+UserForm.displayName = "UserForm";
 
 SelectItem.displayName = "SelectItem";
 

@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
@@ -68,7 +68,6 @@ const Home: NextPage = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        console.log("submitted")
         setLoading(true);
         setError(false);
         setData([]);
@@ -155,9 +154,16 @@ const Home: NextPage = () => {
                         <text className="text-sm text-[#838383] font-medium">Command History</text>
                     </div>
                     <div className="w-[80%] h-max mx-auto mt-[70px] px-5">
-                        <Image src="/command_history_empty.png" alt="Command History" width={36} height={36} className="mx-auto" />
+                        <Image 
+                            src="/command_history_empty.png" 
+                            alt="Command History" 
+                            width={36} 
+                            height={36} 
+                            className="mx-auto" />
                         <div className="pt-3">
-                            <h3 className="text-[#fff] text-sm font-medium text-center">Your command history is empty</h3>
+                            <h3 className="text-[#fff] text-sm font-medium text-center">
+                                Your command history is empty
+                            </h3>
                             <p className="pt-1 text-xs text-[#838383] text-center">
                                 All the commands you write will be shown in the history. 
                                 You can repeat commands or command sets by clicking on them here.
@@ -172,14 +178,3 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-
-
-{/* {data?.map((item, index) => {
-                            if(item.type === DATABASE_QUERY) {
-                                return <QueryResult key={index} props={item.data} />
-                            } else if(item.type === GET_DATA) {
-                                return <RazorpayData key={index} props={item.data} />
-                            } else if(item.type === GET_REPORT) {
-                                return <Report key={index} props={item.data} />
-                            }
-                        } */}
