@@ -104,11 +104,15 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
             facebookSpend.push({ value: facebookSpendNumber.toFixed(2) });
             facebookCac.push({
                 value: ((facebookSpendNumber) / (userBySource.facebook) * 100).toFixed(2),
+                unit: '₹',
+                unitPrefix: true
             });
 
             googleSpend.push({ value: googleSpendNumber.toFixed(2) });
             googleCac.push({
                 value: ((googleSpendNumber) / (userBySource.google) * 100).toFixed(2),
+                unit: '₹',
+                unitPrefix: true
             });
         }
     }

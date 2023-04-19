@@ -1,4 +1,4 @@
-import type { CommandResultType, JsonData, TableRow } from "~/types/types";
+import type { CommandResultType, FinancialData, TableRow } from "~/types/types";
 
 interface Props {
     props: CommandResultType;
@@ -6,7 +6,7 @@ interface Props {
 
 const RazorpayData: React.FC<Props> = ({ props }) => {
     const [dataRaw, error ] = props
-    const data = dataRaw as JsonData;
+    const data = dataRaw as FinancialData;
     return (
         <>
             { data && 

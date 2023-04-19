@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
-import { Cross2Icon, CrossCircledIcon } from '@radix-ui/react-icons';
+import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image";
 
 export const RazorpayResourceForm: React.FC = () => {

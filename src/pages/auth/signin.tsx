@@ -38,15 +38,6 @@ const Auth: NextPage = () => {
               </div>
               <div className="flex flex-col gap-[24px]">
                 <SignInWithGoogle />
-
-                {/* <div className="flex items-center">
-                  <div className="flex-1 h-px bg-[#373737]" />
-                  <text className="px-5 text-md text-[#747474]">OR</text>
-                  <div className="flex-1 h-px bg-[#373737]" />
-                  <div />
-                </div>
-
-                <LoginForm /> */}
               </div>
             </div>
             <div className="flex flex-row gap-2 items-start">
