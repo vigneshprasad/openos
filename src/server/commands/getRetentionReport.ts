@@ -1,5 +1,4 @@
 import { prisma } from "~/server/db";
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type SavedQuery, type ResourceSchemaEmbeddings } from "@prisma/client";
@@ -9,9 +8,11 @@ import { processPrompt } from "~/utils/processPrompt";
 import { executeQuery } from "~/utils/executeQuery";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type RetentionData = {
     date: Date,
+    total: number,
     d0: number,
     d1: number,
     d7: number,
@@ -28,17 +29,14 @@ export const getRetentionReport = async (query: string, userId: string) => {
 
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database not found',
-                    cause: 'Please add a database resource to your account to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database not found',
+                cause: 'Please add a database resource to your account to get your report.'
+            }
+        ]
     }
 
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -61,17 +59,14 @@ export const getRetentionReport = async (query: string, userId: string) => {
     })
 
     if(!activityDescription) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'User activity description not found',
-                    cause: 'Please add user activity to your database to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'User activity description not found',
+                cause: 'Please add user activity to your database to get your report.'
+            }
+        ]
     }
 
     const timeSeries = getMonthlyTimeSeries(13);    
@@ -84,6 +79,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
+    const totalUsers: ExcelCell[] = [{value: 'Total Users'}];
     const d0Retention: ExcelCell[] = [{value: 'D0 Retention', query: retentionDataQuery}];
     const d1Retention: ExcelCell[] = [{value: 'D1 Retention'}];
     const d7Retention: ExcelCell[] = [{value: 'D7 Retention'}];
@@ -101,7 +97,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
         // Retention
         if(retentionData[i]) {
             const retentionDataPerMonth = retentionData[i] as RetentionData;
-
+            totalUsers.push({ value: retentionDataPerMonth.total });
             d0Retention.push({ value: retentionDataPerMonth.d0.toFixed(2)});
             d1Retention.push({ value: retentionDataPerMonth.d1.toFixed(2) });
             d7Retention.push({ value: retentionDataPerMonth.d7.toFixed(2) });
@@ -112,7 +108,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     }
 
     reportTable.push(reportHeader);
-
+    reportTable.push(totalUsers);
     reportTable.push(d0Retention);
     reportTable.push(d1Retention);
     reportTable.push(d7Retention);
@@ -127,13 +123,13 @@ export const getRetentionReport = async (query: string, userId: string) => {
         'M'
     );
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        {
+            heading: 'User Retention',
+            sheet: removeEmptyColumns(reportTableWithProjections)
+        },
+        undefined
+    ]
 }
 
 const getRetentionData = async (
@@ -148,6 +144,7 @@ const getRetentionData = async (
     const result = [
         {
             date: timeSeries[0] as Date,
+            total: 0,
             d0: 0,
             d1: 0,
             d7: 0,
@@ -218,8 +215,6 @@ const getRetentionData = async (
         });
     }
 
-    console.log(retentionActivityPrompt);
-
     const identifierKey = Object.keys(userList[0] as object)[0];
     const dateJoinedKey = Object.keys(userList[0] as object)[1];
     
@@ -251,7 +246,6 @@ const getRetentionData = async (
         for(let j = 0; j < userList.length; j++) {
             const user = userList[j];
             if(!user) continue;
-            console.log(user);
             const identifier = user[identifierKey] as string;
             const dateJoined = user[dateJoinedKey] as string;
 
@@ -291,6 +285,7 @@ const getRetentionData = async (
 
         result.push({
             date: timeSeries[i] as Date,
+            total: userList.length,
             d0: d0Count / userList.length,
             d1: d1Count / userList.length,
             d7: d7Count / userList.length,

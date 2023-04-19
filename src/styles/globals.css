@@ -85,7 +85,7 @@ input {
 }
 .Button.green {
   background-color: #262626;
-  color: #49C179;
+  color: #49c179;
 }
 
 .Button.green:hover {
@@ -97,18 +97,18 @@ input {
 }
 
 .Button.primary {
-  background-color: #2678E0;
+  background-color: #2678e0;
   color: #fff;
 }
 
 .Button.primary:hover {
-  background-color: #3789F1;
+  background-color: #3789f1;
   cursor: pointer;
 }
 
 .Button.secondary {
   background-color: #333134;
-  color: #C4C4C4;
+  color: #c4c4c4;
 }
 
 .Button.secondary:hover {
@@ -143,19 +143,19 @@ input {
 .Label {
   font-size: 14px;
   font-weight: 500;
-  color: #C4C4C4;
+  color: #c4c4c4;
 }
 
 .Input {
   width: 100%;
-  background-color: #0B0B0B;
+  background-color: #0b0b0b;
   margin-top: 4px;
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 14px;
   font-weight: 500;
   color: #fff;
-  border: 1px solid #0B0B0B;
+  border: 1px solid #0b0b0b;
 }
 
 .Input:focus {
@@ -192,7 +192,7 @@ input {
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
-  color: #C4C4C4;
+  color: #c4c4c4;
   text-align: center;
 }
 
@@ -219,7 +219,17 @@ td > div {
   -webkit-box-orient: vertical;
 }
 
-/* TODO: Scrollable table */
+th > div {
+  /* white-space: nowrap; */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 150px;
+  max-width: 300px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 table th:nth-child(1) {
   position: sticky;
   left: 0;

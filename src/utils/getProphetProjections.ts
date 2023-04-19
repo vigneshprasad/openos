@@ -85,7 +85,6 @@ export const getProphetProjectionsReport = async (
                 });
             }
             try {
-                console.log(row[0], prophetArray);
                 const response = await axios.post(PROPHET_API_URL, {
                     periods: periods,
                     freq: frequency,
@@ -101,13 +100,15 @@ export const getProphetProjectionsReport = async (
                         if(json.yhat[key]) {
                             row.push({
                                 value: (json.yhat[key] as number).toFixed(2),
+                                unit: row[2]?.unit,
+                                unitPrefix: row[2]?.unitPrefix && row[2]?.unitPrefix,
                             })
                         }
                         if(!updateHeader && json.ds[key]) {
                             const date = new Date(json.ds[key] as number);
                             date?.setDate(date.getDate() - 1);
                             dateHeader.push({
-                                value: date.toDateString()
+                                value: `Projection - ${date.toDateString()}`
                             })
                         }
                     }

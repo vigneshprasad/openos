@@ -4,16 +4,20 @@ import { useEffect, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { CommandResultType } from "../types/types";
+import type { CommandResultType, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
 import { GettingStartedModal } from "~/components/GettingStartedModal";
 import Image from "next/image";
 
 type CommandDataType = {
-    type: string,
-    data: CommandResultType
+    input: string,
+    id: string,
+    output: CommandResultType
+    feedback: number,
+    type: string
+    createdAt: Date,
 }
 
 const Home: NextPage = () => {
@@ -34,28 +38,39 @@ const Home: NextPage = () => {
 
     const runQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: async (res) => {
-            const dataResult = res as CommandDataType;
-            setData([]);
-            if(dataResult.type === COMPLEX_REPORT) {
-                if(!dataResult.data[0]) {
+            const dataResult = res as unknown as CommandDataType;
+            if(dataResult.type === COMPLEX_REPORT_LOADING) {
+                if(!dataResult.output[0]) {
                     setLoading(false);
                     setError(true);
                     return;
                 }
-                const commands:string[] = dataResult.data[0] as unknown as string[];
-                const dataState = data;
+                const commands:string[] = dataResult.output[0] as unknown as string[];
+                const complexReport:CommandDataType = {
+                    input: command,
+                    id: dataResult.id,
+                    createdAt: dataResult.createdAt,
+                    output: [[], undefined],
+                    feedback: dataResult.feedback,
+                    type: COMPLEX_REPORT,
+                }
+                const prevCommands = data;
+                let simpleReports:SimpleReportType[] = [];
                 for(let i = 0; i < commands.length; i++) {
                     const command = commands[i] as string;
                     if(!commands[i]) continue;
                     const simpleResult = await runSimpleQuery.mutateAsync({ query: command });
-                    const simpleResultData = simpleResult as CommandDataType;
-                    if(!simpleResultData) continue;
-                    dataState.push(simpleResultData);
-                    setData(dataState);
+                    const simpleResultCommandResponse = simpleResult as unknown as CommandDataType;
+                    if(!simpleResultCommandResponse 
+                        || simpleResultCommandResponse.type !== CREATE_REPORT
+                        || !simpleResultCommandResponse.output) continue;
+                    simpleReports = [...simpleReports, simpleResultCommandResponse.output as SimpleReportType]
+                    complexReport.output = simpleReports as unknown as CommandResultType;
+                    setData([...prevCommands, complexReport]);
                 }
                 setLoading(false);
             } else {
-                setData([dataResult]);
+                setData([...data, dataResult]);
                 setLoading(false);
             }
         },
@@ -70,7 +85,6 @@ const Home: NextPage = () => {
 
         setLoading(true);
         setError(false);
-        setData([]);
         runQuery.mutate({ query: command });
     };
 
@@ -104,13 +118,33 @@ const Home: NextPage = () => {
                         </div> : (
                             <div className="overflow-auto p-4 bg-[#111] rounded-md">
                                 {data.map((item, index) => {
-                                    if(item.type === DATABASE_QUERY) {
-                                        return <QueryResult key={index} props={item.data} />
-                                    } else if(item.type === FINANCIAL_DATA) {
-                                        return <RazorpayData key={index} props={item.data} />
-                                    } else if(item.type === CREATE_REPORT) {
-                                        return <Report key={index} props={item.data} />
-                                    }
+                                    return <div key={index}>
+                                        <br />
+                                        {
+                                            item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
+                                        }
+                                        {
+                                            item.type === FINANCIAL_DATA && <RazorpayData key={index} props={item.output} />
+                                        }
+                                        {
+                                            item.type === CREATE_REPORT && <Report key={index} props={item.output} />
+                                        }
+                                        {
+                                            item.type === COMPLEX_REPORT && 
+                                                item.output.map((report, index2) => {
+                                                    const simpleReport = report as unknown as SimpleReportType;
+                                                    if(simpleReport) {
+                                                        return <Report key={index2} props={simpleReport} />
+                                                    } 
+                                                })
+                                        }
+                                        {
+                                            item.type === UNKNOWN_COMMAND && 
+                                                <p className="text-white"> Bad query </p>
+                                        }
+                                        <br />
+                                        <hr />
+                                    </div>
                                 })}
                             </div>
                         )}

@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
 
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { type ResourceSchemaEmbeddings } from "@prisma/client";
@@ -11,6 +10,7 @@ import { getQuery } from "~/utils/getQuery";
 import { executeQuery } from "~/utils/executeQuery";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type UsersBySource = {
     date: Date,
@@ -35,17 +35,14 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     })
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database resource not found',
-                    cause: 'Please add a database resource to your account to get your report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database resource not found',
+                cause: 'Please add a database resource to your account to get your report.'
+            }
+        ]
     }
     
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -98,14 +95,17 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
             facebookAcquisition.push({value: userBySource.facebook});
             facebookAcquisitionGrowth.push({
                 value: ((userBySource?.facebook - prevUserBySource.facebook) / (prevUserBySource.facebook) * 100).toFixed(2),
+                unit: '%'
             })
             googleAcquisition.push({value: userBySource.google});
             googleAcquisitionGrowth.push({
                 value: ((userBySource?.google - prevUserBySource.google) / (prevUserBySource.google) * 100).toFixed(2),
+                unit: '%'
             })
             organicAcquisition.push({value: userBySource.organic});
             organicAcquisitionGrowth.push({
                 value: ((userBySource?.organic - prevUserBySource.organic) / (prevUserBySource.organic) * 100).toFixed(2),
+                unit: '%'
             });
             const otherAcquisitionNumber = userBySource.total
                 - userBySource?.facebook
@@ -119,10 +119,12 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
             otherAcquisition.push({value: otherAcquisitionNumber});
             otherAcquisitionGrowth.push({
                 value: ((otherAcquisitionNumber - otherAcquisitionPrevNumber) / (otherAcquisitionPrevNumber) * 100).toFixed(2),
+                unit: '%'
             });
             totalAcquisition.push({value: usersBySource[i]?.total as number});
             percentOrganicUsers.push({
                 value: ((userBySource?.organic) / (userBySource.total) * 100).toFixed(2),
+                unit: '%'
             });
         }
     }
@@ -147,13 +149,13 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
         'M'
     );
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        {
+            heading: 'User Acquisition',
+            sheet: removeEmptyColumns(reportTableWithProjections)
+        },
+        undefined
+    ]
 }
 
 export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<{

@@ -1,6 +1,5 @@
 import { prisma } from "~/server/db";
 
-import { CREATE_REPORT } from "~/constants/commandConstants";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { Client } from "pg";
@@ -8,6 +7,7 @@ import { getUserBySource } from "./getUserAcquisitionReport";
 import { type Transaction } from "@prisma/client";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type UsersBySource = {
     date: Date,
@@ -37,31 +37,25 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
 
     const databaseResource = databaseResources[0];
     if(!databaseResource) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined, 
-                {
-                    query: 'Request unprocessed',
-                    message: 'Database not found',
-                    cause: 'Please add a database resource to your account to get MIS B2C report.'
-                }
-            ]
-        };
+        return [
+            undefined, 
+            {
+                query: 'Request unprocessed',
+                message: 'Database not found',
+                cause: 'Please add a database resource to your account to get MIS B2C report.'
+            }
+        ]
     }
 
     if(transactions.length === 0) {
-        return {
-            type: CREATE_REPORT,
-            data: [
-                undefined,
-                {
-                    query: 'Request unprocessed',
-                    message: 'No transactions found',
-                    cause: 'Could not process bank statement'
-                }
-            ]
-        }
+        return [
+            undefined,
+            {
+                query: 'Request unprocessed',
+                message: 'No transactions found',
+                cause: 'Could not process bank statement'
+            }
+        ]
     }
 
     const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
@@ -135,13 +129,13 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
     );
 
 
-    return {
-        type: CREATE_REPORT,
-        data: [
-            reportTableWithProjections,
-            undefined
-        ]
-    }
+    return [
+        {
+            heading: 'Marketing Spend',
+            sheet: removeEmptyColumns(reportTableWithProjections)
+        },
+        undefined
+    ]
 }
 
 const getMarketingSpend = (transactions:Transaction[], timeSeries: Date[]) : MarketingSpend[] => {

@@ -1,10 +1,10 @@
-export const MIS_B2C = 'MIS B2C';
-export const MIS_SUBSCRIPTION = 'MIS Subscription';
-export const MIS_TRANSACTION = 'MIS Transaction Revenue';
-export const FINANCIAL_REPORT = 'Financial Report';
+export const MIS_B2C = 'mis b2c';
+export const MIS_SUBSCRIPTION = 'mis subscription';
+export const MIS_TRANSACTION = 'mis transaction revenue';
+export const FINANCIAL_REPORT = 'financial report';
 
-export const USER_ACQUISITION = 'User Acquisition';
-export const USER_ACTIVATION = 'User Activation';
-export const ACTIVE_USERS = 'Active Users';
-export const USER_RETENTION = 'User Retention';
-export const MARKETING_SPEND = 'Marketing Spend';
+export const USER_ACQUISITION = 'user acquisition';
+export const USER_ACTIVATION = 'user activation';
+export const ACTIVE_USERS = 'active users';
+export const USER_RETENTION = 'user retention';
+export const MARKETING_SPEND = 'marketing spend';

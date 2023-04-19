@@ -2,15 +2,6 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {z} from "zod";
 
 export const userRouter = createTRPCRouter({
-  getById: protectedProcedure
-    .query(async ({ctx}) => {
-      return ctx.prisma.user.findFirst({
-        where: {
-          id: ctx.session.user.id
-        }
-      })
-    }),
-  
   isNewUser: protectedProcedure
     .mutation(async ({ctx}) => {
       const user = await ctx.prisma.user.findFirst({

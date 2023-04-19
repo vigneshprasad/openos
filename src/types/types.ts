@@ -1,7 +1,12 @@
 import { type SavedQuery } from "@prisma/client";
 
 export type CommandResultType = [
-    undefined | QueryAndResult | JsonData | ExcelCell[][] | string[] | TransactionClassification[],
+    undefined | QueryAndResult | JsonData | ExcelSheet | string[] | TransactionClassification[] | SimpleReportType[],
+    undefined | Error
+]
+
+export type SimpleReportType = [
+    ExcelSheet,
     undefined | Error
 ]
 
@@ -28,8 +33,15 @@ export type Error = {
     query: string;
 }
 
+export type ExcelSheet = {
+    heading: string;
+    sheet: ExcelCell[][]
+}
+
 export type ExcelCell = {
     value: number | string;
+    unit?: string;
+    unitPrefix?: boolean;
     expression?: string;
     hint?: string;
     query?: SavedQuery
