@@ -19,29 +19,26 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
 
   const [name, setName] = useState<string>(userName || "")
   const [role, setRole] = useState<string>(userRole || "")
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const userResource = api.user.update.useMutation({
-    onSuccess: () => {
-      onSuccessCallback && onSuccessCallback()
-      setSuccess(true);
-      setError(false);
-      setLoading(false);
-    },
-    onError: () => {
-        setSuccess(false);
+    onSuccess: (data) => {
+      if (data[1]) {
         setError(true);
+        setLoading(false)
+      } else {
+        onSuccessCallback && onSuccessCallback()
+        setError(false);
         setLoading(false);
-    },
+      }
+    }
   })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setLoading(true);
-    setSuccess(false);
     setError(false);
 
     void userResource.mutateAsync({
@@ -109,15 +106,15 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
         </Select.Root>
       </label>
 
+      {error && 
+        <text className="text-xs text-red-500 flex justify-center">Please complete the required fields.</text>
+      }
+
       <div className="flex justify-center">
         <button className="Button primary w-[92px]" type="submit">
           Done
         </button>
       </div>
-
-      {error && 
-        <text className="text-xs text-red-500">Please complete the required fields.</text>
-      }
     </form>
   )
 })

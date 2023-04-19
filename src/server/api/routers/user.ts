@@ -17,10 +17,12 @@ export const userRouter = createTRPCRouter({
 
       const stage1 = !user?.name || !user.role
       const stage2 = !user?.BankStatement && !user?.DatabaseResource && !user?.RazorpayResource
+      const stage3 = !user?.isOnboarded
 
       return {
         stage1,
         stage2,
+        stage3,
         user,
       }
     }),
@@ -28,14 +30,20 @@ export const userRouter = createTRPCRouter({
   update: protectedProcedure
     .input(z.object({
       name: z.string({
-        required_error: "Name is required"
+        required_error: "Name is required",
       }),
       role: z.string({
         required_error: "Role is required"
       })
     }))
     .mutation(async ({ctx, input}) => {
-      return ctx.prisma.user.update({
+      if (input.name.length == 0 || input.role.length == 0) {
+        return [undefined, {
+          error: true,
+        }]
+      }
+
+      const user = await ctx.prisma.user.update({
         where: {
           id: ctx.session.user.id
         },
@@ -44,5 +52,7 @@ export const userRouter = createTRPCRouter({
           role: input.role,
         }
       })
+
+      return [user, undefined]
     })
 })

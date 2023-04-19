@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
@@ -10,6 +10,8 @@ import type { CommandResultType, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
 import { GettingStartedModal } from "~/components/GettingStartedModal";
 import Image from "next/image";
+import { Spinner } from "~/components/Spinner";
+import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 
 type CommandDataType = {
     input: string,
@@ -26,6 +28,13 @@ const Home: NextPage = () => {
     const [data, setData] = useState<CommandDataType[]>([]);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (scrollRef.current && (loading || data)) {
+            scrollRef.current.scrollIntoView({ behavior: "smooth" })
+        }
+    }, [loading, data])
 
     const runSimpleQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: (data) => {
@@ -142,10 +151,19 @@ const Home: NextPage = () => {
                                             item.type === UNKNOWN_COMMAND && 
                                                 <p className="text-white"> Bad query </p>
                                         }
+
+                                        {loading && index === data.length - 1  && 
+                                            <div className="w-full flex justify-center">
+                                                <FadingCubesLoader />
+                                            </div>
+                                        }
+
                                         <br />
                                         <hr />
                                     </div>
                                 })}
+
+                                <div ref={scrollRef} />
                             </div>
                         )}
 
@@ -167,7 +185,7 @@ const Home: NextPage = () => {
                                             />
                                         </label>
                                     </fieldset>
-                                    <div className="flex justify-end">
+                                    <div className="flex justify-end items-center gap-2">
                                         <button
                                             type="submit" 
                                             className="bg-[#333134] rounded-md py-2 px-3
@@ -177,6 +195,7 @@ const Home: NextPage = () => {
                                             Execute
                                             <Image src="/svg/enter.svg" alt="Enter" width={12} height={12} />
                                         </button>
+                                        {loading && <Spinner />}
                                     </div>
                                 </form>
                             </div>
