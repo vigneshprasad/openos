@@ -24,6 +24,8 @@ const server = z.object({
   OPENAI_API_KEY: z.string(),
   AWS_ACCESS_KEY_ID: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
+  CUSTOMER_IO_API_KEY: z.string(),
+  SLACK_BOT_TOKEN: z.string(),
 });
 
 /**
@@ -50,6 +52,8 @@ const processEnv = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+  CUSTOMER_IO_API_KEY: process.env.CUSTOMER_IO_API_KEY,
+  SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
@@ -141,6 +141,10 @@ const Home: NextPage = () => {
                                         {
                                             item.type === UNKNOWN_COMMAND && 
                                                 <p className="text-white"> Bad query </p>
+                                        }
+                                        {
+                                            item.type === GET_HELP && 
+                                                <p className="text-white"> {item.output as unknown as string} </p>
                                         }
                                         <br />
                                         <hr />

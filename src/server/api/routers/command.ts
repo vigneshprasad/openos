@@ -5,7 +5,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-import { DATABASE_QUERY, EXPENSE_CLASSIFIER, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND } from "~/constants/commandConstants";
+import { DATABASE_QUERY, EXPENSE_CLASSIFIER, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, ASK_ANALYST, GET_HELP } from "~/constants/commandConstants";
 import { runQuery } from "~/server/commands/runQuery";
 import { TRPCClientError } from "@trpc/client";
 import { getRazorpayData } from "~/server/commands/getRazorpayData";
@@ -19,6 +19,8 @@ import { getMarketingSpendReport } from "~/server/commands/getMarketingSpendRepo
 import { getExpenseClassificationTest } from "~/utils/getExpenseClassification";
 import { returnCommandResult } from "~/utils/returnCommandResult";
 import { type CommandResultType } from "~/types/types";
+import { sendHelpEmail } from "~/utils/sendHelpEmail";
+import { sendHelpMessage } from "~/utils/sendSlackMessage";
 
 export const commandRouter = createTRPCRouter({
   runCommand: protectedProcedure
@@ -127,7 +129,26 @@ export const commandRouter = createTRPCRouter({
                             result,
                             ctx.session.user.id,
                         )
+
                 }
+
+            case ASK_ANALYST:
+            case GET_HELP:
+                // sendHelpEmail(
+                //     input.query,
+                //     ctx.session.user,
+                // );
+                void sendHelpMessage(
+                    input.query,
+                    ctx.session.user,
+                )
+                return {
+                    type: GET_HELP,
+                    output: [
+                        "Your query has been sent to our analysts. We will get back to you shortly.",
+                    ]
+                }
+
             default:
                 return {
                     type: UNKNOWN_COMMAND,

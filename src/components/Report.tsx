@@ -60,7 +60,6 @@ const Report: React.FC<Props> = ({ props }) => {
                                                                 <span>{cell.unit && cell.unit}{cell.value}</span>
                                                                 : <span>{cell.value}{cell.unit && cell.unit}</span>
                                                             }
-                                                            {cell.value}{cell.unit && cell.unit}
                                                             <span className="CellComment">{cell.query.query}</span>
                                                         </div>
                                                     </td>

@@ -1,7 +1,7 @@
 import { type SavedQuery } from "@prisma/client";
 
 export type CommandResultType = [
-    undefined | QueryAndResult | JsonData | ExcelSheet | string[] | TransactionClassification[] | SimpleReportType[],
+    undefined | QueryAndResult | FinancialData | ExcelSheet | string[] | TransactionClassification[] | SimpleReportType[] | string,
     undefined | Error
 ]
 
@@ -10,7 +10,7 @@ export type SimpleReportType = [
     undefined | Error
 ]
 
-export type JsonData = {
+export type FinancialData = {
     dateRange: { from: Date, to: Date };
     customer: { name: string | undefined , email: string | undefined, phone: string | undefined };
     orderId: string | undefined;
