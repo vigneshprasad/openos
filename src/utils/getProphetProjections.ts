@@ -100,13 +100,15 @@ export const getProphetProjectionsReport = async (
                         if(json.yhat[key]) {
                             row.push({
                                 value: (json.yhat[key] as number).toFixed(2),
+                                unit: row[2]?.unit,
+                                unitPrefix: row[2]?.unitPrefix && row[2]?.unitPrefix,
                             })
                         }
                         if(!updateHeader && json.ds[key]) {
                             const date = new Date(json.ds[key] as number);
                             date?.setDate(date.getDate() - 1);
                             dateHeader.push({
-                                value: `Projection -${date.toDateString()}`
+                                value: `Projection - ${date.toDateString()}`
                             })
                         }
                     }

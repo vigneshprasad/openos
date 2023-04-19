@@ -135,11 +135,7 @@ const Home: NextPage = () => {
                                                     const simpleReport = report as unknown as SimpleReportType;
                                                     if(simpleReport) {
                                                         return <Report key={index2} props={simpleReport} />
-                                                    } else {
-                                                        console.log("HOW IS THIS HAPPENING?");
-                                                        console.log(index2, data);
-                                                        console.log("WTF?", item.output[index2]);
-                                                    }
+                                                    } 
                                                 })
                                         }
                                         {

@@ -44,6 +44,7 @@ model User {
     emailVerified       DateTime?
     image               String?
     role                String?
+    isOnboarded         Boolean               @default(false)
     accounts            Account[]
     sessions            Session[]
     DatabaseResource    DatabaseResource[]
@@ -181,7 +182,7 @@ model Transaction {
     user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
     bankStatement   BankStatement @relation(fields: [bankStatementId], references: [id], onDelete: Cascade)
 
-    @@unique([amount, userId, date, description], name: "transaction")
+    @@unique([amount, userId, date, description, balance], name: "transaction")
     @@index([userId])
     @@index([bankStatementId])
 }

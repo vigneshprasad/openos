@@ -33,10 +33,15 @@ export type Error = {
     query: string;
 }
 
-export type ExcelSheet = ExcelCell[][]
+export type ExcelSheet = {
+    heading: string;
+    sheet: ExcelCell[][]
+}
 
 export type ExcelCell = {
     value: number | string;
+    unit?: string;
+    unitPrefix?: boolean;
     expression?: string;
     hint?: string;
     query?: SavedQuery

@@ -10,6 +10,7 @@ import { executeQuery } from "~/utils/executeQuery";
 import { processPrompt } from "~/utils/processPrompt";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type ActiveUsers = {
     date: Date,
@@ -143,16 +144,19 @@ export const getActiveUserReport = async (query: string, userId: string) => {
             dailyActiveUsers.push({ value: dauNumber.toFixed(2) });
             dailyActiveUsersGrowth.push({
                 value: ((dauNumber - prevDauNumber) / (dauNumber) * 100).toFixed(2),
+                unit: '%'
             });
 
             weeklyActiveUsers.push({ value: wauNumber.toFixed(2) });
             weeklyActiveUsersGrowth.push({
                 value: ((wauNumber - prevWauNumber) / (wauNumber) * 100).toFixed(2),
+                unit: '%'
             });
 
             monthlyActiveUsers.push({ value: mauNumber.toFixed(2) });
             monthlyActiveUsersGrowth.push({
                 value: ((mauNumber - prevMauNumber) / (mauNumber) * 100).toFixed(2),
+                unit: '%'
             });
         }
     }
@@ -176,7 +180,10 @@ export const getActiveUserReport = async (query: string, userId: string) => {
 
 
     return [
-        reportTableWithProjections,
+        {
+            heading: 'Active Users',
+            sheet: removeEmptyColumns(reportTableWithProjections),
+        },
         undefined
     ]
 }

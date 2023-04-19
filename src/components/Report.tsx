@@ -1,5 +1,5 @@
 import { type SavedQuery } from "@prisma/client";
-import type { CommandResultType, ExcelCell } from "~/types/types";
+import type { CommandResultType, ExcelSheet } from "~/types/types";
 import { QueryFeedback } from "./QueryFeedback";
 
 interface Props {
@@ -11,12 +11,14 @@ interface GridElement {
     expression?: string;
     hint?: string;
     query?: SavedQuery;
+    unit?: string;
+    unitPrefix?: boolean
 }
 
 const Report: React.FC<Props> = ({ props }) => {
     const [data, error] = props
-    const dataRaw = data as ExcelCell[][]
-    const tableData = data && dataRaw.slice(1) as GridElement[][];
+    const dataRaw = data as ExcelSheet
+    const tableData = dataRaw && dataRaw.sheet.slice(1) as GridElement[][];
     const grid = tableData ? tableData : [];
 
     return (
@@ -26,7 +28,7 @@ const Report: React.FC<Props> = ({ props }) => {
                     <table>
                         <thead>
                             <tr>
-                                {dataRaw[0] && dataRaw[0].map(
+                                {dataRaw.sheet[0] && dataRaw.sheet[0].map(
                                     (cell, index) => (
                                         <th 
                                             // colSpan={index === 0 ? 2 : undefined}
@@ -53,7 +55,12 @@ const Report: React.FC<Props> = ({ props }) => {
                                                     </td>
                                                     <td className="CellWithComment">
                                                         <div>
-                                                            {cell.value}
+                                                            {
+                                                                cell.unitPrefix ?
+                                                                <span>{cell.unit && cell.unit}{cell.value}</span>
+                                                                : <span>{cell.value}{cell.unit && cell.unit}</span>
+                                                            }
+                                                            {cell.value}{cell.unit && cell.unit}
                                                             <span className="CellComment">{cell.query.query}</span>
                                                         </div>
                                                     </td>
@@ -71,7 +78,10 @@ const Report: React.FC<Props> = ({ props }) => {
                                                             cell.value == "-Infinity" || 
                                                             cell.value == Infinity ||
                                                             cell.value == -Infinity ?
-                                                            "-" : cell.value
+                                                            "-" 
+                                                            : cell.unitPrefix ?
+                                                                <span>{cell.unit && cell.unit}{cell.value}</span>
+                                                                : <span>{cell.value}{cell.unit && cell.unit}</span> 
                                                         }
                                                     </div>
                                                 </td>

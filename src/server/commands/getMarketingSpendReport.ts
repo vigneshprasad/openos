@@ -7,6 +7,7 @@ import { getUserBySource } from "./getUserAcquisitionReport";
 import { type Transaction } from "@prisma/client";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type UsersBySource = {
     date: Date,
@@ -129,7 +130,10 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
 
 
     return [
-        reportTableWithProjections,
+        {
+            heading: 'Marketing Spend',
+            sheet: removeEmptyColumns(reportTableWithProjections)
+        },
         undefined
     ]
 }

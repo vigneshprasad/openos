@@ -8,9 +8,11 @@ import { processPrompt } from "~/utils/processPrompt";
 import { executeQuery } from "~/utils/executeQuery";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type RetentionData = {
     date: Date,
+    total: number,
     d0: number,
     d1: number,
     d7: number,
@@ -77,6 +79,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
+    const totalUsers: ExcelCell[] = [{value: 'Total Users'}];
     const d0Retention: ExcelCell[] = [{value: 'D0 Retention', query: retentionDataQuery}];
     const d1Retention: ExcelCell[] = [{value: 'D1 Retention'}];
     const d7Retention: ExcelCell[] = [{value: 'D7 Retention'}];
@@ -94,7 +97,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
         // Retention
         if(retentionData[i]) {
             const retentionDataPerMonth = retentionData[i] as RetentionData;
-
+            totalUsers.push({ value: retentionDataPerMonth.total });
             d0Retention.push({ value: retentionDataPerMonth.d0.toFixed(2)});
             d1Retention.push({ value: retentionDataPerMonth.d1.toFixed(2) });
             d7Retention.push({ value: retentionDataPerMonth.d7.toFixed(2) });
@@ -105,7 +108,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     }
 
     reportTable.push(reportHeader);
-
+    reportTable.push(totalUsers);
     reportTable.push(d0Retention);
     reportTable.push(d1Retention);
     reportTable.push(d7Retention);
@@ -121,7 +124,10 @@ export const getRetentionReport = async (query: string, userId: string) => {
     );
 
     return [
-        reportTableWithProjections,
+        {
+            heading: 'User Retention',
+            sheet: removeEmptyColumns(reportTableWithProjections)
+        },
         undefined
     ]
 }
@@ -138,6 +144,7 @@ const getRetentionData = async (
     const result = [
         {
             date: timeSeries[0] as Date,
+            total: 0,
             d0: 0,
             d1: 0,
             d7: 0,
@@ -278,6 +285,7 @@ const getRetentionData = async (
 
         result.push({
             date: timeSeries[i] as Date,
+            total: userList.length,
             d0: d0Count / userList.length,
             d1: d1Count / userList.length,
             d7: d7Count / userList.length,

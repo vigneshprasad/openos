@@ -7,6 +7,7 @@ import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type IncomeData = {
     subscriptionRevenue: Transaction[]; 
@@ -138,21 +139,29 @@ export const getFinancialReport = async (userId: string) => {
         time?.setDate(time.getDate() - 1);
         if(!time) continue;
         reportHeader.push({
-            value: time.toDateString()
+            value: time.toDateString(),
+            unit: '₹',
+            unitPrefix: true
         })
         bankBalance.push({
-            value: getBalanceByDate(bankTransactions, time)
+            value: getBalanceByDate(bankTransactions, time),
+            unit: '₹',
+            unitPrefix: true
         });
         razorpayBalance.push({
-            value: getBalanceByDate(razorpayTransactions, time)
+            value: getBalanceByDate(razorpayTransactions, time),
+            unit: '₹',
+            unitPrefix: true
         });
         bankBalanceGrowthPercent.push({
             value: ((bankBalance[i]?.value as number) / (bankBalance[i - 1]?.value as number) * 100).toFixed(2),
-            expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`
+            expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`,
+            unit: '%'
         });
         razorpayBalanceGrowthPercent.push({
             value: ((razorpayBalance[i]?.value as number) / (razorpayBalance[i - 1]?.value as number) * 100).toFixed(2),
-            expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`
+            expression: `=${String.fromCharCode(65 + i + 1)}1/${String.fromCharCode(65 + i)}1 * 100`,
+            unit: '%'
         });
         const prevTime = timeSeries[i - 1];
         if(!prevTime) continue;
@@ -178,7 +187,9 @@ export const getFinancialReport = async (userId: string) => {
             transactionRevenueAmount+= transaction.amount;
         }
         transactionRevenue.push({
-            value: transactionRevenueAmount.toFixed(2)
+            value: transactionRevenueAmount.toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //OTHER REVENUE
@@ -190,7 +201,9 @@ export const getFinancialReport = async (userId: string) => {
             otherRevenueAmount+= transaction.amount;
         }
         otherRevenue.push({
-            value: otherRevenueAmount.toFixed(2)
+            value: otherRevenueAmount.toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //TOTAL INCOME
@@ -202,7 +215,9 @@ export const getFinancialReport = async (userId: string) => {
             totalRevenueAmount+= transaction.amount;
         }
         totalIncome.push({
-            value: totalRevenueAmount.toFixed(2)
+            value: totalRevenueAmount.toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //VENDOR PAYOUT
@@ -214,7 +229,9 @@ export const getFinancialReport = async (userId: string) => {
             vendorPayoutAmount+= transaction.amount;
         }
         vendorPayout.push({
-            value: vendorPayoutAmount.toFixed(2)
+            value: vendorPayoutAmount.toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //TRANSACTION FEE
@@ -226,7 +243,9 @@ export const getFinancialReport = async (userId: string) => {
             transactionFeeAmount+= transaction.amount;
         }
         transactionFee.push({
-            value: transactionFeeAmount.toFixed(2)
+            value: transactionFeeAmount.toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //HOSTING
@@ -238,13 +257,17 @@ export const getFinancialReport = async (userId: string) => {
             hostingAmount+= transaction.amount;
         }
         hosting.push({
-            value: (hostingAmount * -1).toFixed(2)
+            value: (hostingAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //GROSS PROFIT
         const grossProfitAmount = totalRevenueAmount - vendorPayoutAmount - transactionFeeAmount - hostingAmount;
         grossProfit.push({
-            value: grossProfitAmount.toFixed(2)
+            value: grossProfitAmount.toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //MARKETING EXPENSES
@@ -256,7 +279,9 @@ export const getFinancialReport = async (userId: string) => {
             marketingExpensesAmount+= transaction.amount;
         }
         marketingExpenses.push({
-            value: (marketingExpensesAmount * -1).toFixed(2)
+            value: (marketingExpensesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //CONTRACTORS
@@ -268,7 +293,9 @@ export const getFinancialReport = async (userId: string) => {
             contractorsAmount+= transaction.amount;
         }
         contractors.push({
-            value: (contractorsAmount * -1).toFixed(2)
+            value: (contractorsAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //PROFESSIONAL SERVICES
@@ -280,7 +307,9 @@ export const getFinancialReport = async (userId: string) => {
             professionalServicesAmount+= transaction.amount;
         }
         professionalServices.push({
-            value: (professionalServicesAmount * -1).toFixed(2)
+            value: (professionalServicesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //SALARIES AND WAGES
@@ -292,7 +321,9 @@ export const getFinancialReport = async (userId: string) => {
             salariesAndWagesAmount+= transaction.amount;
         }
         salariesAndWages.push({
-            value: (salariesAndWagesAmount * -1).toFixed(2)
+            value: (salariesAndWagesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
 
@@ -305,7 +336,9 @@ export const getFinancialReport = async (userId: string) => {
             payrollTaxesAmount+= transaction.amount;
         }
         payrollTaxes.push({
-            value: (payrollTaxesAmount * -1).toFixed(2)
+            value: (payrollTaxesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });        
 
         //OTHER PAYROLL EXPENSES
@@ -317,7 +350,9 @@ export const getFinancialReport = async (userId: string) => {
             payrollExpensesAmount+= transaction.amount;
         }
         otherPayrollExpenses.push({
-            value: (payrollExpensesAmount * -1).toFixed(2)
+            value: (payrollExpensesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //TAX EXPENSES
@@ -329,7 +364,9 @@ export const getFinancialReport = async (userId: string) => {
             taxExpensesAmount+= transaction.amount;
         }
         taxExpenses.push({
-            value: (taxExpensesAmount * -1).toFixed(2)
+            value: (taxExpensesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
         
         //INSURANCE
@@ -341,7 +378,9 @@ export const getFinancialReport = async (userId: string) => {
             insuranceAmount+= transaction.amount;
         }
         insurance.push({
-            value: (insuranceAmount * -1).toFixed(2)
+            value: (insuranceAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //SUBSCRIPTIONS
@@ -353,7 +392,9 @@ export const getFinancialReport = async (userId: string) => {
             subscriptionsAmount+= transaction.amount;
         }
         subscriptionsExpenditure.push({
-            value: (subscriptionsAmount * -1).toFixed(2)
+            value: (subscriptionsAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //OTHER EXPENSES
@@ -365,7 +406,9 @@ export const getFinancialReport = async (userId: string) => {
             otherExpensesAmount+= transaction.amount;
         }
         otherExpenses.push({
-            value: (otherExpensesAmount * -1).toFixed(2)
+            value: (otherExpensesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //FOOD AND DRINKS
@@ -377,7 +420,9 @@ export const getFinancialReport = async (userId: string) => {
             foodAndDrinksAmount+= transaction.amount;
         }
         foodAndDrinks.push({
-            value: (foodAndDrinksAmount * -1).toFixed(2)
+            value: (foodAndDrinksAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //OFFICE SUPPLIES
@@ -389,7 +434,9 @@ export const getFinancialReport = async (userId: string) => {
             officeSuppliesAmount+= transaction.amount;
         }
         officeSupplies.push({
-            value: (officeSuppliesAmount * -1).toFixed(2)
+            value: (officeSuppliesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //OFFICE SPACE
@@ -401,7 +448,9 @@ export const getFinancialReport = async (userId: string) => {
             officeSpaceAmount+= transaction.amount;
         }
         officeSpace.push({
-            value: (officeSpaceAmount * -1).toFixed(2)
+            value: (officeSpaceAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
 
         //EXPENSES TOTAL
@@ -419,13 +468,16 @@ export const getFinancialReport = async (userId: string) => {
             officeSuppliesAmount + 
             officeSpaceAmount;
         expensesTotal.push({
-            value: (totalExpensesAmount * -1).toFixed(2)
+            value: (totalExpensesAmount * -1).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         })
 
         //NET INCOME
         netIncome.push({
-            value:
-                (grossProfitAmount + totalExpensesAmount).toFixed(2)
+            value: (grossProfitAmount + totalExpensesAmount).toFixed(2),
+            unit: '₹',
+            unitPrefix: true
         });
     }
 
@@ -465,7 +517,10 @@ export const getFinancialReport = async (userId: string) => {
     );
 
     return [
-        reportTableWithProjections,
+        {
+            heading: 'Financial Report',
+            sheet: removeEmptyColumns(reportTableWithProjections),
+        },
         undefined
     ]
 }
