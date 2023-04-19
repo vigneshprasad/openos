@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
@@ -10,6 +10,8 @@ import type { CommandResultType, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
 import { GettingStartedModal } from "~/components/GettingStartedModal";
 import Image from "next/image";
+import { Spinner } from "~/components/Spinner";
+import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 
 type CommandDataType = {
     input: string,
@@ -26,6 +28,13 @@ const Home: NextPage = () => {
     const [data, setData] = useState<CommandDataType[]>([]);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (scrollRef.current && (loading || data)) {
+            scrollRef.current.scrollIntoView({ behavior: "smooth" })
+        }
+    }, [loading, data])
 
     const runSimpleQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: (data) => {
@@ -142,6 +151,13 @@ const Home: NextPage = () => {
                                             item.type === UNKNOWN_COMMAND && 
                                                 <p className="text-white"> Bad query </p>
                                         }
+
+                                        {loading && index === data.length - 1  && 
+                                            <div className="w-full flex justify-center">
+                                                <FadingCubesLoader />
+                                            </div>
+                                        }
+
                                         {
                                             item.type === GET_HELP && 
                                                 <p className="text-white"> {item.output as unknown as string} </p>
@@ -150,6 +166,8 @@ const Home: NextPage = () => {
                                         <hr />
                                     </div>
                                 })}
+
+                                <div ref={scrollRef} />
                             </div>
                         )}
 
@@ -171,7 +189,7 @@ const Home: NextPage = () => {
                                             />
                                         </label>
                                     </fieldset>
-                                    <div className="flex justify-end">
+                                    <div className="flex justify-end items-center gap-2">
                                         <button
                                             type="submit" 
                                             className="bg-[#333134] rounded-md py-2 px-3
@@ -181,6 +199,7 @@ const Home: NextPage = () => {
                                             Execute
                                             <Image src="/svg/enter.svg" alt="Enter" width={12} height={12} />
                                         </button>
+                                        {loading && <Spinner />}
                                     </div>
                                 </form>
                             </div>
@@ -192,9 +211,16 @@ const Home: NextPage = () => {
                         <text className="text-sm text-[#838383] font-medium">Command History</text>
                     </div>
                     <div className="w-[80%] h-max mx-auto mt-[70px] px-5">
-                        <Image src="/command_history_empty.png" alt="Command History" width={36} height={36} className="mx-auto" />
+                        <Image 
+                            src="/command_history_empty.png" 
+                            alt="Command History" 
+                            width={36} 
+                            height={36} 
+                            className="mx-auto" />
                         <div className="pt-3">
-                            <h3 className="text-[#fff] text-sm font-medium text-center">Your command history is empty</h3>
+                            <h3 className="text-[#fff] text-sm font-medium text-center">
+                                Your command history is empty
+                            </h3>
                             <p className="pt-1 text-xs text-[#838383] text-center">
                                 All the commands you write will be shown in the history. 
                                 You can repeat commands or command sets by clicking on them here.

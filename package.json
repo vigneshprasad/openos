@@ -35,7 +35,11 @@
     "pg": "^8.10.0",
     "razorpay": "^2.8.6",
     "react": "18.2.0",
+    "react-calendly": "^4.1.1",
+    "react-datasheet": "^1.4.12",
     "react-dom": "18.2.0",
+    "react-loader-spinner": "^5.3.4",
+    "react-lottie-player": "^1.5.4",
     "superjson": "1.9.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.2/xlsx-0.19.2.tgz",
     "zod": "^3.20.6"
