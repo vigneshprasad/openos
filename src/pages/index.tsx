@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { convertComplexReportToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
+import { commands } from "~/constants/commandAutocomplete";
 
 type CommandDataType = {
     input: string,
@@ -37,22 +38,15 @@ const Home: NextPage = () => {
         inputFocusRef.current?.focus()
     }, [inputFocusRef, setCommand])
 
-    const commands = [
-        CREATE_REPORT,
-        DATABASE_QUERY,
-        FINANCIAL_DATA,
-        GET_HELP,
-    ]
-
     useEffect(() => {
         if (scrollRef.current && (loading || data)) {
             scrollRef.current.scrollIntoView({ behavior: "smooth" })
         }
     }, [loading, data])
 
-    const filteredCommands = useMemo<string[]>(() => {
+    const filteredCommands = useMemo(() => {
         return commands.filter((item) => {
-            return item.toLowerCase().includes(command.toLowerCase())
+            return item.command.toLowerCase().includes(command.toLowerCase())
         })
     }, [command])
 
@@ -265,10 +259,10 @@ const Home: NextPage = () => {
                                                     {filteredCommands
                                                         .map((item, index) => (
                                                             <div className="px-3 py-1 flex justify-between items-center" key={index}>
-                                                                <p className="text-[#fff] text-sm font-medium">
-                                                                    {item}
+                                                                <p className="text-[#fff] text-sm">
+                                                                    {item.command}
                                                                 </p>
-                                                                <p className="text-xs text-[#C4C4C4]">Create a task</p>
+                                                                <p className="text-xs text-[#C4C4C4]">{item.description}</p>
                                                             </div>
                                                         )
                                                     )}
