@@ -10,7 +10,6 @@ import { executeQuery } from "~/utils/executeQuery";
 import { processPrompt } from "~/utils/processPrompt";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
-import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type ActiveUsers = {
     date: Date,
@@ -182,7 +181,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     return [
         {
             heading: 'Active Users',
-            sheet: removeEmptyColumns(reportTableWithProjections),
+            sheet: reportTableWithProjections,
         },
         undefined
     ]

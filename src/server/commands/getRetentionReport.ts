@@ -8,7 +8,6 @@ import { processPrompt } from "~/utils/processPrompt";
 import { executeQuery } from "~/utils/executeQuery";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
-import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type RetentionData = {
     date: Date,
@@ -126,7 +125,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     return [
         {
             heading: 'User Retention',
-            sheet: removeEmptyColumns(reportTableWithProjections)
+            sheet: reportTableWithProjections
         },
         undefined
     ]

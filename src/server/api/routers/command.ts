@@ -19,7 +19,6 @@ import { getMarketingSpendReport } from "~/server/commands/getMarketingSpendRepo
 import { getExpenseClassificationTest } from "~/utils/getExpenseClassification";
 import { returnCommandResult } from "~/utils/returnCommandResult";
 import { type CommandResultType } from "~/types/types";
-import { sendHelpEmail } from "~/utils/sendHelpEmail";
 import { sendHelpMessage } from "~/utils/sendSlackMessage";
 
 export const commandRouter = createTRPCRouter({
@@ -129,15 +128,24 @@ export const commandRouter = createTRPCRouter({
                             result,
                             ctx.session.user.id,
                         )
-
+                    default:
+                        return {
+                            type: UNKNOWN_COMMAND,
+                            output: [
+                                [
+                                    undefined,
+                                    {
+                                        text: 'Bad Command',
+                                        cause: 'Invalid Command',
+                                        query: 'Unable to process',
+                                    }
+                                ]
+                            ]
+                        }
                 }
 
             case ASK_ANALYST:
             case GET_HELP:
-                // sendHelpEmail(
-                //     input.query,
-                //     ctx.session.user,
-                // );
                 const message = await sendHelpMessage(
                     input.query,
                     ctx.session.user,
@@ -145,7 +153,7 @@ export const commandRouter = createTRPCRouter({
                 return {
                     type: GET_HELP,
                     output: [
-                        "Your query has been sent to our analysts. We will get back to you shortly.",
+                        message
                     ]
                 }
 
