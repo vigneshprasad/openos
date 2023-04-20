@@ -15,8 +15,8 @@ const Auth: NextPage = () => {
         <div className="col-span-2 flex flex-col justify-center relative">
           <div className="w-inherit absolute right-0">
             <h1 className="text-[32px] leading-[48px] font-medium text-[#fff]">
-              Now that you have a terminal too,<br /> what are you{" "}
-              <span className="text-[#F4BF4F]">building?</span>
+              Retrieve, analyse, model & forecast <br /> your{" "}
+              <span className="text-[#F4BF4F]">data & finances.</span>
             </h1>
 
             <div className="relative mt-[30px] pt-[54.25%] w-[60vw]">
@@ -33,7 +33,7 @@ const Auth: NextPage = () => {
               <div className="pt-[22px]">
                 <h2 className="text-2xl font-medium text-[#fff]">Login to Open OS</h2>
                 <p className="pt-[8px] text-sm font-medium text-[#747474]">
-                  Use your work email, we&apos;ll send you a login link. Simple.
+                  If you do not have an account, we will create one for you upon sign in. 
                 </p>
               </div>
               <div className="flex flex-col gap-[24px]">
@@ -43,8 +43,7 @@ const Auth: NextPage = () => {
             <div className="flex flex-row gap-2 items-start">
               <Image src="/svg/tick.svg" alt="tick" width={20} height={20} />
               <p className="text-sm font-medium text-[#747474]">
-                We don&apos;t share your email with third party vendors to track your web activity. 
-                Your privacy matters to us.
+                By signing in you agree to the Terms & Conditions & Privacy Policy
               </p>
             </div>
           </div>

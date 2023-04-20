@@ -16,7 +16,11 @@ export const userRouter = createTRPCRouter({
       })
 
       const stage1 = !user?.name || !user.role
-      const stage2 = !user?.BankStatement && !user?.DatabaseResource && !user?.RazorpayResource
+      const stage2 = 
+        user?.BankStatement.length === 0 &&
+        user?.DatabaseResource.length === 0 &&
+        user?.RazorpayResource.length === 0
+
       const stage3 = !user?.isOnboarded
 
       return {
