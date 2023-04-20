@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import { CSVLink } from "react-csv";
 import Head from "next/head";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
@@ -49,6 +49,12 @@ const Home: NextPage = () => {
             scrollRef.current.scrollIntoView({ behavior: "smooth" })
         }
     }, [loading, data])
+
+    const filteredCommands = useMemo<string[]>(() => {
+        return commands.filter((item) => {
+            return item.toLowerCase().includes(command.toLowerCase())
+        })
+    }, [command])
 
     const runSimpleQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: (data) => {
@@ -237,29 +243,39 @@ const Home: NextPage = () => {
                             </div>
                             <div className="pt-3 pb-2 pl-5 pr-10">
                                 <form onSubmit={handleSubmit}> 
-                                        <fieldset>
-                                            <label>
-                                                <input 
-                                                    type="text" 
-                                                    className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
-                                                    font-normal placeholder:text-sm placeholder:text-[#616161]"
-                                                    placeholder="Start by typing the command eg. run-query"
-                                                    value={command}
-                                                    onChange={(e) => setCommand(e.target.value)}
-                                                />
-                                            </label>
-                                        </fieldset>   
-                                        {command && command.length > 0 &&
-                                            commands
-                                                .filter((item) => {
-                                                    console.log(item, command);
-                                                    return item.toLowerCase().includes(command.toLowerCase())
-                                                })
-                                                .map((item, index) => (
-                                                <li key={index}>
-                                                    <span>{item}</span>
-                                                </li>
-                                        ))}                                 
+                                    <fieldset>
+                                        <label className="relative">
+                                            <input 
+                                                type="text" 
+                                                className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
+                                                font-normal placeholder:text-sm placeholder:text-[#616161]"
+                                                placeholder="Start by typing the command eg. run-query"
+                                                value={command}
+                                                onChange={(e) => setCommand(e.target.value)}
+                                            />
+
+                                            {command.length > 0 && filteredCommands.length > 0 &&
+                                                <div className="absolute w-[400px] h-[max] max-h-[145px] overflow-y-auto pt-1 bg-[#272628] 
+                                                    border border-solid border-[#333] shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] flex-col gap-2
+                                                    bottom-0"
+                                                    style={{
+                                                        left: (command.length * 10) + 10,
+                                                    }}
+                                                >
+                                                    {filteredCommands
+                                                        .map((item, index) => (
+                                                            <div className="px-3 py-1 flex justify-between items-center" key={index}>
+                                                                <p className="text-[#fff] text-sm font-medium">
+                                                                    {item}
+                                                                </p>
+                                                                <p className="text-xs text-[#C4C4C4]">Create a task</p>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            } 
+                                        </label>
+                                    </fieldset>                                   
                                     <div className="flex justify-end items-center gap-2">
                                         <button
                                             type="submit" 
