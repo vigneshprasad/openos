@@ -195,6 +195,16 @@ input {
   text-align: center;
 }
 
+.tableDiv .table-heading {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 400;
+  color: #616161;
+  background-color: #1C1B1D;
+  text-transform: uppercase;
+}
+
 th {
   border: 1px solid #333;
   padding: 4px;

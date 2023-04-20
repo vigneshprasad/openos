@@ -7,3 +7,11 @@ export const EXPENSE_CLASSIFIER = 'expense-classifier';
 export const ASK_ANALYST = 'ask-analyst';
 export const GET_HELP = 'get-help';
 export const UNKNOWN_COMMAND = 'unknown-command';
+
+export const COMMANDS_LIST = [
+  DATABASE_QUERY,
+  FINANCIAL_DATA,
+  CREATE_REPORT,
+  COMPLEX_REPORT,
+  GET_HELP,
+]

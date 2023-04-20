@@ -1,11 +1,11 @@
 import { type NextPage } from "next";
 import { CSVLink } from "react-csv";
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
-import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP } from "~/constants/commandConstants";
+import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP, COMMANDS_LIST } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType, ExcelSheet, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { convertComplexReportToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
+import { commands } from "~/constants/commandAutocomplete";
 
 type CommandDataType = {
     input: string,
@@ -30,12 +31,24 @@ const Home: NextPage = () => {
     const [data, setData] = useState<CommandDataType[]>([]);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null)
+    const inputFocusRef = useRef<HTMLInputElement>(null)
+
+    const selectCommand = useCallback((command: string) => {
+        setCommand((prevCommand) => `${command}: ${prevCommand}`)
+        inputFocusRef.current?.focus()
+    }, [inputFocusRef, setCommand])
 
     useEffect(() => {
         if (scrollRef.current && (loading || data)) {
             scrollRef.current.scrollIntoView({ behavior: "smooth" })
         }
     }, [loading, data])
+
+    const filteredCommands = useMemo(() => {
+        return commands.filter((item) => {
+            return item.command.toLowerCase().includes(command.toLowerCase())
+        })
+    }, [command])
 
     const runSimpleQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: (data) => {
@@ -95,6 +108,8 @@ const Home: NextPage = () => {
         runQuery.mutate({ query: command });
     };
 
+    console.log("data: ", data)
+
     return (
         <>
         <Head>
@@ -113,19 +128,34 @@ const Home: NextPage = () => {
                         </div>
                     </div>
                     <div className="p-5 bg-[#0A0A0A] grid grid-rows-[1fr_max-content] grid-cols-1 gap-5 overflow-hidden">
-                        {data.length === 0 ? <div className="w-[30%] h-max mx-auto pt-20">
-                            <Image src="/terminal_empty.png" alt="Terminal" width={300} height={100} className="mx-auto" />
-                            <div className="pt-8">
-                                <h3 className="text-[#fff] text-sm font-medium text-center">Write your first command</h3>
-                                <p className="pt-1 text-xs text-[#838383] text-center">
-                                    Start by typing a syntax from the command pallet followed by natural language
-                                </p>
-                            </div>
+                        {data.length === 0 ? <div>
+                            {loading ? 
+                                <div className="w-full flex justify-center">
+                                    <FadingCubesLoader />
+                                </div> :
+
+                                <div className="w-[30%] h-max mx-auto pt-20">
+                                    <Image src="/terminal_empty.png" alt="Terminal" width={300} height={100} className="mx-auto" />
+                                    <div className="pt-8">
+                                        <h3 className="text-[#fff] text-sm font-medium text-center">Write your first command</h3>
+                                        <p className="pt-1 text-xs text-[#838383] text-center">
+                                            Start by typing a syntax from the command pallet followed by natural language
+                                        </p>
+                                    </div>
+                                </div>}
                         </div> : (
                             <div className="overflow-auto p-4 bg-[#111] rounded-md">
                                 {data.map((item, index) => {
+                                    const [key, value] = item.input.split(":")
+
                                     return <div key={index}>
                                         <br />
+                                        
+                                        <p className="pb-2 text-sm text-[#F4BF4F]">
+                                            <span className="text-[#fff]">{key}: </span>
+                                            {value}
+                                        </p>
+
                                         {
                                             item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
                                         }
@@ -190,23 +220,56 @@ const Home: NextPage = () => {
                         )}
 
                         <div className="w-full bg-[#1C1B1D] border border-solid border-[#333] rounded-md">
-                            <div className="px-3 py-2.5 border-b border-solid border-b-[#333]">
+                            <div className="px-3 py-1 border-b border-solid border-b-[#333] flex justify-between items-center">
                                 <text className="text-xs text-[#616161] font-normal">Command Palette</text>
+                                <div className="flex gap-1">
+                                    {COMMANDS_LIST.map((command, index) => (
+                                        <div 
+                                            className="py-1 px-2 bg-[#262626] rounded-md cursor-pointer
+                                            hover:bg-[#464646]"
+                                            key={index}
+                                            onClick={() => selectCommand(command)}
+                                        >
+                                            <text className="text-xs text-[#C4C4C4] leading-[150%]">{command}</text>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="pt-3 pb-2 pl-5 pr-10">
                                 <form onSubmit={handleSubmit}> 
-                                        <fieldset>
-                                            <label>
-                                                <input 
-                                                    type="text" 
-                                                    className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
-                                                    font-normal placeholder:text-sm placeholder:text-[#616161] --font-jetbrains"
-                                                    placeholder="Start by typing the command eg. run-query"
-                                                    value={command}
-                                                    onChange={(e) => setCommand(e.target.value)}
-                                                />
-                                            </label>
-                                        </fieldset>                               
+                                    <fieldset>
+                                        <label className="relative">
+                                            <input 
+                                                type="text" 
+                                                className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
+                                                font-normal placeholder:text-sm placeholder:text-[#616161]"
+                                                placeholder="Start by typing the command eg. run-query"
+                                                value={command}
+                                                onChange={(e) => setCommand(e.target.value)}
+                                            />
+
+                                            {command.length > 0 && filteredCommands.length > 0 &&
+                                                <div className="absolute w-[400px] h-[max] max-h-[145px] overflow-y-auto pt-1 bg-[#272628] 
+                                                    border border-solid border-[#333] shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] flex-col gap-2
+                                                    bottom-0"
+                                                    style={{
+                                                        left: (command.length * 10) + 10,
+                                                    }}
+                                                >
+                                                    {filteredCommands
+                                                        .map((item, index) => (
+                                                            <div className="px-3 py-1 flex justify-between items-center" key={index}>
+                                                                <p className="text-[#fff] text-sm">
+                                                                    {item.command}
+                                                                </p>
+                                                                <p className="text-xs text-[#C4C4C4]">{item.description}</p>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            } 
+                                        </label>
+                                    </fieldset>                                   
                                     <div className="flex justify-end items-center gap-2">
                                         <button
                                             type="submit" 
