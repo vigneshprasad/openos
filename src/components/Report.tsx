@@ -1,6 +1,7 @@
 import { type SavedQuery } from "@prisma/client";
 import type { CommandResultType, ExcelSheet } from "~/types/types";
 import { QueryFeedback } from "./QueryFeedback";
+import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 interface Props {
     props: CommandResultType
@@ -17,7 +18,8 @@ interface GridElement {
 
 const Report: React.FC<Props> = ({ props }) => {
     const [data, error] = props
-    const dataRaw = data as ExcelSheet
+    const dataRaw = data as ExcelSheet;
+    dataRaw.sheet = removeEmptyColumns(dataRaw.sheet);
     const tableData = dataRaw && dataRaw.sheet.slice(1) as GridElement[][];
     const grid = tableData ? tableData : [];
 

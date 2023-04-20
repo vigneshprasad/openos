@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { CSVLink } from "react-csv";
 import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
@@ -6,12 +7,13 @@ import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
 import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP, COMMANDS_LIST } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { CommandResultType, SimpleReportType } from "../types/types";
+import type { CommandResultType, ExcelSheet, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
 import { GettingStartedModal } from "~/components/GettingStartedModal";
 import Image from "next/image";
 import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
+import { convertComplexReportToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 
 type CommandDataType = {
     input: string,
@@ -26,7 +28,6 @@ const Home: NextPage = () => {
 
     const [command, setCommand] = useState<string>("");
     const [data, setData] = useState<CommandDataType[]>([]);
-    const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null)
     const inputFocusRef = useRef<HTMLInputElement>(null)
@@ -35,6 +36,13 @@ const Home: NextPage = () => {
         setCommand((prevCommand) => `${command}: ${prevCommand}`)
         inputFocusRef.current?.focus()
     }, [inputFocusRef, setCommand])
+
+    const commands = [
+        CREATE_REPORT,
+        DATABASE_QUERY,
+        FINANCIAL_DATA,
+        GET_HELP,
+    ]
 
     useEffect(() => {
         if (scrollRef.current && (loading || data)) {
@@ -57,7 +65,6 @@ const Home: NextPage = () => {
             if(dataResult.type === COMPLEX_REPORT_LOADING) {
                 if(!dataResult.output[0]) {
                     setLoading(false);
-                    setError(true);
                     return;
                 }
                 const commands:string[] = dataResult.output[0] as unknown as string[];
@@ -91,7 +98,6 @@ const Home: NextPage = () => {
         },
         onError: () => {
             setLoading(false);
-            setError(true)
         }
     });
 
@@ -99,7 +105,6 @@ const Home: NextPage = () => {
         e.preventDefault();
 
         setLoading(true);
-        setError(false);
         runQuery.mutate({ query: command });
     };
 
@@ -160,6 +165,17 @@ const Home: NextPage = () => {
                                         {
                                             item.type === CREATE_REPORT && <Report key={index} props={item.output} />
                                         }
+                                        {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
+                                                <>
+                                                    <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
+                                                        <button className="bg-[#333134] rounded-md py-2 px-3
+                                                        text-[#838383] font-normal text-xs flex gap-1.5
+                                                        hover:bg-[#434144] cursor-pointer">
+                                                            <p>Download CSV</p>
+                                                        </button>
+                                                    </CSVLink>
+                                                </>
+                                        }   
                                         {
                                             item.type === COMPLEX_REPORT && 
                                                 item.output.map((report, index2) => {
@@ -169,23 +185,33 @@ const Home: NextPage = () => {
                                                     } 
                                                 })
                                         }
+                                        {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
+                                                <>
+                                                    <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
+                                                        <button className="bg-[#333134] rounded-md py-2 px-3
+                                                        text-[#838383] font-normal text-xs flex gap-1.5
+                                                        hover:bg-[#434144] cursor-pointer">
+                                                            <p>Download CSV</p>
+                                                        </button>
+                                                    </CSVLink>
+                                                </>
+                                        }   
                                         {
                                             item.type === UNKNOWN_COMMAND && 
                                                 <p className="text-white"> Bad query </p>
                                         }
-
+                                        {
+                                            item.type === GET_HELP && 
+                                                <p className="text-white"> {item.output as unknown as string} </p>
+                                        }
+                                        <>
+                                            <br /><hr />
+                                        </>
                                         {loading && index === data.length - 1  && 
                                             <div className="w-full flex justify-center">
                                                 <FadingCubesLoader />
                                             </div>
                                         }
-
-                                        {
-                                            item.type === GET_HELP && 
-                                                <p className="text-white"> {item.output as unknown as string} </p>
-                                        }
-                                        <br />
-                                        <hr />
                                     </div>
                                 })}
 
@@ -210,20 +236,30 @@ const Home: NextPage = () => {
                                 </div>
                             </div>
                             <div className="pt-3 pb-2 pl-5 pr-10">
-                                <form onSubmit={handleSubmit}>
-                                    <fieldset>
-                                        <label>
-                                            <input
-                                                ref={inputFocusRef}
-                                                type="text" 
-                                                className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
-                                                font-normal placeholder:text-sm placeholder:text-[#616161]"
-                                                placeholder="Start by typing the command eg. run-query"
-                                                value={command}
-                                                onChange={(e) => setCommand(e.target.value)}
-                                            />
-                                        </label>
-                                    </fieldset>
+                                <form onSubmit={handleSubmit}> 
+                                        <fieldset>
+                                            <label>
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
+                                                    font-normal placeholder:text-sm placeholder:text-[#616161]"
+                                                    placeholder="Start by typing the command eg. run-query"
+                                                    value={command}
+                                                    onChange={(e) => setCommand(e.target.value)}
+                                                />
+                                            </label>
+                                        </fieldset>   
+                                        {command && command.length > 0 &&
+                                            commands
+                                                .filter((item) => {
+                                                    console.log(item, command);
+                                                    return item.toLowerCase().includes(command.toLowerCase())
+                                                })
+                                                .map((item, index) => (
+                                                <li key={index}>
+                                                    <span>{item}</span>
+                                                </li>
+                                        ))}                                 
                                     <div className="flex justify-end items-center gap-2">
                                         <button
                                             type="submit" 

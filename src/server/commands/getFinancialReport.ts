@@ -7,7 +7,6 @@ import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
-import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 
 type IncomeData = {
     subscriptionRevenue: Transaction[]; 
@@ -519,7 +518,7 @@ export const getFinancialReport = async (userId: string) => {
     return [
         {
             heading: 'Financial Report',
-            sheet: removeEmptyColumns(reportTableWithProjections),
+            sheet: reportTableWithProjections,
         },
         undefined
     ]
