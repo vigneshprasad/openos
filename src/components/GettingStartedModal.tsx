@@ -70,9 +70,9 @@ export const GettingStartedModal: React.FC = () => {
               {activeStage === formStages.Integrations && (
                 <div className="w-[70%] mx-auto pt-[48px] pb-4 grid grid-cols-1 grid-rows-[max-content_1fr] gap-6">
                   <div>
-                    <h1 className="text-2xl leading-400 text-[#fff]">Connect your tools 🛠️</h1>
+                    <h1 className="text-2xl leading-400 text-[#fff]">Connect your data sources 🛠️</h1>
                     <p className="pt-2 text-sm text-[#616161]">
-                      Supercharge your productivity and connect tools you use everyday
+                        Connect at-least one data source to get started.
                     </p>
                   </div>
 

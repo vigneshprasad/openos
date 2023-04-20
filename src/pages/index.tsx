@@ -118,10 +118,9 @@ const Home: NextPage = () => {
                         {data.length === 0 ? <div className="w-[30%] h-max mx-auto pt-20">
                             <Image src="/terminal_empty.png" alt="Terminal" width={300} height={100} className="mx-auto" />
                             <div className="pt-8">
-                                <h3 className="text-[#fff] text-sm font-medium text-center">Start by writing your first command</h3>
+                                <h3 className="text-[#fff] text-sm font-medium text-center">Write your first command</h3>
                                 <p className="pt-1 text-xs text-[#838383] text-center">
-                                    Open OS lets you write exactly like you speak, in natural English. But if you wish to write commands, 
-                                    try the command palette.
+                                    Start by typing a syntax from the command pallet followed by natural language
                                 </p>
                             </div>
                         </div> : (
@@ -223,7 +222,7 @@ const Home: NextPage = () => {
                             </h3>
                             <p className="pt-1 text-xs text-[#838383] text-center">
                                 All the commands you write will be shown in the history. 
-                                You can repeat commands or command sets by clicking on them here.
+                                {/* You can repeat commands or command sets by clicking on them here. */}
                             </p>
                         </div>
                     </div>

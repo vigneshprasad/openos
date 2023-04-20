@@ -12,7 +12,7 @@ export const Integrations: React.FC = () => {
           <div>
             <h3 className="text-sm text-[#fff] font-semibold">PostgreSQL</h3>
             <p className="pt-1 pb-2 text-sm text-[#616161] font-medium">
-              A powerful, open source object-relational database system
+                Connect your database to create reports & retrieve data.
             </p>
             <a 
               href="https://www.postgresql.org/" 
@@ -30,7 +30,7 @@ export const Integrations: React.FC = () => {
           <div>
             <h3 className="text-sm text-[#fff] font-semibold">Razorpay</h3>
             <p className="pt-1 pb-2 text-sm text-[#616161] font-medium">
-              Power your finance, grow your business
+                Use Razorpay to pull your financial data & create financial reports
             </p>
             <a 
               href="https://razorpay.com/" 
