@@ -7,14 +7,15 @@ interface Props {
 const QueryResult: React.FC<Props> = ({ props }) => {
     const [dataRaw, error ] = props
     const data = dataRaw as QueryAndResult;
+
     return (
         <>
             { data && 
-                <div className="text-white">
+                <div>
                     {data?.query && 
                         <div>
-                            <h3> Your question was converted to SQL as </h3>
-                            <h3> {data.query} </h3>
+                            <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
+                            <h3 className="pt-1 text-white text-sm">{data.query}</h3>
                             <br />
                         </div>
                     }
@@ -23,6 +24,9 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                         {
                             data?.result && data.result.length > 0 &&
                             <div className="tableDiv">
+                                <p className="table-heading">
+                                    {data.name}
+                                </p>
                                 <table>
                                     <thead>
                                         {

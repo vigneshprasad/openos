@@ -19,6 +19,7 @@ export type FinancialData = {
 }
 
 export type QueryAndResult = {
+    name: string;
     query: string;
     result: TableRow[];
 }

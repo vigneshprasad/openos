@@ -25,6 +25,7 @@ const Report: React.FC<Props> = ({ props }) => {
         <>
             {data && 
                 <div className="tableDiv">
+                    <p className="table-heading">{dataRaw.heading}</p>
                     <table>
                         <thead>
                             <tr>
