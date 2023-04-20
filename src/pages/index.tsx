@@ -31,13 +31,6 @@ const Home: NextPage = () => {
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null)
 
-    const commands = [
-        CREATE_REPORT,
-        DATABASE_QUERY,
-        FINANCIAL_DATA,
-        GET_HELP,
-    ]
-
     useEffect(() => {
         if (scrollRef.current && (loading || data)) {
             scrollRef.current.scrollIntoView({ behavior: "smooth" })
@@ -207,24 +200,13 @@ const Home: NextPage = () => {
                                                 <input 
                                                     type="text" 
                                                     className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
-                                                    font-normal placeholder:text-sm placeholder:text-[#616161]"
+                                                    font-normal placeholder:text-sm placeholder:text-[#616161] --font-jetbrains"
                                                     placeholder="Start by typing the command eg. run-query"
                                                     value={command}
                                                     onChange={(e) => setCommand(e.target.value)}
                                                 />
                                             </label>
-                                        </fieldset>   
-                                        {command && command.length > 0 &&
-                                            commands
-                                                .filter((item) => {
-                                                    console.log(item, command);
-                                                    return item.toLowerCase().includes(command.toLowerCase())
-                                                })
-                                                .map((item, index) => (
-                                                <li key={index}>
-                                                    <span>{item}</span>
-                                                </li>
-                                        ))}                                 
+                                        </fieldset>                               
                                     <div className="flex justify-end items-center gap-2">
                                         <button
                                             type="submit" 
