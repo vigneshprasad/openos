@@ -13,7 +13,12 @@ export const getQuery = async (client:Client, embeddings:ResourceSchemaEmbedding
         800
     )
     prompt += schemaString;
+    prompt += "Keep in mind the following:\n"
+    prompt += "- The users table uses uuid not id.\n"
+    prompt += "- The users table is called users.\n"
+    prompt += "- The users table uses date joined not created at.\n"
     const newPrompt = prompt + `### A query to get ${query}\nSELECT`;
+
     const completion = await openai.createCompletion({
         model: COMPLETIONS_MODEL,
             prompt: newPrompt,

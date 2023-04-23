@@ -198,7 +198,8 @@ const getUserByFunnelStep = async (
 
     if(!funnelStep1SavedQuery) {
         queryStep1 = await processPrompt(
-            `Number of users who ${funnelSteps.step1} with user date joined`,
+            `Get the number of users who signed up from ${timeSeries0} to ${timeSeries1} using the users table.
+            Using those users find out who has taken the action - ${funnelSteps.step1}`,
             client, 
             embeddings, 
             timeSeries
@@ -216,10 +217,12 @@ const getUserByFunnelStep = async (
             queryStep1 = funnelStep1SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
         } else {
             queryStep1 = await processPrompt(
-                `Number of users who ${funnelSteps.step1} with user date joined`, 
+                `Get the number of users who signed up from ${timeSeries0} to ${timeSeries1} using the users table.
+                Using those users find out who has taken the action - ${funnelSteps.step1}`,
                 client, 
                 embeddings, 
-                timeSeries
+                timeSeries,
+                true
             );
             funnelStep1SavedQuery = await prisma.savedQuery.update({
                 where: {
@@ -234,10 +237,11 @@ const getUserByFunnelStep = async (
 
     if(!funnelStep2SavedQuery) {
         queryStep2 = await processPrompt(
-            `Number of users who ${funnelSteps.step2} with user date joined`,
+            `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step2}`,
             client, 
             embeddings, 
-            timeSeries
+            timeSeries,
+            true
         );
         funnelStep2SavedQuery = await prisma.savedQuery.create({
             data: {
@@ -252,10 +256,11 @@ const getUserByFunnelStep = async (
             queryStep2 = funnelStep2SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
         } else {
             queryStep2 = await processPrompt(
-                `Number of users who ${funnelSteps.step2} with user date joined`,
+                `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step2}`,
                 client, 
                 embeddings, 
-                timeSeries
+                timeSeries,
+                true
             );
             funnelStep2SavedQuery = await prisma.savedQuery.update({
                 where: {
@@ -270,7 +275,7 @@ const getUserByFunnelStep = async (
 
     if(!funnelStep3SavedQuery) {
         queryStep3 = await processPrompt(
-            `Number of users who ${funnelSteps.step3} with user date joined`,
+            `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
             client, 
             embeddings, 
             timeSeries
@@ -288,7 +293,7 @@ const getUserByFunnelStep = async (
             queryStep3 = funnelStep3SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
         } else {
             queryStep3 = await processPrompt(
-                `Number of users who ${funnelSteps.step3} with user date joined`,
+                `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
                 client, 
                 embeddings, 
                 timeSeries
@@ -305,7 +310,7 @@ const getUserByFunnelStep = async (
     }
         
     const queryTotal = await processPrompt(
-        'Get number of users that joined', client, embeddings, timeSeries
+        'Get number of users who joined', client, embeddings, timeSeries
     )
 
     if(!queryStep1 || !queryStep2 || !queryStep3 ||
@@ -354,8 +359,8 @@ const getUserByFunnelStep = async (
             } catch (error) {
             }
             try {
-                const step3Result = await executeQuery(client, sqlQueryTotal);
-                totalCount = step3Result[0]?.count as number;
+                const totalResult = await executeQuery(client, sqlQueryTotal);
+                totalCount = totalResult[0]?.count as number;
             } catch (error) {
             }
             result.push({

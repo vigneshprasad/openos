@@ -131,6 +131,7 @@ export const commandRouter = createTRPCRouter({
                     default:
                         return {
                             type: UNKNOWN_COMMAND,
+                            input: input.query,
                             output: [
                                 [
                                     undefined,
@@ -152,6 +153,7 @@ export const commandRouter = createTRPCRouter({
                 )
                 return {
                     type: GET_HELP,
+                    input: input.query,
                     output: [
                         message
                     ]
@@ -160,6 +162,7 @@ export const commandRouter = createTRPCRouter({
             default:
                 return {
                     type: UNKNOWN_COMMAND,
+                    input: input.query,
                     output: [
                         [
                             undefined,

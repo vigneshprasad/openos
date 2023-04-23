@@ -61,6 +61,7 @@ const Home: NextPage = () => {
 
     const runQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: async (res) => {
+            setCommand("");
             const dataResult = res as unknown as CommandDataType;
             if(dataResult.type === COMPLEX_REPORT_LOADING) {
                 if(!dataResult.output[0]) {
@@ -107,8 +108,6 @@ const Home: NextPage = () => {
         setLoading(true);
         runQuery.mutate({ query: command });
     };
-
-    console.log("data: ", data)
 
     return (
         <>

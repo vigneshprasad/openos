@@ -19,7 +19,9 @@ interface GridElement {
 const Report: React.FC<Props> = ({ props }) => {
     const [data, error] = props
     const dataRaw = data as ExcelSheet;
-    dataRaw.sheet = removeEmptyColumns(dataRaw.sheet);
+    if(dataRaw && dataRaw.sheet) {
+        dataRaw.sheet = removeEmptyColumns(dataRaw.sheet);
+    }
     const tableData = dataRaw && dataRaw.sheet.slice(1) as GridElement[][];
     const grid = tableData ? tableData : [];
 
