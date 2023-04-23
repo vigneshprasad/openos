@@ -248,7 +248,7 @@ const Home: NextPage = () => {
                                                 onChange={(e) => setCommand(e.target.value)}
                                             />
 
-                                            {command.length > 0 && filteredCommands.length > 0 &&
+                                            {command.length > 0 && filteredCommands.length > 0 && !loading && 
                                                 <div className="absolute w-[400px] h-[max] max-h-[145px] overflow-y-auto pt-1 bg-[#272628] 
                                                     border border-solid border-[#333] shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] flex-col gap-2
                                                     bottom-0"

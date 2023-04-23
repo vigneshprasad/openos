@@ -9,9 +9,9 @@ export const GET_HELP = 'get-help';
 export const UNKNOWN_COMMAND = 'unknown-command';
 
 export const COMMANDS_LIST = [
-  DATABASE_QUERY,
-  FINANCIAL_DATA,
-  CREATE_REPORT,
-  COMPLEX_REPORT,
-  GET_HELP,
+    DATABASE_QUERY,
+    FINANCIAL_DATA,
+    CREATE_REPORT,
+    ASK_ANALYST,
+    GET_HELP,
 ]

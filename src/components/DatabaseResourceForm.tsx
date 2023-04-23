@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
@@ -14,6 +14,7 @@ export const DatabaseResourceForm: React.FC = () => {
     const [dbPassword, setDbPassword] = useState<string>("");
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("")
     const [loading, setLoading] = useState(false);
 
     const createDatabaseResource = api.databaseResource.create.useMutation({
@@ -22,9 +23,10 @@ export const DatabaseResourceForm: React.FC = () => {
             setError(false);
             setLoading(false);
         },
-        onError: () => {
+        onError: (e) => {
             setSuccess(false);
             setError(true);
+            setErrorMessage("Error: " + e.message);
             setLoading(false);
         },
     });
@@ -139,10 +141,10 @@ export const DatabaseResourceForm: React.FC = () => {
                                 <button type="submit" className="Button primary">Connect</button>
                             }
                         </div>
-                        {/* <div className="flex justify-content-end mt-8">
+                        <div className="flex justify-content-end mt-8">
                             {success && <p className="text-green-500">Success</p>}
-                            {error && <p className="text-red-500">Error</p>}
-                        </div> */}
+                            {error && <p className="text-red-500">{errorMessage}</p>}
+                        </div>
                     </form>
                 </Dialog.Content>
             </Dialog.Portal>
