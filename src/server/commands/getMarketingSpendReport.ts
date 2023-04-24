@@ -82,7 +82,7 @@ export const getMarketingSpendReport = async (query: string, userId: string) => 
     
     const {
         data: usersBySource
-    } =  await getUserBySource(client, embeddings, timeSeries);
+    } =  await getUserBySource(client, embeddings, timeSeries, databaseResource.id);
     const marketingSpents: MarketingSpend[] = getMarketingSpend(transactions, timeSeries);
 
     for(let i = 1; i < timeSeries.length; i++) {
