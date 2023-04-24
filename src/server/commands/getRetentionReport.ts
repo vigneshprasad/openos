@@ -158,7 +158,7 @@ const getRetentionData = async (
 
     const userListQuery = await processPrompt(
         `Get emails and date joined of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
-        client, embeddings, timeSeries
+        client, embeddings, timeSeries, databaseResourceId
     );
     
     let userList;
@@ -188,7 +188,7 @@ const getRetentionData = async (
         } else {
             retentionActivityPrompt = await processPrompt(
                 `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
-                client, embeddings, timeSeries
+                client, embeddings, timeSeries, databaseResourceId
             );
             retentionActivitySavedQuery = await prisma.savedQuery.update({
                 where: {
@@ -202,7 +202,7 @@ const getRetentionData = async (
     } else {
         retentionActivityPrompt = await processPrompt(
             `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
-            client, embeddings, timeSeries
+            client, embeddings, timeSeries, databaseResourceId
         );
         retentionActivitySavedQuery = await prisma.savedQuery.create({
             data: {

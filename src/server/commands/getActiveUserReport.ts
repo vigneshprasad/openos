@@ -10,6 +10,7 @@ import { executeQuery } from "~/utils/executeQuery";
 import { processPrompt } from "~/utils/processPrompt";
 import { getProphetProjectionsReport } from "~/utils/getProphetProjections";
 import { REPORT_PROJECTIONS } from "~/constants/prophetConstants";
+import { NUMBER_OF_RETRIES } from "~/constants/config";
 
 type ActiveUsers = {
     date: Date,
@@ -89,7 +90,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
         if(activitySavedQuery.feedback === 1) {
             activityPrompt = activitySavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
         } else {
-            activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries);
+            activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries, databaseResource.id);
             activitySavedQuery = await prisma.savedQuery.update({
                 where: {
                     id: activitySavedQuery.id
@@ -100,7 +101,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
             });
         }
     } else {
-        activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries);
+        activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries, databaseResource.id);
         activitySavedQuery = await prisma.savedQuery.create({
             data: {
                 databaseResourceId: databaseResource.id,
@@ -195,63 +196,68 @@ const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings
         mau: 0
     }];
 
-    const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
-    const timeSeries1 = moment(timeSeries[1]).format("YYYY-MM-DD");
-    
-    query = query.replace('<DATE 1>', timeSeries0).replace('<DATE 2>', timeSeries1);
+    for(let attempt = 0; attempt < NUMBER_OF_RETRIES; attempt++) {
+        console.log(attempt);
+        const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
+        const timeSeries1 = moment(timeSeries[1]).format("YYYY-MM-DD");
+        
+        query = query.replace('<DATE 1>', timeSeries0).replace('<DATE 2>', timeSeries1);
 
-    if(!query || !query.includes(timeSeries0) || !query.includes(timeSeries1)) {
-        return [];
-    }
-
-    try {
-        for(let i = 1; i < timeSeries.length; i++) {
-            if(!timeSeries[i] || !timeSeries[i - 1])  {
-                continue;
-            }
-            let dauTotal = 0;
-            for(let j = 0; j < 30; j++) {
-                const date0 = moment(timeSeries[i - 1]).add(j, 'days').format('YYYY-MM-DD');
-                const date1 = moment(timeSeries[i - 1]).add(j + 1, 'days').format('YYYY-MM-DD');
-                const sqlQuery = query.replace(timeSeries0, date0).replace(timeSeries1, date1);
-                try {
-                    const step1Result = await executeQuery(client, sqlQuery);
-                    dauTotal += (Number(step1Result[0]?.count));
-                } catch (error) {
-                }
-            }
-            let wauTotal = 0;
-            for(let j = 0; j < 4; j++) {
-                const date0 = moment(timeSeries[i - 1]).add(j * 7, 'days').format('YYYY-MM-DD');
-                const date1 = moment(timeSeries[i - 1]).add((j + 1) * 7, 'days').format('YYYY-MM-DD');
-                const sqlQuery = query.replace(timeSeries0, date0).replace(timeSeries1, date1);
-                try {
-                    const step1Result = await executeQuery(client, sqlQuery);
-                    wauTotal += (Number(step1Result[0]?.count));
-                } catch (error) {
-                }
-            }
-            const date0 = moment(timeSeries[i - 1]).format('YYYY-MM-DD');
-            const date1 = moment(timeSeries[i]).format('YYYY-MM-DD');
-            const sqlQuery = query.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            let mauTotal = 0;
-            try {
-                const step1Result = await executeQuery(client, sqlQuery);
-                mauTotal = Number(step1Result[0]?.count);
-            }
-            catch (error) {
-            }
-            result.push({
-                date: timeSeries[i] as Date,
-                dau: dauTotal / 30,
-                wau: wauTotal / 4,
-                mau: mauTotal,
-            });
+        if(!query || !query.includes(timeSeries0) || !query.includes(timeSeries1)) {
+            return [];
         }
-    } catch (error) {
-        console.log(error);
-    }
 
+        try {
+            for(let i = 1; i < timeSeries.length; i++) {
+                if(!timeSeries[i] || !timeSeries[i - 1])  {
+                    continue;
+                }
+                let dauTotal = 0;
+                for(let j = 0; j < 30; j++) {
+                    const date0 = moment(timeSeries[i - 1]).add(j, 'days').format('YYYY-MM-DD');
+                    const date1 = moment(timeSeries[i - 1]).add(j + 1, 'days').format('YYYY-MM-DD');
+                    const sqlQuery = query.replace(timeSeries0, date0).replace(timeSeries1, date1);
+                    try {
+                        const step1Result = await executeQuery(client, sqlQuery);
+                        dauTotal += (Number(step1Result[0]?.count));
+                    } catch (error) {
+                        if(i !== timeSeries.length - 1) continue;
+                    }
+                }
+                let wauTotal = 0;
+                for(let j = 0; j < 4; j++) {
+                    const date0 = moment(timeSeries[i - 1]).add(j * 7, 'days').format('YYYY-MM-DD');
+                    const date1 = moment(timeSeries[i - 1]).add((j + 1) * 7, 'days').format('YYYY-MM-DD');
+                    const sqlQuery = query.replace(timeSeries0, date0).replace(timeSeries1, date1);
+                    try {
+                        const step1Result = await executeQuery(client, sqlQuery);
+                        wauTotal += (Number(step1Result[0]?.count));
+                    } catch (error) {
+                        if(i !== timeSeries.length - 1) continue;
+                    }
+                }
+                const date0 = moment(timeSeries[i - 1]).format('YYYY-MM-DD');
+                const date1 = moment(timeSeries[i]).format('YYYY-MM-DD');
+                const sqlQuery = query.replace(timeSeries0, date0).replace(timeSeries1, date1);
+                let mauTotal = 0;
+                try {
+                    const step1Result = await executeQuery(client, sqlQuery);
+                    mauTotal = Number(step1Result[0]?.count);
+                }
+                catch (error) {
+                    if(i !== timeSeries.length - 1) continue;
+                }
+                result.push({
+                    date: timeSeries[i] as Date,
+                    dau: dauTotal / 30,
+                    wau: wauTotal / 4,
+                    mau: mauTotal,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
     return result;
 }
 

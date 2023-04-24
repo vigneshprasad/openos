@@ -10,7 +10,7 @@ export const returnCommandResult = async (
 ):Promise<CommandHistory> => {
 
     const output = JSON.parse(JSON.stringify(data)) as Prisma.JsonObject;
-    console.log(output);
+    const error = data[1] ? true : false
     
     const commandResult = await prisma.commandHistory.create({
         data: {
@@ -18,6 +18,7 @@ export const returnCommandResult = async (
             input: input,
             output: output,
             type: type,
+            error: error
         }
     });
 

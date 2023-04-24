@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import type { QueryResult } from "pg";
+import { NUMBER_OF_RETRIES } from "~/constants/config";
 
 import { prisma } from "~/server/db";
 
@@ -38,15 +39,15 @@ export const runQuery = async (query: string, userId: string) => {
             }
         });
 
-        sqlQuery = await getQuery(client, embeddings, query);
-
-        //@TO DO: Use ExecuteQuery here
-        try {
-            const res: QueryResult<TableRow> = await client.query<TableRow>(
-                sqlQuery
-            )
-            await client.end();
-            if(res.rows.length > 0) {
+        for(let i = 0; i < NUMBER_OF_RETRIES; i++) {
+            sqlQuery = await getQuery(client, embeddings, query, databaseResource.id);
+            console.log(i);
+            //@TO DO: Use ExecuteQuery here
+            try {
+                const res: QueryResult<TableRow> = await client.query<TableRow>(
+                    sqlQuery
+                )
+                await client.end();
                 return [
                     {
                         query: sqlQuery,
@@ -56,17 +57,19 @@ export const runQuery = async (query: string, userId: string) => {
                     undefined
                 ];
             }
-        }
-        catch(e) {
-            await client.end();
-            return [
-                undefined, 
-                {
-                    query: sqlQuery,
-                    message: 'An error occured while trying to run your query',
-                    cause: e
+            catch(e) {
+                await client.end();
+                if(i === NUMBER_OF_RETRIES - 1) {
+                    return [
+                        undefined, 
+                        {
+                            query: sqlQuery,
+                            message: 'An error occured while trying to run your query',
+                            cause: e
+                        }
+                    ]
                 }
-            ]
+            }
         }
 
     } catch(e) {

@@ -202,7 +202,9 @@ const getUserByFunnelStep = async (
             Using those users find out who has taken the action - ${funnelSteps.step1}`,
             client, 
             embeddings, 
-            timeSeries
+            timeSeries,
+            databaseResourceId, 
+            true
         );
         funnelStep1SavedQuery = await prisma.savedQuery.create({
             data: {
@@ -222,6 +224,7 @@ const getUserByFunnelStep = async (
                 client, 
                 embeddings, 
                 timeSeries,
+                databaseResourceId,
                 true
             );
             funnelStep1SavedQuery = await prisma.savedQuery.update({
@@ -241,6 +244,7 @@ const getUserByFunnelStep = async (
             client, 
             embeddings, 
             timeSeries,
+            databaseResourceId,
             true
         );
         funnelStep2SavedQuery = await prisma.savedQuery.create({
@@ -260,6 +264,7 @@ const getUserByFunnelStep = async (
                 client, 
                 embeddings, 
                 timeSeries,
+                databaseResourceId,
                 true
             );
             funnelStep2SavedQuery = await prisma.savedQuery.update({
@@ -278,7 +283,8 @@ const getUserByFunnelStep = async (
             `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
             client, 
             embeddings, 
-            timeSeries
+            timeSeries,
+            databaseResourceId,
         );
         funnelStep3SavedQuery = await prisma.savedQuery.create({
             data: {
@@ -296,7 +302,8 @@ const getUserByFunnelStep = async (
                 `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
                 client, 
                 embeddings, 
-                timeSeries
+                timeSeries,
+                databaseResourceId,
             );
             funnelStep3SavedQuery = await prisma.savedQuery.update({
                 where: {
@@ -310,7 +317,7 @@ const getUserByFunnelStep = async (
     }
         
     const queryTotal = await processPrompt(
-        'Get number of users who joined', client, embeddings, timeSeries
+        'Get number of users who joined', client, embeddings, timeSeries, databaseResourceId
     )
 
     if(!queryStep1 || !queryStep2 || !queryStep3 ||

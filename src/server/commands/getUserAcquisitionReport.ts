@@ -62,7 +62,7 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     const {
         data: usersBySource,
         query: usersBySourceQuery 
-    } = await getUserBySource(client, embeddings, timeSeries);
+    } = await getUserBySource(client, embeddings, timeSeries, databaseResource.id);
     
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
@@ -157,7 +157,11 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     ]
 }
 
-export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[]) : Promise<{
+export const getUserBySource = async (
+    client:Client, 
+    embeddings:ResourceSchemaEmbeddings[], 
+    timeSeries: Date[], 
+    databaseResourceId: string): Promise<{
     data: UsersBySource[],
     query: UsersBySourceQuery
 }> => {
@@ -174,10 +178,10 @@ export const getUserBySource = async (client:Client, embeddings:ResourceSchemaEm
     const fbPrompt = `Get number of users with source Facebook that joined from ${timeSeries0} to ${timeSeries1}`
     const organicPrompt = `Get number of users without any source that joined from ${timeSeries0} to ${timeSeries1}`
     const totalPrompt = `Get number of users with that joined from ${timeSeries0} to ${timeSeries1}`
-    const fbSqlQuery = await getQuery(client, embeddings, fbPrompt);
+    const fbSqlQuery = await getQuery(client, embeddings, fbPrompt, databaseResourceId);
     const googleSqlQuery = fbSqlQuery.replace("Facebook", "Google").replace('facebook', 'google');
-    const organicSqlQuery = await getQuery(client, embeddings, organicPrompt);
-    const totalSqlQuery = await getQuery(client, embeddings, totalPrompt);
+    const organicSqlQuery = await getQuery(client, embeddings, organicPrompt, databaseResourceId);
+    const totalSqlQuery = await getQuery(client, embeddings, totalPrompt, databaseResourceId);
 
     if(!fbSqlQuery || !googleSqlQuery || !totalSqlQuery || !organicSqlQuery) {
         return {

@@ -8,6 +8,7 @@ export const processPrompt = async (
     client:Client, 
     embeddings:ResourceSchemaEmbeddings[], 
     timeSeries: Date[], 
+    databaseResourceId: string,
     removeDate?: boolean
 ): Promise<string> => {
     const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
@@ -19,6 +20,6 @@ export const processPrompt = async (
     } else {
         prompt = query + ` from ${timeSeries0} to ${timeSeries1}`
     }
-    const sqlQuery = await getQuery(client, embeddings, prompt);
+    const sqlQuery = await getQuery(client, embeddings, prompt, databaseResourceId);
     return sqlQuery;
 }

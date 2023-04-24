@@ -99,7 +99,7 @@ export const getProphetProjectionsReport = async (
                         const key = keys[k] as string;
                         if(json.yhat[key]) {
                             row.push({
-                                value: (json.yhat[key] as number).toFixed(2),
+                                value: (json.yhat[key] as number).toFixed(0),
                                 unit: row[2]?.unit,
                                 unitPrefix: row[2]?.unitPrefix && row[2]?.unitPrefix,
                             })
