@@ -6,7 +6,10 @@ export const commandHistoryRouter = createTRPCRouter({
       return ctx.prisma.commandHistory.findMany({
         where: {
           userId: ctx.session.user.id
-        }
+        },
+        orderBy: [{
+          createdAt: "desc"
+        }]
       })
     })
 })
