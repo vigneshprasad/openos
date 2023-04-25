@@ -48,7 +48,7 @@ const Home: NextPage = () => {
     }, [inputFocusRef, setCommand])
 
     const autocompleteCommand = useCallback((command: string) => {
-        setCommand(`${command}: `)
+        setCommand(command)
         inputFocusRef.current?.focus()
     }, [inputFocusRef, setCommand])
 
@@ -60,7 +60,7 @@ const Home: NextPage = () => {
 
     const filteredCommands = useMemo(() => {
         return commands.filter((item) => {
-            return item.command.toLowerCase().includes(command.toLowerCase())
+            return item.command.toLowerCase().includes(command.toLowerCase()) && item.command.toLowerCase() !== command.toLowerCase()
         })
     }, [command])
 
