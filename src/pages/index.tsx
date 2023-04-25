@@ -17,6 +17,7 @@ import { convertComplexReportToExcel, convertSimpleReportToExcel } from "~/utils
 import { commands } from "~/constants/commandAutocomplete";
 import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
+import { type CommandHistory } from "@prisma/client";
 
 type CommandDataType = {
     input: string,
@@ -34,6 +35,7 @@ const Home: NextPage = () => {
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null)
     const inputFocusRef = useRef<HTMLInputElement>(null)
+    const [commandHistory, setCommandHistory] = useState<CommandHistory[]>([]);
 
     const selectCommand = useCallback((command: string) => {
         setCommand((prevCommand) => `${command}: ${prevCommand}`)
@@ -114,21 +116,23 @@ const Home: NextPage = () => {
         }
     });
 
-    const commandHistory = api.commandHistory.getAll.useMutation({
+    const commandHistoryMutation = api.commandHistory.getAll.useMutation({
         onSuccess: (data) => {
-            return data;
+            setCommandHistory(data)
         },
         onError: () => {
             return null;
         }
     })
 
+    useEffect(() => commandHistoryMutation.mutate(), [commandHistoryMutation])
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         setLoading(true);
         runQuery.mutate({ query: command });
-        commandHistory.mutate()
+        commandHistoryMutation.mutate()
     };
 
     return (
@@ -318,7 +322,7 @@ const Home: NextPage = () => {
                         </div>
                     </div>
                     <CommandHistorySection
-                        commands={commandHistory.data}
+                        commands={commandHistory}
                         selectCommandFromHistory={selectCommandFromHistory}
                     />
                 </div>
