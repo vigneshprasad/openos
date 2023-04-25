@@ -2,6 +2,7 @@ import { type SavedQuery } from "@prisma/client";
 import type { CommandResultType, ExcelSheet } from "~/types/types";
 import { QueryFeedback } from "./QueryFeedback";
 import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
+import { ErrorBox } from "./ErrorBox";
 
 interface Props {
     props: CommandResultType
@@ -98,14 +99,11 @@ const Report: React.FC<Props> = ({ props }) => {
                     </table>
                 </div>
             }
-            {error && 
-                <div className="justify-content-end mt-8">
-                    {error && <p className="text-red-500">Error: {error?.message} </p>}
-                    <br />
-                    {error && <p className="text-red-500">Details: {String(error?.cause)} </p>}
-                    <br />
-                    {error && <p className="text-red-500">Query: {String(error?.query)} </p>}
-                </div>
+            {error &&
+                <ErrorBox
+                    title={error.message}
+                    description={error.cause}
+                />
             }
         </>
     );
