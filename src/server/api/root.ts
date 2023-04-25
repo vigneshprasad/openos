@@ -6,6 +6,7 @@ import { awsRouter } from "./routers/aws";
 import { bankStatementRouter } from "./routers/bankStatement";
 import { savedQueryRouter } from "./routers/savedQuery";
 import { userRouter } from "./routers/user";
+import { commandHistoryRouter } from "./routers/commandHistory";
 
 /**
  * This is the primary router for your server.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   bankStatement: bankStatementRouter,
   savedQuery: savedQueryRouter,
   user: userRouter,
+  commandHistory: commandHistoryRouter,
 });
 
 // export type definition of API
