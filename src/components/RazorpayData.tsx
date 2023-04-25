@@ -1,4 +1,5 @@
 import type { CommandResultType, FinancialData, TableRow } from "~/types/types";
+import { ErrorBox } from "./ErrorBox";
 
 interface Props {
     props: CommandResultType;
@@ -83,13 +84,10 @@ const RazorpayData: React.FC<Props> = ({ props }) => {
                 </>
             }
             {error && 
-                <div className="justify-content-end mt-8">
-                    {error && <p className="text-red-500">Error: {error?.message} </p>}
-                    <br />
-                    {error && <p className="text-red-500">Details: {String(error?.cause)} </p>}
-                    <br />
-                    {error && <p className="text-red-500">Query: {String(error?.query)} </p>}
-                </div>
+                <ErrorBox
+                    title={error.message}
+                    description={error.cause}
+                />
             }
         </>
     );
