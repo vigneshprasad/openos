@@ -46,19 +46,19 @@ export const commands = [
         description: 'Get marketing spend data',
     },
     {
-        command: `${DATABASE_QUERY}`,
+        command: `${DATABASE_QUERY}: `,
         description: 'Query the database',
     },
     {
-        command: `${FINANCIAL_DATA}`,
+        command: `${FINANCIAL_DATA}: `,
         description: 'Get financial data from Razorpay',
     },
     {
-        command: `${GET_HELP}`,
+        command: `${GET_HELP}: `,
         description: 'Get help from OpenOS team',
     },
     {
-        command: `${ASK_ANALYST}`,
+        command: `${ASK_ANALYST}: `,
         description: 'Ask our analyst a question',
     },
 ]
