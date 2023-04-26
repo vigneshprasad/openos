@@ -18,6 +18,7 @@ import { commands } from "~/constants/commandAutocomplete";
 import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
 import { type CommandHistory } from "@prisma/client";
+import { MicrosoftClarityScript } from "~/components/MicrosoftClarityScript";
 
 type CommandDataType = {
     input: string,
@@ -141,18 +142,7 @@ const Home: NextPage = () => {
                 <title>Open OS</title>
                 <meta name="description" content="Tools to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
-                <script 
-                    type="text/javascript" 
-                    dangerouslySetInnerHTML={{
-                        __html: `
-                            (function(c,l,a,r,i,t,y){
-                                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                                t=l.createElement(r);t.async=1;t.src=“https://www.clarity.ms/tag/”+i;
-                                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-                            })(window, document, “clarity”, “script”, “guj4op6jay”);
-                        `,
-                    }}
-                />    
+                <MicrosoftClarityScript />    
             </Head>
             <main className="min-h-screen">
                 <Navbar />
