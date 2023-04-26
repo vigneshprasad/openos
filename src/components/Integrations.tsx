@@ -3,7 +3,11 @@ import { DatabaseResourceForm } from "./DatabaseResourceForm";
 import { RazorpayResourceForm } from "./RazorpayResourceForm";
 import { StatementUploadForm } from "./StatementUploadForm";
 
-export const Integrations: React.FC = () => {
+interface IProps {
+  onSuccessCallback?: () => void
+}
+
+export const Integrations: React.FC<IProps> = ({onSuccessCallback}) => {
   return (
     <>
       <div className="pb-6 flex flex-col gap-4 max-h-60 overflow-y-auto">
@@ -55,7 +59,10 @@ export const Integrations: React.FC = () => {
         </div>
       </div>
       <div className="flex justify-center">
-        <button className="Button primary w-[92px]" type="submit">
+        <button 
+          className="Button primary w-[92px]" 
+          onClick={() => onSuccessCallback && onSuccessCallback()}
+        >
           Next
         </button>
       </div>
