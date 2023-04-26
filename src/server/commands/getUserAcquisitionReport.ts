@@ -178,10 +178,10 @@ export const getUserBySource = async (
     const fbPrompt = `Get number of users with source Facebook that joined from ${timeSeries0} to ${timeSeries1}`
     const organicPrompt = `Get number of users without any source that joined from ${timeSeries0} to ${timeSeries1}`
     const totalPrompt = `Get number of users with that joined from ${timeSeries0} to ${timeSeries1}`
-    const fbSqlQuery = await getQuery(client, embeddings, fbPrompt, databaseResourceId);
-    const googleSqlQuery = fbSqlQuery.replace("Facebook", "Google").replace('facebook', 'google');
-    const organicSqlQuery = await getQuery(client, embeddings, organicPrompt, databaseResourceId);
-    const totalSqlQuery = await getQuery(client, embeddings, totalPrompt, databaseResourceId);
+    let fbSqlQuery = await getQuery(client, embeddings, fbPrompt, databaseResourceId);
+    let googleSqlQuery = fbSqlQuery.replace("Facebook", "Google").replace('facebook', 'google');
+    let organicSqlQuery = await getQuery(client, embeddings, organicPrompt, databaseResourceId);
+    let totalSqlQuery = await getQuery(client, embeddings, totalPrompt, databaseResourceId);
 
     if(!fbSqlQuery || !googleSqlQuery || !totalSqlQuery || !organicSqlQuery) {
         return {
@@ -194,6 +194,7 @@ export const getUserBySource = async (
             }
         }
     }
+
     if(!fbSqlQuery.includes(timeSeries0) || !googleSqlQuery.includes(timeSeries1) || !totalSqlQuery.includes(timeSeries0) || !organicSqlQuery.includes(timeSeries0)
         || !fbSqlQuery.includes(timeSeries1) || !googleSqlQuery.includes(timeSeries1) || !totalSqlQuery.includes(timeSeries1) || !organicSqlQuery.includes(timeSeries1)) {
             return {
@@ -207,6 +208,11 @@ export const getUserBySource = async (
             };
     }
 
+    fbSqlQuery = fbSqlQuery.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>');
+    googleSqlQuery = googleSqlQuery.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>');
+    organicSqlQuery = organicSqlQuery.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>');
+    totalSqlQuery = totalSqlQuery.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>');
+
     try {
         for(let i = 1; i < timeSeries.length; i++) {
             if(!timeSeries[i] || !timeSeries[i - 1])  {
@@ -214,10 +220,10 @@ export const getUserBySource = async (
             }
             const date0 = moment(timeSeries[i - 1]).format('YYYY-MM-DD');
             const date1 = moment(timeSeries[i]).format('YYYY-MM-DD');
-            const fbQuery = fbSqlQuery.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            const googleQuery = googleSqlQuery.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            const organicQuery = organicSqlQuery.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            const totalQuery = totalSqlQuery.replace(timeSeries0, date0).replace(timeSeries1, date1);
+            const fbQuery = fbSqlQuery.replace('<DATE-1>', date0).replace('<DATE-2>', date1);
+            const googleQuery = googleSqlQuery.replace('<DATE-1>', date0).replace('<DATE-2>', date1);
+            const organicQuery = organicSqlQuery.replace('<DATE-1>', date0).replace('<DATE-2>', date1);
+            const totalQuery = totalSqlQuery.replace('<DATE-1>', date0).replace('<DATE-2>', date1);
             let fbCount = 0;
             let googleCount = 0;
             let organicCount = 0;
