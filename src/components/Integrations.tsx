@@ -56,7 +56,7 @@ export const Integrations: React.FC = () => {
       </div>
       <div className="flex justify-center">
         <button className="Button primary w-[92px]" type="submit">
-          Done
+          Next
         </button>
       </div>
     </>

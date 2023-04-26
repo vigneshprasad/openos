@@ -13,12 +13,14 @@ export const StatementUploadForm: React.FC = () => {
     const [fileSelected, setFileSelected] = useState<File | undefined>();
     const [presignedUrl, setPresignedUrl] = useState("");
     const [transactionData, setTransactionData] = useState<Transaction[]>([]);
+    const [open, setOpen] = useState(false);
     
     const bankStatement = api.bankStatement.create.useMutation({
         onSuccess: () => {
             setSuccess(true);
             setError(false);
             setLoading(false);
+            setOpen(false)
         },
         onError: () => {
             setSuccess(false);
@@ -77,7 +79,7 @@ export const StatementUploadForm: React.FC = () => {
     }
 
     return (
-        <Dialog.Root>
+        <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
                 {success ? 
                     <button className="Button bg-[#262626] mt-1 h-9 flex text-[#49C179]" disabled>
@@ -124,10 +126,9 @@ export const StatementUploadForm: React.FC = () => {
                         </div>
                     </form>
                     
-                    {/* <div className="flex justify-content-end mt-8">
-                        {success && <p className="text-green-500">Success</p>}
-                        {error && <p className="text-red-500">Error</p>}
-                    </div> */}
+                    <div className="flex justify-content-end mt-8">
+                        {error && <p className="text-red-500">Error. Please try again</p>}
+                    </div>
                     {transactionData.length > 0 && <div className="h-72 overflow-scroll">
                         <table>
                             <thead>

@@ -3,9 +3,7 @@ import React from "react";
 import { api } from "~/utils/api";
 import * as Select from '@radix-ui/react-select';
 import { CheckCircledIcon, ChevronDownIcon } from '@radix-ui/react-icons';
-import { useSession } from "next-auth/react";
 import { ROLES } from "~/constants/roles";
-import { User } from "@prisma/client";
 
 interface IProps {
   userName?: string,
@@ -15,7 +13,6 @@ interface IProps {
 
 export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
   onSuccessCallback, userName, userRole}, ref) => {
-  const {data: sessionData} = useSession()
 
   const [name, setName] = useState<string>(userName || "")
   const [role, setRole] = useState<string>(userRole || "")
@@ -112,7 +109,7 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
 
       <div className="flex justify-center">
         <button className="Button primary w-[92px]" type="submit">
-          Done
+          Next
         </button>
       </div>
     </form>

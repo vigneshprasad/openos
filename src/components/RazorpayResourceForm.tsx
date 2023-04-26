@@ -13,12 +13,14 @@ export const RazorpayResourceForm: React.FC = () => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const razorpayResource = api.razorpayResource.create.useMutation({
         onSuccess: () => {
             setSuccess(true);
             setError(false);
             setLoading(false);
+            setOpen(false)
         },
         onError: () => {
             setSuccess(false);
@@ -41,7 +43,7 @@ export const RazorpayResourceForm: React.FC = () => {
     };
 
     return (
-        <Dialog.Root>
+        <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
                 {success ? 
                     <button className="Button bg-[#262626] mt-1 h-9 flex text-[#49C179]" disabled>
@@ -112,10 +114,9 @@ export const RazorpayResourceForm: React.FC = () => {
                                 <button type="submit" className="Button primary">Connect</button>
                             }
                         </div>
-                        {/* <div className="flex justify-content-end mt-8">
-                            {success && <p className="text-green-500">Success</p>}
-                            {error && <p className="text-red-500">Error</p>}
-                        </div> */}
+                        <div className="flex justify-content-end mt-8">
+                            {error && <p className="text-red-500">Error Please try again</p>}
+                        </div>
                     </form>                    
                 </Dialog.Content>
             </Dialog.Portal>

@@ -16,12 +16,14 @@ export const DatabaseResourceForm: React.FC = () => {
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("")
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const createDatabaseResource = api.databaseResource.create.useMutation({
         onSuccess: () => {
             setSuccess(true);
             setError(false);
             setLoading(false);
+            setOpen(false);
         },
         onError: (e) => {
             setSuccess(false);
@@ -48,7 +50,7 @@ export const DatabaseResourceForm: React.FC = () => {
     };
 
     return (
-        <Dialog.Root>
+        <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
                 {success ? 
                     <button className="Button bg-[#262626] mt-1 h-9 flex text-[#49C179]" disabled>
