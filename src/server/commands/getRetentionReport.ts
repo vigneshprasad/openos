@@ -157,7 +157,7 @@ const getRetentionData = async (
     const dummyIdentifier = "dummytest@gmail.com"
 
     const userListQuery = await processPrompt(
-        `Get emails and date joined of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
+        `Get emails and created at of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
         client, embeddings, timeSeries, databaseResourceId
     );
     

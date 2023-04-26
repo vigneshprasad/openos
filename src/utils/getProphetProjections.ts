@@ -47,6 +47,7 @@ export const getProphetProjections = async (
                     if(!keys[i]) continue
                     const key = keys[i] as string;
                     if(json.yhat[key] && json.ds[key]) {
+                        if(json.yhat[key] as number < 0) continue;
                         projections.push({
                             ds: json.ds[key] as number,
                             y: json.yhat[key] as number,

@@ -16,7 +16,6 @@ type UsersByFunnelStep = {
     step1: number,
     step2: number,
     step3: number,
-    total: number,
 }
 
 type FunnelQuery = {
@@ -79,8 +78,6 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
 
-    const funnelTotal: ExcelCell[] = [{value: 'Total'}];
-
     const {
         data: usersByFunnelStep,
         query: funnelQuery,
@@ -90,7 +87,6 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     const funnelStep2: ExcelCell[] = [{value: 'Funnel Step 2', query: funnelQuery.step2}];
     const funnelStep3: ExcelCell[] = [{value: 'Funnel Step 3', query: funnelQuery.step3}];
 
-    const signedUpToStep1: ExcelCell[] = [{value: 'Signed up Step 1%'}];
     const funnelStep1toStep2: ExcelCell[] = [{value: 'Funnel Step 1 to Step 2%'}];
     const funnelStep2toStep3: ExcelCell[] = [{value: 'Funnel Step 2 to Step 3%'}];
 
@@ -105,15 +101,10 @@ export const getUserActivationReport = async (query: string, userId: string) => 
         //Funnel Steps
         const funnelStep = usersByFunnelStep[i] as UsersByFunnelStep;
         if(funnelStep) {
-            funnelTotal.push({ value: funnelStep?.total})
             funnelStep1.push({ value: funnelStep?.step1 });
             funnelStep2.push({ value: funnelStep?.step2 });
             funnelStep3.push({ value: funnelStep?.step3 });
             
-            signedUpToStep1.push({
-                value: ((funnelStep?.step1) / (funnelStep?.total) * 100).toFixed(2),
-                unit: '%'
-            });
             funnelStep1toStep2.push({
                 value: ((funnelStep?.step2) / (funnelStep?.step1) * 100).toFixed(2),
                 unit: '%'
@@ -126,11 +117,9 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     }
 
     reportTable.push(reportHeader);
-    reportTable.push(funnelTotal);
     reportTable.push(funnelStep1);
     reportTable.push(funnelStep2);
     reportTable.push(funnelStep3);
-    reportTable.push(signedUpToStep1);
     reportTable.push(funnelStep1toStep2);
     reportTable.push(funnelStep2toStep3);
 
@@ -167,7 +156,6 @@ const getUserByFunnelStep = async (
         step1: 0,
         step2: 0,
         step3: 0,
-        total: 0
     }];
 
     const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
@@ -206,17 +194,18 @@ const getUserByFunnelStep = async (
             databaseResourceId, 
             true
         );
+        queryStep1 = queryStep1.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         funnelStep1SavedQuery = await prisma.savedQuery.create({
             data: {
                 databaseResourceId: databaseResourceId,
                 reportKey: 'Funnel Step 1',
-                query: queryStep1.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                query: queryStep1,
                 feedback: 0
             }
         });
     } else {
         if(funnelStep1SavedQuery.feedback === 1) {
-            queryStep1 = funnelStep1SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+            queryStep1 = funnelStep1SavedQuery.query
         } else {
             queryStep1 = await processPrompt(
                 `Get the number of users who signed up from ${timeSeries0} to ${timeSeries1} using the users table.
@@ -227,12 +216,13 @@ const getUserByFunnelStep = async (
                 databaseResourceId,
                 true
             );
+            queryStep1 = queryStep1.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             funnelStep1SavedQuery = await prisma.savedQuery.update({
                 where: {
                     id: funnelStep1SavedQuery.id
                 },
                 data: {
-                    query: queryStep1.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                    query: queryStep1
                 }
             });
         } 
@@ -247,17 +237,18 @@ const getUserByFunnelStep = async (
             databaseResourceId,
             true
         );
+        queryStep2 = queryStep2.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         funnelStep2SavedQuery = await prisma.savedQuery.create({
             data: {
                 databaseResourceId: databaseResourceId,
                 reportKey: 'Funnel Step 2',
-                query: queryStep2.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                query: queryStep2,
                 feedback: 0
             }
         });
     } else {
         if(funnelStep2SavedQuery.feedback === 1) {
-            queryStep2 = funnelStep2SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+            queryStep2 = funnelStep2SavedQuery.query
         } else {
             queryStep2 = await processPrompt(
                 `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step2}`,
@@ -267,12 +258,13 @@ const getUserByFunnelStep = async (
                 databaseResourceId,
                 true
             );
+            queryStep2 = queryStep2.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             funnelStep2SavedQuery = await prisma.savedQuery.update({
                 where: {
                     id: funnelStep2SavedQuery.id
                 },
                 data: {
-                    query: queryStep2.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                    query: queryStep2,
                 }
             });
         }
@@ -286,17 +278,18 @@ const getUserByFunnelStep = async (
             timeSeries,
             databaseResourceId,
         );
+        queryStep3 = queryStep3.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         funnelStep3SavedQuery = await prisma.savedQuery.create({
             data: {
                 databaseResourceId: databaseResourceId,
                 reportKey: 'Funnel Step 3',
-                query: queryStep3.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                query: queryStep3,
                 feedback: 0
             }
         });
     } else {
         if(funnelStep3SavedQuery.feedback === 1) {
-            queryStep3 = funnelStep3SavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+            queryStep3 = funnelStep3SavedQuery.query
         } else {
             queryStep3 = await processPrompt(
                 `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
@@ -305,26 +298,22 @@ const getUserByFunnelStep = async (
                 timeSeries,
                 databaseResourceId,
             );
+            queryStep3 = queryStep3.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             funnelStep3SavedQuery = await prisma.savedQuery.update({
                 where: {
                     id: funnelStep3SavedQuery.id
                 },
                 data: {
-                    query: queryStep3.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                    query: queryStep3 
                 }
             });
         }
     }
-        
-    const queryTotal = await processPrompt(
-        'Get number of users who joined', client, embeddings, timeSeries, databaseResourceId
-    )
 
     if(!queryStep1 || !queryStep2 || !queryStep3 ||
-        !queryStep1.includes(timeSeries0) || !queryStep1.includes(timeSeries1) ||
-        !queryStep2.includes(timeSeries0) || !queryStep2.includes(timeSeries1) ||
-        !queryStep3.includes(timeSeries0) || !queryStep3.includes(timeSeries1) ||
-        !queryTotal.includes(timeSeries0) || !queryTotal.includes(timeSeries1)) {
+        !queryStep1.includes('<DATE-1>') || !queryStep1.includes('<DATE-2>') ||
+        !queryStep2.includes('<DATE-1>') || !queryStep2.includes('<DATE-2>') ||
+        !queryStep3.includes('<DATE-1>') || !queryStep3.includes('<DATE-2>')) {
         return {
             data: result,
             query: {
@@ -342,14 +331,12 @@ const getUserByFunnelStep = async (
             }
             const date0 = moment(timeSeries[i - 1]).format('YYYY-MM-DD');
             const date1 = moment(timeSeries[i]).format('YYYY-MM-DD');
-            const sqlQueryStep1 = queryStep1.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            const sqlQueryStep2 = queryStep2.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            const sqlQueryStep3 = queryStep3.replace(timeSeries0, date0).replace(timeSeries1, date1);
-            const sqlQueryTotal = queryTotal.replace(timeSeries0, date0).replace(timeSeries1, date1);
+            const sqlQueryStep1 = queryStep1.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
+            const sqlQueryStep2 = queryStep2.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
+            const sqlQueryStep3 = queryStep3.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
             let step1Count = 0;
             let step2Count = 0;
             let step3Count = 0;
-            let totalCount = 0;
             try {
                 const step1Result = await executeQuery(client, sqlQueryStep1);
                 step1Count = step1Result[0]?.count as number;
@@ -365,17 +352,11 @@ const getUserByFunnelStep = async (
                 step3Count = step3Result[0]?.count as number;
             } catch (error) {
             }
-            try {
-                const totalResult = await executeQuery(client, sqlQueryTotal);
-                totalCount = totalResult[0]?.count as number;
-            } catch (error) {
-            }
             result.push({
                 date: timeSeries[i] as Date,
                 step1: step1Count,
                 step2: step2Count,
                 step3: step3Count,
-                total: totalCount
             })
         }
     } catch (error) {
