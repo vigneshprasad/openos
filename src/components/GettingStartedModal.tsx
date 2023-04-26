@@ -76,7 +76,7 @@ export const GettingStartedModal: React.FC = () => {
                     </p>
                   </div>
 
-                  <Integrations />
+                  <Integrations onSuccessCallback={userMutation.mutate} />
                 </div>
               )}
 

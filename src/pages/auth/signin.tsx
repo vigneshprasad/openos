@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { MicrosoftClarityScript } from "~/components/MicrosoftClarityScript";
 import { SignInWithGoogle } from "~/components/SignInWithGoogle";
 
 const Auth: NextPage = () => {
@@ -10,6 +11,7 @@ const Auth: NextPage = () => {
         <title>Open OS</title>
         <meta name="description" content="Tools to make your life easier" />
         <link rel="icon" href="/favicon.ico" />
+        <MicrosoftClarityScript />
       </Head>
       <main className="min-h-screen grid grid-cols-3 bg-[#0A0A0A]">
         <div className="col-span-2 flex flex-col justify-center relative">
