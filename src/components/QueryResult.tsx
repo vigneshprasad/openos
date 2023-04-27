@@ -11,7 +11,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
 
     return (
         <>
-            { data && 
+            { data && data !== null && 
                 <div>
                     {data?.query && 
                         <div>

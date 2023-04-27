@@ -1,10 +1,24 @@
-import { type SimpleReportType, type ExcelCell } from "~/types/types";
+import { type SimpleReportType, type ExcelCell, type TableRow } from "~/types/types";
 
 export const convertSimpleReportToExcel = (data: ExcelCell[][]): string => {
     
     const csv = data.map((item) => {
         const row = item;
         const rowValues = row.map((cell) => cell.value);
+        return rowValues.join(",");
+    }) .join("\n");
+
+    return csv;
+}
+
+export const convertDatabaseQueryResultToExcel = (data: TableRow[]): string => {
+    const csv = data.map((item) => {
+        const row = item;
+        const rowValues = Object.keys(row).map(
+            (key: string) => {
+                return (row[key] as string);
+            }
+        );    
         return rowValues.join(",");
     }) .join("\n");
 

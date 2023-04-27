@@ -14,7 +14,7 @@ export const ErrorBox: React.FC<IProps> = ({title, description}) => {
       <div className="mt-4 flex gap-1 items-center">
         <Image src="/svg/incorrect.svg" alt="Incorrect" width={16} height={16} />
         <p className="text-xs text-[#E78933]">
-          {description}
+          {description.toString()}
         </p>
       </div>
     </div>

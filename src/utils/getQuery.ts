@@ -4,6 +4,7 @@ import { createContext } from "./createContext";
 import { openai } from "~/server/services/openai";
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { prisma } from "~/server/db";
+import moment from "moment";
 
 export const getQuery = async (client:Client, embeddings:ResourceSchemaEmbeddings[], query: string, databaseResourceId: string) : Promise<string> => {
            
@@ -20,8 +21,10 @@ export const getQuery = async (client:Client, embeddings:ResourceSchemaEmbedding
         }
     });
 
+    prompt += "Keep in mind the following\n";
+    prompt += `- Don't use interval and treat the current date as ${moment().format('YYYY-MM-DD')}`
+
     if(promptAdditions.length > 0) {
-        prompt += "Keep in mind the following\n";
         promptAdditions.forEach((promptAddition) => {
             prompt += `- ${promptAddition?.rules}\n`;
         });

@@ -41,7 +41,6 @@ export const runQuery = async (query: string, userId: string) => {
 
         for(let i = 0; i < NUMBER_OF_RETRIES; i++) {
             sqlQuery = await getQuery(client, embeddings, query, databaseResource.id);
-            console.log(i);
             //@TO DO: Use ExecuteQuery here
             try {
                 const res: QueryResult<TableRow> = await client.query<TableRow>(

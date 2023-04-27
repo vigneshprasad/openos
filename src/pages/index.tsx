@@ -7,13 +7,13 @@ import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
 import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP, COMMANDS_LIST } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { CommandResultType, ExcelSheet, SimpleReportType } from "../types/types";
+import type { CommandResultType, ExcelSheet, QueryAndResult, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
 import { GettingStartedModal } from "~/components/GettingStartedModal";
 import Image from "next/image";
 import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
-import { convertComplexReportToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
+import { convertComplexReportToExcel, convertDatabaseQueryResultToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import { commands } from "~/constants/commandAutocomplete";
 import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
@@ -185,6 +185,17 @@ const Home: NextPage = () => {
 
                                             {
                                                 item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
+                                            }
+                                            {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
+                                                    <>
+                                                        <CSVLink data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
+                                                            <button className="bg-[#333134] rounded-md py-2 px-3
+                                                            text-[#838383] font-normal text-xs flex gap-1.5
+                                                            hover:bg-[#434144] cursor-pointer">
+                                                                <p>Download CSV</p>
+                                                            </button>
+                                                        </CSVLink>
+                                                    </>
                                             }
                                             {
                                                 item.type === FINANCIAL_DATA && <RazorpayData key={index} props={item.output} />
