@@ -4,7 +4,11 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image";
 
-export const DatabaseResourceForm: React.FC = () => {
+interface IProps {
+    type: string
+}
+
+export const DatabaseResourceForm: React.FC<IProps> = ({type}) => {
 
     const [name, setName] = useState<string>("");
     const [host, setHost] = useState<string>("");
@@ -45,7 +49,7 @@ export const DatabaseResourceForm: React.FC = () => {
             dbName: dbName,
             dbUsername: dbUsername,
             dbPassword: dbPassword,
-            type: "postgres",
+            type: type,
         });
     };
 
@@ -64,7 +68,7 @@ export const DatabaseResourceForm: React.FC = () => {
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content className="DialogContent p-4">
                     <div className="pb-4 flex flex-row justify-between items-center">
-                        <text className="text-md text-[#fff]">Connect to PostgreSQL</text>
+                        <text className="text-md text-[#fff]">Connect to {type}</text>
                         <Dialog.Close asChild>
                             <CrossCircledIcon color="#C4C4C4" className="cursor-pointer" />
                         </Dialog.Close>

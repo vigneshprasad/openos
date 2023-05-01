@@ -26,7 +26,43 @@ export const Integrations: React.FC<IProps> = ({onSuccessCallback}) => {
               About this app
             </a>
           </div>
-          <DatabaseResourceForm />
+          <DatabaseResourceForm type="PostgresQL"/>
+        </div>
+
+        <div className="py-3 pl-3 pr-4 grid grid-rows-1 grid-cols-[max-content_1fr_max-content] gap-4 items-start bg-[#1C1C1C] rounded-md">
+          <Image src="/mysql.png" alt="MySQL" width={32} height={32} className="mt-1 rounded" />
+          <div>
+            <h3 className="text-sm text-[#fff] font-semibold">MySQL</h3>
+            <p className="pt-1 pb-2 text-sm text-[#616161] font-medium">
+                Connect your database to create reports & retrieve data.
+            </p>
+            <a 
+              href="https://www.mysql.com/" 
+              target="_blank" 
+              className="text-[#5EA3FB] text-sm font-normal hover:underline hover:underline-offset-2"
+            >
+              About this app
+            </a>
+          </div>
+          <DatabaseResourceForm type="MySQL"/>
+        </div>
+
+        <div className="py-3 pl-3 pr-4 grid grid-rows-1 grid-cols-[max-content_1fr_max-content] gap-4 items-start bg-[#1C1C1C] rounded-md">
+          <Image src="/mariadb.png" alt="MariaDB" width={32} height={32} className="mt-1 rounded" />
+          <div>
+            <h3 className="text-sm text-[#fff] font-semibold">Maria DB</h3>
+            <p className="pt-1 pb-2 text-sm text-[#616161] font-medium">
+                Connect your database to create reports & retrieve data.
+            </p>
+            <a 
+              href="https://mariadb.org/" 
+              target="_blank" 
+              className="text-[#5EA3FB] text-sm font-normal hover:underline hover:underline-offset-2"
+            >
+              About this app
+            </a>
+          </div>
+          <DatabaseResourceForm type="Maria DB"/>
         </div>
 
         <div className="py-3 pl-3 pr-4 grid grid-rows-1 grid-cols-[max-content_1fr_max-content] gap-4 items-start bg-[#1C1C1C] rounded-md">

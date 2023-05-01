@@ -18,14 +18,14 @@ export const bankStatementRouter = createTRPCRouter({
             }),
         }))
         .mutation(async ({ ctx, input }) => {    
-            const bankStatement = await ctx.prisma.bankStatement.create({
+            return await ctx.prisma.bankStatement.create({
                 data: {
                     name: input.name,
                     url: input.url,
                     userId: ctx.session.user.id,
                 },
             });     
-            return await processBankStatement(bankStatement, ctx.session.user.id, bankStatement.id)       
+            // return await processBankStatement(bankStatement, ctx.session.user.id, bankStatement.id)       
         })
 
 });

@@ -1,4 +1,5 @@
 import axios from "axios";
+import moment from "moment";
 import { PROPHET_API_URL } from "~/constants/prophetConstants";
 import { type ExcelCell } from "~/types/types";
 
@@ -81,7 +82,7 @@ export const getProphetProjectionsReport = async (
             const prophetArray:{ds: string, y: number }[] = [];
             for(let j = 1; j < (data[i]?.length as number); j++) {
                 prophetArray.push({
-                    ds: dateHeader[j]?.value as string,
+                    ds: moment(dateHeader[j]?.value as string).format("YYYY-MM-DD"),
                     y: row[j]?.value as number || 0,
                 });
             }

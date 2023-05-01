@@ -48,57 +48,70 @@ export const databaseResourceRouter = createTRPCRouter({
         dbPassword: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
-        const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
-        const client = new Client({
-            connectionString: dbUrl,
-            ssl: { rejectUnauthorized: false, }
+        // const dbUrl = `postgresql://${input.dbUsername}:${input.dbPassword}@${input.host}:${input.port}/${input.dbName}?sslmode=require`;
+        // const client = new Client({
+        //     connectionString: dbUrl,
+        //     ssl: { rejectUnauthorized: false, }
+        // });
+        // await client.connect();
+        // try {
+        //     const client = new Client({
+        //         connectionString: dbUrl,
+        //         ssl: { rejectUnauthorized: false, }
+        //     });
+        //     await client.connect();
+        //     const sqlQuery = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public'"
+        //     const res = await client.query<Schema>(
+        //         sqlQuery
+        //     )
+        //     await client.end();
+        //     const databaseResource = await ctx.prisma.databaseResource.create({
+        //         data: {
+        //             name: input.name,
+        //             host: input.host,
+        //             port: input.port,
+        //             type: input.type,
+        //             dbName: input.dbName,
+        //             username: input.dbUsername,
+        //             password: input.dbPassword,
+        //             userId: ctx.session.user.id,
+        //             status: false,
+        //         },
+        //     });
+        //     const tables = convertSchemaToStringArray(res.rows);
+        //     for(let i = 0; i < tables.length; i++) {
+        //         if(tables[i]) {
+        //             const res = await openai.createEmbedding({
+        //                 model: EMBEDDINGS_MODEL,
+        //                 input: String(tables[i]),
+        //             });
+        //             const json = res.data.data[0]?.embedding as Prisma.JsonArray
+        //             await ctx.prisma.resourceSchemaEmbeddings.create({
+        //                 data: {
+        //                     name: String(tables[i]),
+        //                     databaseResourceId: String(databaseResource.id),
+        //                     embeddings: json,
+        //                 }
+        //             })
+        //         }
+        //     }
+        // } catch(e) {
+        //     console.error("Error", e)
+        //     await client.end();
+        //     return "Could not create database";
+        // }
+        return await ctx.prisma.databaseResource.create({
+            data: {
+                name: input.name,
+                host: input.host,
+                port: input.port,
+                type: input.type,
+                dbName: input.dbName,
+                username: input.dbUsername,
+                password: input.dbPassword,
+                userId: ctx.session.user.id,
+                status: false,
+            },
         });
-        await client.connect();
-        try {
-            const client = new Client({
-                connectionString: dbUrl,
-                ssl: { rejectUnauthorized: false, }
-            });
-            await client.connect();
-            const sqlQuery = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public'"
-            const res = await client.query<Schema>(
-                sqlQuery
-            )
-            await client.end();
-            const databaseResource = await ctx.prisma.databaseResource.create({
-                data: {
-                    name: input.name,
-                    host: input.host,
-                    port: input.port,
-                    type: input.type,
-                    dbName: input.dbName,
-                    username: input.dbUsername,
-                    password: input.dbPassword,
-                    userId: ctx.session.user.id,
-                    status: false,
-                },
-            });
-            const tables = convertSchemaToStringArray(res.rows);
-            for(let i = 0; i < tables.length; i++) {
-                if(tables[i]) {
-                    const res = await openai.createEmbedding({
-                        model: EMBEDDINGS_MODEL,
-                        input: String(tables[i]),
-                    });
-                    const json = res.data.data[0]?.embedding as Prisma.JsonArray
-                    await ctx.prisma.resourceSchemaEmbeddings.create({
-                        data: {
-                            name: String(tables[i]),
-                            databaseResourceId: String(databaseResource.id),
-                            embeddings: json,
-                        }
-                    })
-                }
-            }
-        } catch(e) {
-            console.error("Error", e)
-            await client.end();
-            return "Could not create database";
-        }
     })
 });

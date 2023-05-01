@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
-import { type Transaction } from "@prisma/client";
+// import { type Transaction } from "@prisma/client";
 import Image from "next/image";
 
 export const StatementUploadForm: React.FC = () => {    
@@ -12,7 +12,7 @@ export const StatementUploadForm: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [fileSelected, setFileSelected] = useState<File | undefined>();
     const [presignedUrl, setPresignedUrl] = useState("");
-    const [transactionData, setTransactionData] = useState<Transaction[]>([]);
+    // const [transactionData, setTransactionData] = useState<Transaction[]>([]);
     const [open, setOpen] = useState(false);
     
     const bankStatement = api.bankStatement.create.useMutation({
@@ -63,11 +63,11 @@ export const StatementUploadForm: React.FC = () => {
         })
         const url = result.url.split('?')[0];
         if(result.status === 200 && url) {
-            const transactions = await bankStatement.mutateAsync({
+            void await bankStatement.mutateAsync({
                 name: name,
                 url: url,
             });
-            setTransactionData(transactions);
+            // setTransactionData(transactions);
         }
     }
 
@@ -129,7 +129,7 @@ export const StatementUploadForm: React.FC = () => {
                     <div className="flex justify-content-end mt-8">
                         {error && <p className="text-red-500">Error. Please try again</p>}
                     </div>
-                    {transactionData.length > 0 && <div className="h-72 overflow-scroll">
+                    {/* {transactionData.length > 0 && <div className="h-72 overflow-scroll">
                         <table>
                             <thead>
                                 <tr>
@@ -150,7 +150,7 @@ export const StatementUploadForm: React.FC = () => {
                                 )
                             })}
                         </table>
-                    </div>}
+                    </div>} */}
                 </Dialog.Content>
             </Dialog.Portal>
         </Dialog.Root>
