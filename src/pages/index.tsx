@@ -171,14 +171,12 @@ const Home: NextPage = () => {
                                         </div>
                                     </div>}
                             </div> : (
-                                <div className="overflow-auto p-4 bg-[#111] rounded-md">
+                                <div className="hide-scrollbar overflow-auto flex flex-col gap-5">
                                     {data.map((item, index) => {
                                         const [key, value] = item.input.split(":")
 
-                                        return <div key={index}>
-                                            <br />
-                                            
-                                            <p className="pb-2 text-sm text-[#F4BF4F]">
+                                        return <div className="p-4 bg-[#111] rounded-md" key={index}>
+                                            <p className="text-sm text-[#F4BF4F]">
                                                 <span className="text-[#fff]">{key}: </span>
                                                 {value}
                                             </p>
@@ -189,7 +187,7 @@ const Home: NextPage = () => {
                                             {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
                                                     <>
                                                         <CSVLink data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
-                                                            <button className="bg-[#333134] rounded-md py-2 px-3
+                                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                                             text-[#838383] font-normal text-xs flex gap-1.5
                                                             hover:bg-[#434144] cursor-pointer">
                                                                 <p>Download CSV</p>
@@ -206,7 +204,7 @@ const Home: NextPage = () => {
                                             {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
                                                     <>
                                                         <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
-                                                            <button className="bg-[#333134] rounded-md py-2 px-3
+                                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                                             text-[#838383] font-normal text-xs flex gap-1.5
                                                             hover:bg-[#434144] cursor-pointer">
                                                                 <p>Download CSV</p>
@@ -226,7 +224,7 @@ const Home: NextPage = () => {
                                             {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
                                                     <>
                                                         <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
-                                                            <button className="bg-[#333134] rounded-md py-2 px-3
+                                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                                             text-[#838383] font-normal text-xs flex gap-1.5
                                                             hover:bg-[#434144] cursor-pointer">
                                                                 <p>Download CSV</p>
@@ -245,16 +243,14 @@ const Home: NextPage = () => {
                                                 item.type === GET_HELP && 
                                                     <p className="text-white"> {item.output as unknown as string} </p>
                                             }
-                                            <>
-                                                <br /><hr />
-                                            </>
-                                            {loading && index === data.length - 1  && 
-                                                <div className="w-full flex justify-center">
-                                                    <FadingCubesLoader />
-                                                </div>
-                                            }
                                         </div>
                                     })}
+
+                                    {loading && 
+                                        <div className="w-full flex justify-center">
+                                            <FadingCubesLoader />
+                                        </div>
+                                    }
 
                                     <div ref={scrollRef} />
                                 </div>

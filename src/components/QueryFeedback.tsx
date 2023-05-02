@@ -2,6 +2,7 @@ import { type SavedQuery } from "@prisma/client";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import { CheckIcon, Cross1Icon } from '@radix-ui/react-icons';
+import Image from "next/image";
 
 interface Props {
     queryProp: SavedQuery;
@@ -36,27 +37,27 @@ export const QueryFeedback: React.FC<Props> = ({queryProp}) => {
     }
 
     return (
-        <div>
+        <div className="flex gap-4 items-center justify-center">
             {
                 query.feedback === 0 && (
                     <>
-                        <button className="btn cursor-pointer bg-green-400" onClick={handleThumbsUp}>
-                            <CheckIcon />
+                        <button className="btn cursor-pointer" onClick={handleThumbsUp}>
+                            <Image src="/like.png" alt="Like" width={14} height={14} />
                         </button>
-                        <button className="btn cursor-pointer bg-red-400" onClick={handleThumbsDown}>
-                            <Cross1Icon />
+                        <button className="btn cursor-pointer" onClick={handleThumbsDown}>
+                            <Image src="/dislike.png" alt="Like" width={14} height={14} />
                         </button>
                     </>
                 )
             }
             {
                 query.feedback === 1 && (
-                    <CheckIcon className="text-green-400" />
+                    <Image src="/like.png" alt="Like" width={14} height={14} />
                 )
             } 
             {
                 query.feedback === -1 && (
-                    <Cross1Icon className="text-red-400" />
+                    <Image src="/dislike.png" alt="Like" width={14} height={14} />
                 )
             }
         </div>

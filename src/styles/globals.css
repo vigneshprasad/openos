@@ -202,7 +202,6 @@ input {
   font-weight: 400;
   color: #616161;
   background-color: #1C1B1D;
-  text-transform: uppercase;
 }
 
 th {
@@ -210,11 +209,30 @@ th {
   padding: 4px;
 }
 
+th:first-child {
+  border-left: none;
+  border-right: none;
+}
+
+th:last-child {
+  border-left: none;
+  border-right: none;
+}
+
 td {
   max-width: 300px;
   text-overflow: ellipsis;
   border: 1px solid #333;
   padding: 12px;
+}
+
+td:first-child {
+  border-left: none;
+  border-right: none;
+}
+
+tr:last-child td {
+  border-bottom: none;
 }
 
 td > div {
@@ -272,4 +290,13 @@ table td:nth-child(1) {
 
 .CellWithComment:hover span.CellComment {
   display: block;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
