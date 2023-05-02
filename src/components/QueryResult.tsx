@@ -17,7 +17,6 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                         <div>
                             <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
                             <h3 className="pt-1 text-white text-sm">{data.query}</h3>
-                            <br />
                         </div>
                     }
                     <div>
@@ -26,7 +25,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                             data?.result && data.result.length > 0 &&
                             <div className="tableDiv">
                                 <p className="table-heading">
-                                    {data.name}
+                                    Output for query
                                 </p>
                                 <table>
                                     <thead>
@@ -43,19 +42,30 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                                         }
                                     </thead>
                                     <tbody>
-                                    {data?.result && data.result.map((row: TableRow, index:number) => (
-                                        <tr key={index}>
-                                            {Object.keys(row).map((key: string) => {
-                                                return (      
-                                                    <td key={key}>
-                                                        <div>
-                                                            {row[key]?.toString()}
-                                                        </div>
-                                                    </td>
-                                                )}
-                                            )}
-                                        </tr>
-                                    ))}
+                                        {data?.result && data.result.length > 1 ? 
+                                            data.result.map((row: TableRow, index:number) => (
+                                                <tr key={index}>
+                                                    {Object.keys(row).map((key: string) => {
+                                                        return (      
+                                                            <td key={key}>
+                                                                <div>
+                                                                    {row[key]?.toString()}
+                                                                </div>
+                                                            </td>
+                                                        )}
+                                                    )}
+                                                </tr>
+                                            )
+                                        ) : (
+                                            <tr className="px-3 pt-4 py-5 flex gap-2">
+                                                <p className="text-sm text-[#838383] first-letter:uppercase">
+                                                    {data.name}:
+                                                </p>
+                                                <p className="text-sm text-[#fff]">
+                                                    {data.result[0]?.count}
+                                                </p>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
