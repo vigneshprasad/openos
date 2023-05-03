@@ -9,7 +9,8 @@ interface IProps {
 
 export const CommandHistorySection: React.FC<IProps> = ({commands, selectCommandFromHistory}) => {
     return (
-        <div className="grid grid-rows-[max-content_1fr] grid-cols-1 bg-[#1C1B1D] border border-solid border-[#333333]">
+        <div className="grid grid-rows-[max-content_1fr] grid-cols-1 bg-[#1C1B1D] border border-solid 
+            border-[#333333] border-l-0">
             <div className="p-3 border-b border-solid border-b-[#333333]">
                 <text className="text-sm text-[#838383] font-medium">Command History</text>
             </div>

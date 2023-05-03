@@ -3,6 +3,7 @@ import type { CommandResultType, ExcelSheet } from "~/types/types";
 import { QueryFeedback } from "./QueryFeedback";
 import { removeEmptyColumns } from "~/utils/removeEmptyColumns";
 import { ErrorBox } from "./ErrorBox";
+import Image from "next/image";
 
 interface Props {
     props: CommandResultType
@@ -27,10 +28,13 @@ const Report: React.FC<Props> = ({ props }) => {
     const grid = tableData ? tableData : [];
 
     return (
-        <>
+        <div>
             {data && 
-                <div className="tableDiv">
-                    <p className="table-heading">{dataRaw.heading}</p>
+                <div className="tableDiv max-w-max">
+                    <div className="table-heading flex gap-1">
+                        <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                        <p>{dataRaw.heading}</p>
+                    </div>
                     <table>
                         <thead>
                             <tr>
@@ -105,7 +109,7 @@ const Report: React.FC<Props> = ({ props }) => {
                     description={error.cause}
                 />
             }
-        </>
+        </div>
     );
 };
 
