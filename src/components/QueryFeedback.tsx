@@ -1,7 +1,6 @@
 import { type SavedQuery } from "@prisma/client";
 import { useState } from "react";
 import { api } from "~/utils/api";
-import { CheckIcon, Cross1Icon } from '@radix-ui/react-icons';
 import Image from "next/image";
 
 interface Props {
@@ -37,27 +36,33 @@ export const QueryFeedback: React.FC<Props> = ({queryProp}) => {
     }
 
     return (
-        <div className="flex gap-4 items-center justify-center">
+        <div className="flex gap-1 items-center justify-center">
             {
                 query.feedback === 0 && (
                     <>
                         <button className="btn cursor-pointer" onClick={handleThumbsUp}>
-                            <Image src="/like.png" alt="Like" width={14} height={14} />
+                            <Image src="/like.png" alt="Like" width={15} height={15} />
                         </button>
                         <button className="btn cursor-pointer" onClick={handleThumbsDown}>
-                            <Image src="/dislike.png" alt="Like" width={14} height={14} />
+                            <Image src="/dislike.png" alt="Like" width={15} height={15} 
+                                style={{transform: "rotateY(180deg)"}} />
                         </button>
                     </>
                 )
             }
             {
                 query.feedback === 1 && (
-                    <Image src="/like.png" alt="Like" width={14} height={14} />
+                    <div className="p-[2px] bg-[#303030] rounded-[4px]">
+                        <Image src="/like.png" alt="Like" width={15} height={15} />
+                    </div>
                 )
             } 
             {
                 query.feedback === -1 && (
-                    <Image src="/dislike.png" alt="Like" width={14} height={14} />
+                    <div className="p-[2px] bg-[#303030] rounded-[4px]">
+                        <Image src="/dislike.png" alt="Like" width={15} height={15}
+                            style={{transform: "rotateY(180deg)"}} />
+                    </div>
                 )
             }
         </div>

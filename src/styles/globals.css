@@ -209,30 +209,11 @@ th {
   padding: 4px;
 }
 
-th:first-child {
-  border-left: none;
-  border-right: none;
-}
-
-th:last-child {
-  border-left: none;
-  border-right: none;
-}
-
 td {
   max-width: 300px;
   text-overflow: ellipsis;
   border: 1px solid #333;
   padding: 12px;
-}
-
-td:first-child {
-  border-left: none;
-  border-right: none;
-}
-
-tr:last-child td {
-  border-bottom: none;
 }
 
 td > div {
@@ -267,29 +248,6 @@ table td:nth-child(1) {
   position: sticky;
   left: 0;
   background-color: #161517;
-}
-
-.CellWithComment {
-  position: relative;
-}
-
-.CellComment {
-  display: none;
-  position: absolute;
-  z-index: 100;
-  border: 1px;
-  background-color: white;
-  border-style: solid;
-  border-width: 1px;
-  border-color: red;
-  padding: 3px;
-  color: red;
-  top: 20px;
-  left: 20px;
-}
-
-.CellWithComment:hover span.CellComment {
-  display: block;
 }
 
 .hide-scrollbar {
