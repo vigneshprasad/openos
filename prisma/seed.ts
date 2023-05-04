@@ -4,6 +4,7 @@ import { EMBEDDINGS_MODEL } from "../src/constants/openAi";
 import { prisma } from "../src/server/db";
 import { openai } from "../src/server/openai";
 import { convertSchemaToStringArray } from "../src/utils/convertSchemaToStringArray";
+import { processBankStatement } from "~/utils/processBankStatement";
 
 type Schema = { 
     table_schema: string;
