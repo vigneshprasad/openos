@@ -193,15 +193,15 @@ const Home: NextPage = () => {
                                                 item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
                                             }
                                             {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
-                                                    <>
-                                                        <CSVLink data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
+                                                    <div className="max-w-max">
+                                                        <CSVLink className="w-fit-content" data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
                                                             <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                                             text-[#838383] font-normal text-xs flex gap-1.5
                                                             hover:bg-[#434144] cursor-pointer">
                                                                 <p>Download CSV</p>
                                                             </button>
                                                         </CSVLink>
-                                                    </>
+                                                    </div>
                                             }
                                             {
                                                 item.type === FINANCIAL_DATA && <RazorpayData key={index} props={item.output} />
@@ -210,7 +210,7 @@ const Home: NextPage = () => {
                                                 item.type === CREATE_REPORT && <Report key={index} props={item.output} />
                                             }
                                             {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
-                                                    <>
+                                                    <div className="max-w-max">
                                                         <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
                                                             <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                                             text-[#838383] font-normal text-xs flex gap-1.5
@@ -218,7 +218,7 @@ const Home: NextPage = () => {
                                                                 <p>Download CSV</p>
                                                             </button>
                                                         </CSVLink>
-                                                    </>
+                                                    </div>
                                             }   
                                             {
                                                 item.type === COMPLEX_REPORT && 
@@ -230,7 +230,7 @@ const Home: NextPage = () => {
                                                     })
                                             }
                                             {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
-                                                    <>
+                                                    <div className="max-w-max">
                                                         <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
                                                             <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                                             text-[#838383] font-normal text-xs flex gap-1.5
@@ -238,7 +238,7 @@ const Home: NextPage = () => {
                                                                 <p>Download CSV</p>
                                                             </button>
                                                         </CSVLink>
-                                                    </>
+                                                    </div>
                                             }   
                                             {
                                                 item.type === UNKNOWN_COMMAND && 
