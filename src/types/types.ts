@@ -20,7 +20,7 @@ export type FinancialData = {
 
 export type QueryAndResult = {
     name: string;
-    query: string;
+    query: SavedQuery;
     result: TableRow[];
 }
 

@@ -41,7 +41,6 @@ const Report: React.FC<Props> = ({ props }) => {
                                 {dataRaw.sheet[0] && dataRaw.sheet[0].map(
                                     (cell, index) => (
                                         <th 
-                                            // colSpan={index === 0 ? 2 : undefined}
                                             key={index}
                                         >
                                             <div>{cell.value}</div>
@@ -53,7 +52,6 @@ const Report: React.FC<Props> = ({ props }) => {
                         <tbody>
                             {grid.map((row, i) => (
                                 <tr key={i}>
-                                    {/* <td>{i+1}</td> */}
                                     {row.map((cell, j) => {
                                         if(cell.query) {
                                             return (

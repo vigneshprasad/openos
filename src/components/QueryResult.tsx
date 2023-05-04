@@ -1,6 +1,7 @@
 import type { QueryAndResult, CommandResultType, TableRow } from "~/types/types";
 import { ErrorBox } from "./ErrorBox";
 import Image from "next/image";
+import { QueryFeedback } from "./QueryFeedback";
 
 interface Props {
     props: CommandResultType;
@@ -17,7 +18,10 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                     {data?.query && 
                         <div className="pt-2">
                             <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
-                            <h3 className="pt-1 text-white text-sm">{data.query}</h3>
+                            <h3 className="pt-1 text-white text-sm">{data.query.query}</h3>
+                            <div>
+                                <QueryFeedback queryProp={data.query}/>
+                            </div>
                         </div>
                     }
                     <div>

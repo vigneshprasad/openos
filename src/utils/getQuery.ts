@@ -31,8 +31,6 @@ export const getQuery = async (client:Client, embeddings:ResourceSchemaEmbedding
     }
     const newPrompt = prompt + `### A query to get ${query}\nSELECT`;
 
-    console.log(newPrompt);
-
     const completion = await openai.createCompletion({
         model: COMPLETIONS_MODEL,
             prompt: newPrompt,
@@ -57,8 +55,6 @@ export const getQuery = async (client:Client, embeddings:ResourceSchemaEmbedding
                     sqlQuery = sqlQuery.replace(sqlQueryModification.queryValue, sqlQueryModification.replacementValue);
                 });
             }
-
-            console.log(sqlQuery);
 
             return sqlQuery;
         }

@@ -1,6 +1,14 @@
-import { type CommandHistory } from "@prisma/client";
 import Image from "next/image";
 import React from "react";
+
+type CommandHistory = {
+    createdAt: Date,
+    updatedAt: Date,
+    userId: string,
+    input: string,
+    feedback: number,
+    type: string
+}
 
 interface IProps {
   commands?: CommandHistory[];
