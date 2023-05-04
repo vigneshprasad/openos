@@ -16,12 +16,12 @@ const QueryResult: React.FC<Props> = ({ props }) => {
             { data && data !== null && 
                 <div>
                     {data?.query && 
-                        <div className="pt-2">
-                            <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
-                            <h3 className="pt-1 text-white text-sm">{data.query.query}</h3>
+                        <div className="pt-2 flex justify-between items-start">
                             <div>
-                                <QueryFeedback queryProp={data.query}/>
+                                <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
+                                <h3 className="pt-1 text-white text-sm">{data.query.query}</h3>
                             </div>
+                            <QueryFeedback queryProp={data.query}/>
                         </div>
                     }
                     <div>
