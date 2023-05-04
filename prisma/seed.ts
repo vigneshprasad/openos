@@ -4,6 +4,7 @@ import { EMBEDDINGS_MODEL } from "~/constants/openAi";
 import { prisma } from "~/server/db";
 import { openai } from "~/server/openai";
 import { convertSchemaToStringArray } from "~/utils/convertSchemaToStringArray";
+import { processBankStatement } from "~/utils/processBankStatement";
 
 type Schema = { 
     table_schema: string;
@@ -12,7 +13,7 @@ type Schema = {
     data_type: string;
 }
   
-const seedDatabase = async (databaseResourceId: string) => {
+const createPostgresSchemaEmbeddings = async (databaseResourceId: string) => {
     const databaseResource = await prisma.databaseResource.findUnique({
         where: {
             id: databaseResourceId
@@ -65,4 +66,18 @@ const seedDatabase = async (databaseResourceId: string) => {
         console.log("Could not create database");
         return;
     }
+}
+
+const createTransactionsFromBankStatement = async(bankStatementId: string) => {
+    const bankStatement = await prisma.bankStatement.findUnique({
+        where: {
+            id: bankStatementId
+        }
+    });
+
+    if(!bankStatement) {
+        console.log('No bank statement found')
+        return;
+    }
+    await processBankStatement(bankStatement, bankStatement?.userId, bankStatement?.id)
 }

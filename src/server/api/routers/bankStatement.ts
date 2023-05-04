@@ -4,7 +4,6 @@ import {
   } from "~/server/api/trpc";
 
 import { z } from "zod";
-import { processBankStatement } from "~/utils/processBankStatement";
   
 export const bankStatementRouter = createTRPCRouter({
 
@@ -25,7 +24,6 @@ export const bankStatementRouter = createTRPCRouter({
                     userId: ctx.session.user.id,
                 },
             });     
-            // return await processBankStatement(bankStatement, ctx.session.user.id, bankStatement.id)       
         })
 
 });

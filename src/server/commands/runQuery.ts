@@ -32,6 +32,29 @@ export const runQuery = async (query: string, userId: string) => {
             ssl: { rejectUnauthorized: false, }
         });
         await client.connect();
+
+        const savedQuery = await prisma.savedQuery.findFirst({
+            where: {
+                databaseResourceId: databaseResource.id,
+                name: query,
+                feedback: 1
+            }
+        });
+
+        if(savedQuery) {
+            const res: QueryResult<TableRow> = await client.query<TableRow>(
+                savedQuery.query
+            )
+            await client.end();
+            return [
+                {
+                    query: savedQuery,
+                    result: res.rows,
+                    name: query
+                }, 
+                undefined
+            ];
+        }
     
         const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
             where: {
@@ -46,10 +69,20 @@ export const runQuery = async (query: string, userId: string) => {
                 const res: QueryResult<TableRow> = await client.query<TableRow>(
                     sqlQuery
                 )
+
+                const savedQuery = await prisma.savedQuery.create({
+                    data: {
+                        databaseResourceId: databaseResource.id,
+                        query: sqlQuery,
+                        name: query,
+                        feedback: 0
+                    }
+                });
+
                 await client.end();
                 return [
                     {
-                        query: sqlQuery,
+                        query: savedQuery,
                         result: res.rows,
                         name: query
                     }, 

@@ -17,7 +17,6 @@ import { convertComplexReportToExcel, convertDatabaseQueryResultToExcel, convert
 import { commands } from "~/constants/commandAutocomplete";
 import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
-import { type CommandHistory } from "@prisma/client";
 import { MicrosoftClarityScript } from "~/components/MicrosoftClarityScript";
 
 type CommandDataType = {
@@ -27,6 +26,15 @@ type CommandDataType = {
     feedback: number,
     type: string
     createdAt: Date,
+}
+
+type CommandHistory = {
+    createdAt: Date,
+    updatedAt: Date,
+    userId: string,
+    input: string,
+    feedback: number,
+    type: string
 }
 
 const Home: NextPage = () => {
