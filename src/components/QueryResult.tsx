@@ -16,20 +16,20 @@ const QueryResult: React.FC<Props> = ({ props }) => {
             { data && data !== null && 
                 <div>
                     {data?.query && 
-                        <div className="pt-2">
-                            <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
-                            <h3 className="pt-1 text-white text-sm">{data.query.query}</h3>
+                        <div className="pt-2 flex justify-between items-start">
                             <div>
-                                <QueryFeedback queryProp={data.query}/>
+                                <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
+                                <h3 className="pt-1 text-white text-sm">{data.query.query}</h3>
                             </div>
+                            <QueryFeedback queryProp={data.query}/>
                         </div>
                     }
                     <div>
                         { data?.result && data.result.length === 0 && <h1>No results</h1>}
                         {
                             data?.result && data.result.length > 0 &&
-                            <div className="tableDiv">
-                                <div className="table-heading flex gap-1 border-b border-solid border-b-[#333]">
+                            <div className="tableDiv max-w-max">
+                                <div className="table-heading flex gap-1">
                                     <Image src="/svg/query_icon.svg" alt="Report icon" width={12} height={12} />
                                     <p>Output for query</p>
                                 </div>

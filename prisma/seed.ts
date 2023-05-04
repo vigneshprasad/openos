@@ -1,9 +1,9 @@
 import { type Prisma } from ".prisma/client";
 import { Client } from "pg";
-import { EMBEDDINGS_MODEL } from "~/constants/openAi";
-import { prisma } from "~/server/db";
-import { openai } from "~/server/openai";
-import { convertSchemaToStringArray } from "~/utils/convertSchemaToStringArray";
+import { EMBEDDINGS_MODEL } from "../src/constants/openAi";
+import { prisma } from "../src/server/db";
+import { openai } from "../src/server/openai";
+import { convertSchemaToStringArray } from "../src/utils/convertSchemaToStringArray";
 import { processBankStatement } from "~/utils/processBankStatement";
 
 type Schema = { 
