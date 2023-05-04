@@ -28,7 +28,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                         { data?.result && data.result.length === 0 && <h1>No results</h1>}
                         {
                             data?.result && data.result.length > 0 &&
-                            <div className="tableDiv">
+                            <div className="tableDiv max-w-max">
                                 <div className="table-heading flex gap-1">
                                     <Image src="/svg/query_icon.svg" alt="Report icon" width={12} height={12} />
                                     <p>Output for query</p>
