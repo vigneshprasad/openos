@@ -258,3 +258,12 @@ table td:nth-child(1) {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+thead tr th:first-child,
+tbody tr td:first-child {
+  min-width: 250px;
+}
+
+tbody tr td:first-child .textAlignLeft {
+  justify-content: start;
+}

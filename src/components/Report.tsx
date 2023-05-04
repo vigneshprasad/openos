@@ -56,6 +56,7 @@ const Report: React.FC<Props> = ({ props }) => {
                                     {row.map((cell, j) => (
                                         <td key={j}>
                                             <div className={`
+                                                    ${cell.query ? "" : "textAlignLeft"}
                                                     flex gap-4 items-center
                                                     ${cell.query ? "justify-between" : "justify-center"}
                                                 `}
