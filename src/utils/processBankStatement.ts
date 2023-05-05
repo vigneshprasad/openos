@@ -112,7 +112,18 @@ export const processBankStatement = async (
             if(!balance) {
                 continue
             }
-            const category = await getExpenseClassification(row[descriptionKey]?.trim() || 'No description');
+            const previousTransaction = await prisma.transaction.findFirst({
+                where: {
+                    description: row[descriptionKey]?.trim(),
+                }
+            });
+            let category;
+            if(previousTransaction) {
+                category = previousTransaction.category;
+            } else {
+                 category = await getExpenseClassification(row[descriptionKey]?.trim() || 'No description');
+            }
+            console.log(row[descriptionKey]?.trim(), category);
             transactions.push({
                 date: dateValue,
                 description: row[descriptionKey]?.trim() || 'No description',

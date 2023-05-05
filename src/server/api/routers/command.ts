@@ -20,6 +20,8 @@ import { getExpenseClassificationTest } from "~/utils/getExpenseClassification";
 import { returnCommandResult } from "~/utils/returnCommandResult";
 import { type CommandResultType } from "~/types/types";
 import { sendHelpMessage } from "~/utils/sendSlackMessage";
+import { activeUserData, marketingSpentData, retentionData, userAcquisitionData, userActivationData } from "~/constants/dummyData";
+import { Command } from "aws-sdk/clients/sms";
 
 export const commandRouter = createTRPCRouter({
   runCommand: protectedProcedure
@@ -31,6 +33,13 @@ export const commandRouter = createTRPCRouter({
     .mutation(async ({ctx, input}) => {
         const command = input.query.split(':')[0]?.trim().toLowerCase();
         const query = input.query.split(':')[1]?.trim().toLowerCase();
+
+        const user = await ctx.prisma.user.findUnique({
+            where: {
+                id: ctx.session.user.id,
+            }
+        });
+
         if(!query || !command) {
             return returnCommandResult(
                 UNKNOWN_COMMAND,
@@ -88,6 +97,14 @@ export const commandRouter = createTRPCRouter({
                             ctx.session.user.id,
                         )
                     case USER_ACQUISITION:
+                        if(user?.isDummy) {
+                            return returnCommandResult(
+                                command,
+                                input.query,
+                                userAcquisitionData as CommandResultType,
+                                ctx.session.user.id,
+                            )
+                        }
                         result = await getUserAcquisitionReport(query, ctx.session.user.id) as CommandResultType; 
                         return await returnCommandResult(
                             command,
@@ -96,6 +113,14 @@ export const commandRouter = createTRPCRouter({
                             ctx.session.user.id,
                         )
                     case USER_ACTIVATION:
+                        if(user?.isDummy) {
+                            return returnCommandResult(
+                                command,
+                                input.query,
+                                userActivationData as CommandResultType,
+                                ctx.session.user.id,
+                            )
+                        }
                         result =  await getUserActivationReport(query, ctx.session.user.id) as CommandResultType;
                         return await returnCommandResult(
                             command,
@@ -104,6 +129,14 @@ export const commandRouter = createTRPCRouter({
                             ctx.session.user.id,
                         )
                     case ACTIVE_USERS:
+                        if(user?.isDummy) {
+                            return returnCommandResult(
+                                command,
+                                input.query,
+                                activeUserData as CommandResultType,
+                                ctx.session.user.id,
+                            )
+                        }
                         result = await getActiveUserReport(query, ctx.session.user.id) as CommandResultType;
                         return await returnCommandResult(
                             command,
@@ -112,6 +145,14 @@ export const commandRouter = createTRPCRouter({
                             ctx.session.user.id,
                         )
                     case USER_RETENTION:
+                        if(user?.isDummy) {
+                            return returnCommandResult(
+                                command,
+                                input.query,
+                                retentionData as CommandResultType,
+                                ctx.session.user.id,
+                            )
+                        }
                         result = await getRetentionReport(query, ctx.session.user.id) as CommandResultType;
                         return await returnCommandResult(
                             command,
@@ -121,6 +162,14 @@ export const commandRouter = createTRPCRouter({
                         )
 
                     case MARKETING_SPEND:
+                        if(user?.isDummy) {
+                            return returnCommandResult(
+                                command,
+                                input.query,
+                                marketingSpentData as CommandResultType,
+                                ctx.session.user.id,
+                            )
+                        }
                         result = await getMarketingSpendReport(query, ctx.session.user.id) as CommandResultType;
                         return await returnCommandResult(
                             command,
