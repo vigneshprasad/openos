@@ -3,7 +3,6 @@ import { CSVLink } from "react-csv";
 import Head from "next/head";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
-import { Navbar } from "~/components/Navbar";
 import QueryResult from "~/components/QueryResult";
 import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP, COMMANDS_LIST } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
@@ -18,6 +17,7 @@ import { commands } from "~/constants/commandAutocomplete";
 import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
 import { MicrosoftClarityScript } from "~/components/MicrosoftClarityScript";
+import { BaseLayout } from "~/components/BaseLayout";
 
 type CommandDataType = {
     input: string,
@@ -152,12 +152,11 @@ const Home: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
                 <MicrosoftClarityScript />    
             </Head>
-            <main className="min-h-screen">
-                <Navbar />
-                <GettingStartedModal />
-                <div className="h-[calc(100vh_-_44px)] grid grid-cols-[3fr_1fr] grid-rows-1">
+            <GettingStartedModal />
+            <BaseLayout activeKey="terminal">
+                <div className="grid grid-cols-[3fr_1fr] grid-rows-1">
                     <div className="grid grid-rows-[max-content_1fr] grid-cols-1">
-                        <div className="w-full p-1 bg-[#131313] border border-solid border-[#333]">
+                        <div className="w-full p-1 bg-[#131313] border border-solid border-[#333] border-l-0">
                             <div className="w-[172px] px-2.5 py-2 bg-[#0A2950] rounded-md">
                                 <text className="text-sm font-normal text-[#fff]">Terminal</text>
                             </div>
@@ -343,7 +342,7 @@ const Home: NextPage = () => {
                         selectCommandFromHistory={selectCommandFromHistory}
                     />
                 </div>
-            </main>
+            </BaseLayout>
         </>
     );
 };
