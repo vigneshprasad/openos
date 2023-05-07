@@ -3,7 +3,7 @@ import IntegrationsIcon from "./icons/Integrations"
 import TerminalIcon from "./icons/Terminal"
 import CustomizationIcon from "./icons/Customization";
 
-export type SideNavKeys = "terminal" | "integrations"
+export type SideNavKeys = "terminal" | "integrations" | "customization"
 
 type IProps = {
   activeKey: SideNavKeys;
