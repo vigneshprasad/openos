@@ -1,6 +1,7 @@
 import Link from "next/link";
 import IntegrationsIcon from "./icons/Integrations"
 import TerminalIcon from "./icons/Terminal"
+import CustomizationIcon from "./icons/Customization";
 
 export type SideNavKeys = "terminal" | "integrations"
 
@@ -25,6 +26,14 @@ const SIDENAV_ITEMS = [
     },
     route: "/integrations"
   },
+  {
+    key: "customization",
+    icon: {
+      active: <CustomizationIcon color="#4191F6" />,
+      inactive: <CustomizationIcon color="#747474" />
+    },
+    route: "/customization"
+  }
 ] 
 
 export const SideNavbar: React.FC<IProps> = ({activeKey}) => {
