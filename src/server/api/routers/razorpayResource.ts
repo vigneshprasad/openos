@@ -7,9 +7,9 @@ import {
 
 export const razorpayResourceRouter = createTRPCRouter({
     
-  getAll: protectedProcedure
+  getByUserId: protectedProcedure
     .query(({ ctx }) => {
-      return ctx.prisma.razorpayResource.findMany({
+      return ctx.prisma.razorpayResource.findFirst({
         where: {
           userId: ctx.session.user.id,
         }

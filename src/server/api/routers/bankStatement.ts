@@ -7,6 +7,15 @@ import { z } from "zod";
   
 export const bankStatementRouter = createTRPCRouter({
 
+    getByUserId: protectedProcedure
+        .query(({ctx}) => {
+            return ctx.prisma.bankStatement.findFirst({
+                where: {
+                    userId: ctx.session.user.id,
+                }
+            });
+        }),
+
     create: protectedProcedure
         .input(z.object({ 
             name: z.string({
