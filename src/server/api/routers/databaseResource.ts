@@ -16,6 +16,17 @@ export const databaseResourceRouter = createTRPCRouter({
       });
     }),
 
+  getByType: protectedProcedure
+    .input(z.string())
+    .query(({ctx, input: type}) => {
+      return ctx.prisma.databaseResource.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          type: type
+        }
+      })
+    }),
+
   create: protectedProcedure
     .input(z.object({ 
         name: z.string({

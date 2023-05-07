@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
@@ -14,6 +14,12 @@ export const StatementUploadForm: React.FC = () => {
     const [presignedUrl, setPresignedUrl] = useState("");
     // const [transactionData, setTransactionData] = useState<Transaction[]>([]);
     const [open, setOpen] = useState(false);
+
+    const data = api.bankStatement.getByUserId.useQuery()
+
+    useEffect(() => {
+        if (data) setSuccess(true)
+    }, [data])
     
     const bankStatement = api.bankStatement.create.useMutation({
         onSuccess: () => {

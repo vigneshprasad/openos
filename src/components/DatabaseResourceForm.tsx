@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
@@ -21,6 +21,12 @@ export const DatabaseResourceForm: React.FC<IProps> = ({type}) => {
     const [errorMessage, setErrorMessage] = useState("")
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
+
+    const {data} = api.databaseResource.getByType.useQuery(type)
+
+    useEffect(() => {
+        if (data) setSuccess(true)
+    }, [data])
 
     const createDatabaseResource = api.databaseResource.create.useMutation({
         onSuccess: () => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
@@ -14,6 +14,12 @@ export const RazorpayResourceForm: React.FC = () => {
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
+
+    const {data} = api.razorpayResource.getByUserId.useQuery()
+
+    useEffect(() => {
+        if (data) setSuccess(true)
+    }, [data])
 
     const razorpayResource = api.razorpayResource.create.useMutation({
         onSuccess: () => {
