@@ -19,6 +19,10 @@ type RetentionData = {
     d30: number,
 }
 
+type UserCount = {
+    count: number
+}
+
 export const getRetentionReport = async (query: string, userId: string) => {
     const databaseResources = await prisma.databaseResource.findMany({
         where: {
@@ -97,11 +101,11 @@ export const getRetentionReport = async (query: string, userId: string) => {
         if(retentionData[i]) {
             const retentionDataPerMonth = retentionData[i] as RetentionData;
             totalUsers.push({ value: retentionDataPerMonth.total });
-            d0Retention.push({ value: retentionDataPerMonth.d0.toFixed(2)});
-            d1Retention.push({ value: retentionDataPerMonth.d1.toFixed(2) });
-            d7Retention.push({ value: retentionDataPerMonth.d7.toFixed(2) });
-            d14Retention.push({ value: retentionDataPerMonth.d14.toFixed(2) });
-            d30Retention.push({ value: retentionDataPerMonth.d30.toFixed(2) });
+            d0Retention.push({ value: retentionDataPerMonth.d0.toFixed(2), unit: '%'});
+            d1Retention.push({ value: retentionDataPerMonth.d1.toFixed(2), unit: '%' });
+            d7Retention.push({ value: retentionDataPerMonth.d7.toFixed(2), unit: '%' });
+            d14Retention.push({ value: retentionDataPerMonth.d14.toFixed(2), unit: '%' });
+            d30Retention.push({ value: retentionDataPerMonth.d30.toFixed(2), unit: '%' });
 
         }
     }
@@ -156,7 +160,7 @@ const getRetentionData = async (
     const timeSeries1 = moment(timeSeries[1]).format("YYYY-MM-DD");
     const dummyIdentifier = "dummytest@gmail.com"
 
-    const userListQuery = await processPrompt(
+    let userListQuery = await processPrompt(
         `Get emails and created at of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
         client, embeddings, timeSeries, databaseResourceId
     );
@@ -172,30 +176,31 @@ const getRetentionData = async (
         };
     }
 
-
+    userListQuery =userListQuery.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
 
     let retentionActivityPrompt, retentionActivitySavedQuery;
     retentionActivitySavedQuery = await prisma.savedQuery.findFirst({
         where: {
             databaseResourceId: databaseResourceId,
-            reportKey: 'Retention Activity'
+            reportKey: 'Retention Activity',
         }
     });
     
     if(retentionActivitySavedQuery) {
         if(retentionActivitySavedQuery.feedback === 1) {
-            retentionActivityPrompt = retentionActivitySavedQuery.query.replace('<DATE-1>', timeSeries0).replace('<DATE-2>', timeSeries1);
+            retentionActivityPrompt = retentionActivitySavedQuery.query;
         } else {
             retentionActivityPrompt = await processPrompt(
                 `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
                 client, embeddings, timeSeries, databaseResourceId
             );
+            retentionActivityPrompt = retentionActivityPrompt.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             retentionActivitySavedQuery = await prisma.savedQuery.update({
                 where: {
                     id: retentionActivitySavedQuery.id
                 },
                 data: {
-                    query: retentionActivityPrompt.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>')
+                    query: retentionActivityPrompt
                 }
             });
         }
@@ -204,11 +209,12 @@ const getRetentionData = async (
             `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
             client, embeddings, timeSeries, databaseResourceId
         );
+        retentionActivityPrompt = retentionActivityPrompt.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         retentionActivitySavedQuery = await prisma.savedQuery.create({
             data: {
                 databaseResourceId: databaseResourceId,
                 reportKey: 'Retention Activity',
-                query: retentionActivityPrompt.replace(timeSeries0, '<DATE-1>').replace(timeSeries1, '<DATE-2>'),
+                query: retentionActivityPrompt,
                 feedback: 0
             }
         });
@@ -217,14 +223,13 @@ const getRetentionData = async (
     const identifierKey = Object.keys(userList[0] as object)[0];
     const dateJoinedKey = Object.keys(userList[0] as object)[1];
     
-    if(!userListQuery || !userListQuery.includes(timeSeries0) || !userListQuery.includes(timeSeries1) 
-        || !dateJoinedKey ||!identifierKey || !retentionActivityPrompt || !retentionActivityPrompt.includes(timeSeries0) || !retentionActivityPrompt.includes(timeSeries1)) {
+    if(!userListQuery || !userListQuery.includes('<DATE-1>') || !userListQuery.includes('<DATE-2>') 
+        || !dateJoinedKey ||!identifierKey || !retentionActivityPrompt || !retentionActivityPrompt.includes('<DATE-1>') || !retentionActivityPrompt.includes('<DATE-2>')) {
         return {
             data: [],
             query: retentionActivitySavedQuery
         };
     }
-
 
     for(let i = 1; i < timeSeries.length; i++) {
         if(!timeSeries[i] || !timeSeries[i - 1])  {
@@ -233,7 +238,7 @@ const getRetentionData = async (
         const date0 = moment(timeSeries[i - 1]).format('YYYY-MM-DD');
         const date1 = moment(timeSeries[i]).format('YYYY-MM-DD');
 
-        const userListQueryNew = userListQuery.replace(timeSeries0, date0).replace(timeSeries1, date1);
+        const userListQueryNew = userListQuery.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
         const userList = await executeQuery(client, userListQueryNew);
 
         let d0Count = 0;
@@ -251,15 +256,18 @@ const getRetentionData = async (
             const start = moment(dateJoined).format("YYYY-MM-DD");
             const d0End = moment(dateJoined).add(1, 'days').format("YYYY-MM-DD");
             const d1End = moment(dateJoined).add(2, 'days').format("YYYY-MM-DD");
+            const d7Start = moment(dateJoined).add(7, 'days').format("YYYY-MM-DD");
             const d7End = moment(dateJoined).add(8, 'days').format("YYYY-MM-DD");
+            const d14Start = moment(dateJoined).add(14, 'days').format("YYYY-MM-DD");
             const d14End = moment(dateJoined).add(15, 'days').format("YYYY-MM-DD");
+            const d30Start = moment(dateJoined).add(30, 'days').format("YYYY-MM-DD");
             const d30End = moment(dateJoined).add(31, 'days').format("YYYY-MM-DD");
 
-            const activityQueryD0 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d0End).replace(dummyIdentifier, identifier);
-            const activityQueryD1 = retentionActivityPrompt.replace(timeSeries0, d0End).replace(timeSeries1, d1End).replace(dummyIdentifier, identifier);
-            const activityQueryD7 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d7End).replace(dummyIdentifier, identifier);
-            const activityQueryD14 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d14End).replace(dummyIdentifier, identifier);
-            const activityQueryD30 = retentionActivityPrompt.replace(timeSeries0, start).replace(timeSeries1, d30End).replace(dummyIdentifier, identifier);
+            const activityQueryD0 = retentionActivityPrompt.replaceAll('<DATE-1>', start).replaceAll('<DATE-2>', d0End).replaceAll(dummyIdentifier, identifier);
+            const activityQueryD1 = retentionActivityPrompt.replaceAll('<DATE-1>', d0End).replaceAll('<DATE-2>', d1End).replaceAll(dummyIdentifier, identifier);
+            const activityQueryD7 = retentionActivityPrompt.replaceAll('<DATE-1>', d7Start).replaceAll('<DATE-2>', d7End).replaceAll(dummyIdentifier, identifier);
+            const activityQueryD14 = retentionActivityPrompt.replaceAll('<DATE-1>', d14Start).replaceAll('<DATE-2>', d14End).replaceAll(dummyIdentifier, identifier);
+            const activityQueryD30 = retentionActivityPrompt.replaceAll('<DATE-1>', d30Start).replaceAll('<DATE-2>', d30End).replaceAll(dummyIdentifier, identifier);
 
             try {
                 const activityCountD0 = await executeQuery(client, activityQueryD0);
@@ -268,28 +276,27 @@ const getRetentionData = async (
                 const activityCountD14 = await executeQuery(client, activityQueryD14);
                 const activityCountD30 = await executeQuery(client, activityQueryD30);
 
-                if(activityCountD0.length > 0) d0Count++;
-                if(activityCountD1.length > 0) d1Count++;
-                if(activityCountD7.length > 0) d7Count++;
-                if(activityCountD14.length > 0) d14Count++;
-                if(activityCountD30.length > 0) d30Count++;
+                if(activityCountD0.length > 0 && (activityCountD0[0] as UserCount).count > 0 ) d0Count++;
+                if(activityCountD1.length > 0 && (activityCountD1[0] as UserCount).count > 0) d1Count++;
+                if(activityCountD7.length > 0 && (activityCountD7[0] as UserCount).count > 0) d7Count++;
+                if(activityCountD14.length > 0 && (activityCountD14[0] as UserCount).count > 0) d14Count++;
+                if(activityCountD30.length > 0 && (activityCountD30[0] as UserCount).count > 0) d30Count++;
 
             } catch(e) {
                 console.log(e);
                 continue;
             }
-
             
         }
 
         result.push({
             date: timeSeries[i] as Date,
             total: userList.length,
-            d0: d0Count / userList.length,
-            d1: d1Count / userList.length,
-            d7: d7Count / userList.length,
-            d14: d14Count / userList.length,
-            d30: d30Count / userList.length,
+            d0: d0Count * 100 / userList.length,
+            d1: d1Count * 100 / userList.length,
+            d7: d7Count * 100 / userList.length,
+            d14: d14Count * 100 / userList.length,
+            d30: d30Count * 100 / userList.length,
         });
     }
 

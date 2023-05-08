@@ -19,6 +19,7 @@ const steps = [
 
 export const GettingStartedModal: React.FC = () => {
   const [activeStage, setActiveStage] = useState<number>(1)
+  const [skipStage2, setSkipStage2] = useState<boolean>(false)
   const [isNewUser, setIsNewUser] = useState(false)
 
   const userMutation = api.user.isNewUser.useMutation({
@@ -26,7 +27,7 @@ export const GettingStartedModal: React.FC = () => {
       if (data.stage1) {
         setActiveStage(formStages.UserDetails)
         setIsNewUser(true)
-      } else if (data.stage2) {
+      } else if (data.stage2 && !skipStage2) {
         setActiveStage(formStages.Integrations)
         setIsNewUser(true)
       } else if (data.stage3) {
@@ -38,7 +39,7 @@ export const GettingStartedModal: React.FC = () => {
     }
   })
 
-  useEffect(() => void userMutation.mutate(), [activeStage, isNewUser])
+  useEffect(() => void userMutation.mutate(), [activeStage, isNewUser, skipStage2])
 
   return (
     <div>
@@ -76,7 +77,10 @@ export const GettingStartedModal: React.FC = () => {
                     </p>
                   </div>
 
-                  <Integrations onSuccessCallback={userMutation.mutate} />
+                  <Integrations 
+                    skipOption={setSkipStage2}
+                    onSuccessCallback={userMutation.mutate} 
+                    />
                 </div>
               )}
 

@@ -15,7 +15,7 @@ export const StatementUploadForm: React.FC = () => {
     // const [transactionData, setTransactionData] = useState<Transaction[]>([]);
     const [open, setOpen] = useState(false);
 
-    const data = api.bankStatement.getByUserId.useQuery()
+    const {data} = api.bankStatement.getByUserId.useQuery();
 
     useEffect(() => {
         if (data) setSuccess(true)
