@@ -21,6 +21,7 @@ export const commandHistoryRouter = createTRPCRouter({
                 type: true,
                 error: true
             },
+            take: 30,
         })
     })
 });

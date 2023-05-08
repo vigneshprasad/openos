@@ -54,7 +54,6 @@ export const IntegrationsList: React.FC = () => {
                     <div 
                         className="min-h-[100px] py-3 pl-3 pr-4 grid grid-cols-[max-content_1fr_max-content]
                         gap-4 items-start bg-[#1C1C1C] rounded-md"
-                        // key={integration.key}
                     >
                         <Image
                             src={integration.imageSrc} 
