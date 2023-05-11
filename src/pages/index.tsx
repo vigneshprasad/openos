@@ -17,6 +17,7 @@ import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
 import { BaseLayout } from "~/components/BaseLayout";
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 type CommandDataType = {
     input: string,
@@ -37,7 +38,7 @@ type CommandHistory = {
 }
 
 const Home: NextPage = () => {
-
+    const router = useRouter();
     const [command, setCommand] = useState<string>("");
     const [data, setData] = useState<CommandDataType[]>([]);
     const [loading, setLoading] = useState(false);
@@ -134,6 +135,26 @@ const Home: NextPage = () => {
     })
 
     useEffect(() => commandHistoryMutation.mutate(), [data])
+
+    useEffect(() => {
+        const executeTemplateCommand = async (): Promise<void> => {
+            // Add template command to input
+            const templateCommand = router.query.exec as string
+            setCommand(templateCommand)
+
+            // Execute template command
+            setLoading(true);
+            command.length > 0 && runQuery.mutate({ query: command });
+            commandHistoryMutation.mutate()
+
+            // Clear router query parameters
+            await router.replace("/", undefined, {shallow: true})
+        }
+
+        if (router && router.query.exec) {
+            void executeTemplateCommand()
+        }
+    }, [router.query.exec, command])
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -288,6 +309,7 @@ const Home: NextPage = () => {
                                                     font-normal placeholder:text-sm placeholder:text-[#616161]"
                                                     placeholder="Start by typing the command eg. run-query"
                                                     value={command}
+                                                    disabled={loading}
                                                     onChange={(e) => setCommand(e.target.value)}
                                                 />
 
