@@ -2,6 +2,7 @@ import Image from "next/image"
 import { DatabaseResourceForm } from "./DatabaseResourceForm"
 import { StatementUploadForm } from "./StatementUploadForm"
 import { RazorpayResourceForm } from "./RazorpayResourceForm"
+import { StripeResourceForm } from "./StripeResourceForm"
 
 const INTEGRATIONS = [
     {
@@ -35,6 +36,14 @@ const INTEGRATIONS = [
         imageSrc: "/razorpay.png",
         url: "https://razorpay.com/",
         button: <RazorpayResourceForm />
+    },
+    {
+        key: "stripe",
+        title: "Stripe",
+        description: "Use Stripe to pull your financial data & create financial reports",
+        imageSrc: "/stripe.png",
+        url: "https://stripe.com/",
+        button: <StripeResourceForm />
     },
     {
         key: "bankStatement",

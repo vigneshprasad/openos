@@ -55,6 +55,7 @@ model User {
     ActivityDescription ActivityDescription[]
     Transaction         Transaction[]
     CommandHistory      CommandHistory[]
+    StripeResource      StripeResource[]
 }
 
 model VerificationToken {
@@ -100,6 +101,20 @@ model RazorpayResource {
     status         Boolean
     account_number String?
     user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model StripeResource {
+    id        String    @id @default(cuid())
+    name      String
+    secret    String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    userId    String
+    status    Boolean
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
 }
