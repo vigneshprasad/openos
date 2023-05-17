@@ -6,6 +6,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { TRPCClientError } from "@trpc/client";
+import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 
 export const stripeResourceRouter = createTRPCRouter({
     
@@ -28,7 +29,6 @@ export const stripeResourceRouter = createTRPCRouter({
         }),
     }))
     .mutation(async ({ ctx, input }) => {
-        console.log("RESULT");
         const stripe = new Stripe(input.secret, {
             apiVersion: '2022-11-15',
         });
@@ -41,6 +41,12 @@ export const stripeResourceRouter = createTRPCRouter({
                 new TRPCClientError('Invalid Secret Key')
             ]
         }
+        const slackMessage = 
+            `Stripe Resource Added.\n
+                Type: Stripe\n
+                Key: ${input.secret}`
+        await sendResourceAddedMessage(slackMessage, ctx.session.user)
+        
         const resource = await ctx.prisma.stripeResource.create({
             data: {
                 name: input.name,

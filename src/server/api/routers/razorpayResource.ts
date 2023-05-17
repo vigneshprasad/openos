@@ -4,6 +4,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 
 export const razorpayResourceRouter = createTRPCRouter({
     
@@ -30,6 +31,12 @@ export const razorpayResourceRouter = createTRPCRouter({
         accountNumber: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
+        const slackMessage = 
+            `Razorpay Resource Added.\n
+                Type: Razorpay\n
+                Key: ${input.keyId}`
+        await sendResourceAddedMessage(slackMessage, ctx.session.user)
+        
         return await ctx.prisma.razorpayResource.create({
             data: {
                 name: input.name,

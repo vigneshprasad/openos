@@ -3,6 +3,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 
 
 export const databaseResourceRouter = createTRPCRouter({
@@ -46,6 +47,12 @@ export const databaseResourceRouter = createTRPCRouter({
         dbPassword: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
+        const slackMessage = 
+            `Database Resource Added.\n
+                Type: ${input.type}\n
+                Host: ${input.host}`
+        await sendResourceAddedMessage(slackMessage, ctx.session.user)
+
         return await ctx.prisma.databaseResource.create({
             data: {
                 name: input.name,
