@@ -37,7 +37,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                                     <thead>
                                         {
                                             data?.result && 
-                                            data.result.length > 1 && 
+                                            (data.result.length > 1 || !data.result[0]?.count) && 
                                             Object.keys(data?.result[0] as TableRow).map(
                                                 (key: string) => {
                                                     return (
@@ -48,7 +48,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                                         }
                                     </thead>
                                     <tbody>
-                                        {data?.result && data.result.length > 1 ? 
+                                        {data?.result && (data.result.length > 1 || !data.result[0]?.count) ? 
                                             data.result.map((row: TableRow, index:number) => (
                                                 <tr key={index}>
                                                     {Object.keys(row).map((key: string) => {
