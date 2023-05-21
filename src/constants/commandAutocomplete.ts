@@ -16,6 +16,11 @@ import {
     MARKETING_SPEND,
 } from './reportConstants'
 
+export type CommandSuggestion = {
+    command: string;
+    description: string;
+}
+
 export const commands = [
     {
         command: `${CREATE_REPORT}: ${FINANCIAL_REPORT}`,
