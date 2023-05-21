@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import { CSVLink } from "react-csv";
-import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 import RazorpayData from "~/components/RazorpayData";
 import QueryResult from "~/components/QueryResult";
@@ -15,8 +14,8 @@ import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { convertComplexReportToExcel, convertDatabaseQueryResultToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import { CommandHistorySection } from "~/components/CommandHistorySection";
 import { ErrorBox } from "~/components/ErrorBox";
-import { MicrosoftClarityScript } from "~/components/MicrosoftClarityScript";
 import { BaseLayout } from "~/components/BaseLayout";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import AutoComplete from "~/components/AutoComplete";
 
@@ -158,9 +157,8 @@ const Home: NextPage = () => {
         <>
             <Head>
                 <title>Open OS</title>
-                <meta name="description" content="Tools to make your life easier" />
+                <meta name="description" content="Toolsyo to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
-                <MicrosoftClarityScript />    
             </Head>
             <GettingStartedModal />
             <BaseLayout activeKey="terminal">

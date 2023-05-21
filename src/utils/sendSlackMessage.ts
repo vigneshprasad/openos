@@ -24,3 +24,20 @@ export const sendHelpMessage = async (query: string, user: User) => {
     return message;
 
 }
+
+export const sendResourceAddedMessage = async (resource: string, user: User) => {
+
+    const url =  "https://slack.com/api/chat.postMessage";
+    await axios.post(url, {
+        channel: "#resources",
+        text: 
+            `User has added a resource: \n 
+            ${resource}\n
+            User Name: ${user?.name as string}\n
+            User Email: ${user?.email as string}\n`
+    }, { 
+        headers: {
+            Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN as string}`
+        }
+    });
+}

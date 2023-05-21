@@ -7,6 +7,7 @@ import { bankStatementRouter } from "./routers/bankStatement";
 import { savedQueryRouter } from "./routers/savedQuery";
 import { userRouter } from "./routers/user";
 import { commandHistoryRouter } from "./routers/commandHistory";
+import { stripeResourceRouter } from "./routers/stripeResource";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +17,7 @@ import { commandHistoryRouter } from "./routers/commandHistory";
 export const appRouter = createTRPCRouter({
   databaseResource: databaseResourceRouter,
   razorpayResource: razorpayResourceRouter,
+  stripeResource: stripeResourceRouter,
   commandRouter: commandRouter,
   aws: awsRouter,
   bankStatement: bankStatementRouter,
