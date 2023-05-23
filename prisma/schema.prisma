@@ -46,6 +46,7 @@ model User {
     role                String?
     isOnboarded         Boolean               @default(false)
     isDummy             Boolean?
+    createdAt           DateTime              @default(now())
     accounts            Account[]
     sessions            Session[]
     DatabaseResource    DatabaseResource[]

@@ -182,5 +182,5 @@ const printUsers = async () => {
 }
 
 // void createPostgresSchemaEmbeddings('clhsqjk8x0007ml0fp85re5dw');
-// void createMySQLSchemaEmbeddings('clh87d2fm00099kiiwko94cky');
+// void createMySQLSchemaEmbeddings('cli0gswve00009knpq3cb8zo4');
 // void createTransactionsFromBankStatement('clhsqpu2f0009ml0fqjyivs0y');

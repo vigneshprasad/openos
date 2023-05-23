@@ -6,6 +6,7 @@ import mysql from 'mysql';
 import util from 'util';
 
 export const executeQuery = async (databaseResource:DatabaseResource, sqlQuery: string) : Promise<TableRow[]> => {
+    console.log("EXECUTE QUERY", databaseResource, sqlQuery);
     switch(databaseResource.type) {
         case POSTGRES:
             return await executePostgres(databaseResource, sqlQuery);
@@ -27,7 +28,7 @@ const executePostgres = async (databaseResource:DatabaseResource, sqlQuery: stri
         sqlQuery
     )
     await client.end();
-
+    
     if(res.rows.length > 0) {
         return res.rows
     }
