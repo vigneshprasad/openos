@@ -21,7 +21,6 @@ import { returnCommandResult } from "~/utils/returnCommandResult";
 import { type CommandResultType } from "~/types/types";
 import { sendHelpMessage } from "~/utils/sendSlackMessage";
 import { activeUserData, marketingSpentData, retentionData, userAcquisitionData, userActivationData } from "~/constants/dummyData";
-import { Command } from "aws-sdk/clients/sms";
 
 export const commandRouter = createTRPCRouter({
   runCommand: protectedProcedure

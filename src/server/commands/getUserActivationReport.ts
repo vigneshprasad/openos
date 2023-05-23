@@ -2,8 +2,7 @@ import { prisma } from "~/server/db";
 
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type SavedQuery, type ResourceSchemaEmbeddings, type funnelSteps } from "@prisma/client";
-import { Client } from "pg";
+import { type SavedQuery, type ResourceSchemaEmbeddings, type funnelSteps, type DatabaseResource } from "@prisma/client";
 
 import moment from "moment";
 import { processPrompt } from "~/utils/processPrompt";
@@ -43,13 +42,6 @@ export const getUserActivationReport = async (query: string, userId: string) => 
         ]
     }
 
-    const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
-    const client = new Client({
-        connectionString: dbUrl,
-        ssl: { rejectUnauthorized: false, }
-    });
-    await client.connect();
-
     const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
         where: {
             databaseResourceId: databaseResource.id
@@ -81,7 +73,7 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     const {
         data: usersByFunnelStep,
         query: funnelQuery,
-    } = await getUserByFunnelStep(funnelSteps[0], client, embeddings, timeSeries, databaseResource.id);
+    } = await getUserByFunnelStep(funnelSteps[0], databaseResource, embeddings, timeSeries);
 
     const funnelStep1: ExcelCell[] = [{value: 'Funnel Step 1', query: funnelQuery.step1}];
     const funnelStep2: ExcelCell[] = [{value: 'Funnel Step 2', query: funnelQuery.step2}];
@@ -123,8 +115,6 @@ export const getUserActivationReport = async (query: string, userId: string) => 
     reportTable.push(funnelStep1toStep2);
     reportTable.push(funnelStep2toStep3);
 
-    await client.end();
-
     const reportTableWithProjections = await getProphetProjectionsReport(
         reportTable,
         REPORT_PROJECTIONS,
@@ -142,10 +132,9 @@ export const getUserActivationReport = async (query: string, userId: string) => 
 
 const getUserByFunnelStep = async (
     funnelSteps:funnelSteps, 
-    client:Client, 
+    databaseResource:DatabaseResource,
     embeddings:ResourceSchemaEmbeddings[], 
-    timeSeries: Date[],
-    databaseResourceId: string,
+    timeSeries: Date[]
 ) : Promise<{
     data: UsersByFunnelStep[],
     query: FunnelQuery
@@ -165,21 +154,21 @@ const getUserByFunnelStep = async (
 
     funnelStep1SavedQuery = await prisma.savedQuery.findFirst({
         where: {
-            databaseResourceId: databaseResourceId,
+            databaseResourceId: databaseResource.id,
             reportKey: 'Funnel Step 1'
         }
     });
 
     funnelStep2SavedQuery = await prisma.savedQuery.findFirst({
         where: {
-            databaseResourceId: databaseResourceId,
+            databaseResourceId: databaseResource.id,
             reportKey: 'Funnel Step 2'
         }
     });
 
     funnelStep3SavedQuery = await prisma.savedQuery.findFirst({
         where: {
-            databaseResourceId: databaseResourceId,
+            databaseResourceId: databaseResource.id,
             reportKey: 'Funnel Step 3'
         }
     });
@@ -188,16 +177,16 @@ const getUserByFunnelStep = async (
         queryStep1 = await processPrompt(
             `Get the number of users who signed up from ${timeSeries0} to ${timeSeries1} using the users table.
             Using those users find out who has taken the action - ${funnelSteps.step1}`,
-            client, 
             embeddings, 
             timeSeries,
-            databaseResourceId, 
+            databaseResource.id,
+            databaseResource.type, 
             true
         );
         queryStep1 = queryStep1.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         funnelStep1SavedQuery = await prisma.savedQuery.create({
             data: {
-                databaseResourceId: databaseResourceId,
+                databaseResourceId: databaseResource.id,
                 reportKey: 'Funnel Step 1',
                 query: queryStep1,
                 feedback: 0
@@ -210,10 +199,10 @@ const getUserByFunnelStep = async (
             queryStep1 = await processPrompt(
                 `Get the number of users who signed up from ${timeSeries0} to ${timeSeries1} using the users table.
                 Using those users find out who has taken the action - ${funnelSteps.step1}`,
-                client, 
                 embeddings, 
                 timeSeries,
-                databaseResourceId,
+                databaseResource.id,
+                databaseResource.type,
                 true
             );
             queryStep1 = queryStep1.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
@@ -231,16 +220,16 @@ const getUserByFunnelStep = async (
     if(!funnelStep2SavedQuery) {
         queryStep2 = await processPrompt(
             `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step2}`,
-            client, 
             embeddings, 
             timeSeries,
-            databaseResourceId,
+            databaseResource.id,
+            databaseResource.type,
             true
         );
         queryStep2 = queryStep2.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         funnelStep2SavedQuery = await prisma.savedQuery.create({
             data: {
-                databaseResourceId: databaseResourceId,
+                databaseResourceId: databaseResource.id,
                 reportKey: 'Funnel Step 2',
                 query: queryStep2,
                 feedback: 0
@@ -252,10 +241,10 @@ const getUserByFunnelStep = async (
         } else {
             queryStep2 = await processPrompt(
                 `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step2}`,
-                client, 
                 embeddings, 
                 timeSeries,
-                databaseResourceId,
+                databaseResource.id,
+                databaseResource.type,
                 true
             );
             queryStep2 = queryStep2.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
@@ -273,15 +262,15 @@ const getUserByFunnelStep = async (
     if(!funnelStep3SavedQuery) {
         queryStep3 = await processPrompt(
             `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
-            client, 
             embeddings, 
             timeSeries,
-            databaseResourceId,
+            databaseResource.id,
+            databaseResource.type,
         );
         queryStep3 = queryStep3.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         funnelStep3SavedQuery = await prisma.savedQuery.create({
             data: {
-                databaseResourceId: databaseResourceId,
+                databaseResourceId: databaseResource.id,
                 reportKey: 'Funnel Step 3',
                 query: queryStep3,
                 feedback: 0
@@ -293,10 +282,10 @@ const getUserByFunnelStep = async (
         } else {
             queryStep3 = await processPrompt(
                 `Number of users who joined from ${timeSeries0} to ${timeSeries1} who have ${funnelSteps.step3}`,
-                client, 
                 embeddings, 
                 timeSeries,
-                databaseResourceId,
+                databaseResource.id,
+                databaseResource.type,
             );
             queryStep3 = queryStep3.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             funnelStep3SavedQuery = await prisma.savedQuery.update({
@@ -338,17 +327,17 @@ const getUserByFunnelStep = async (
             let step2Count = 0;
             let step3Count = 0;
             try {
-                const step1Result = await executeQuery(client, sqlQueryStep1);
+                const step1Result = await executeQuery(databaseResource, sqlQueryStep1);
                 step1Count = step1Result[0]?.count as number;
             } catch (error) {
             }
             try {
-                const step2Result = await executeQuery(client, sqlQueryStep2);
+                const step2Result = await executeQuery(databaseResource, sqlQueryStep2);
                 step2Count = step2Result[0]?.count as number;
             } catch (error) {
             }
             try {
-                const step3Result = await executeQuery(client, sqlQueryStep3);
+                const step3Result = await executeQuery(databaseResource, sqlQueryStep3);
                 step3Count = step3Result[0]?.count as number;
             } catch (error) {
             }

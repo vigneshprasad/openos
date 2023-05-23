@@ -1,10 +1,6 @@
-import { Client } from "pg";
-import type { QueryResult } from "pg";
 import { NUMBER_OF_RETRIES } from "~/constants/config";
-
 import { prisma } from "~/server/db";
-
-import { type TableRow } from "~/types/types";
+import { executeQuery } from "~/utils/executeQuery";
 import { getQuery } from "~/utils/getQuery";
 
 export const runQuery = async (query: string, userId: string) => {
@@ -25,14 +21,7 @@ export const runQuery = async (query: string, userId: string) => {
         ];
     }
     let sqlQuery = '';
-    const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
     try {
-        const client = new Client({
-            connectionString: dbUrl,
-            ssl: { rejectUnauthorized: false, }
-        });
-        await client.connect();
-
         const savedQuery = await prisma.savedQuery.findFirst({
             where: {
                 databaseResourceId: databaseResource.id,
@@ -41,15 +30,12 @@ export const runQuery = async (query: string, userId: string) => {
             }
         });
 
-        if(savedQuery) {
-            const res: QueryResult<TableRow> = await client.query<TableRow>(
-                savedQuery.query
-            )
-            await client.end();
+        if(savedQuery) {   
+            const result = await executeQuery(databaseResource, savedQuery.query);
             return [
                 {
                     query: savedQuery,
-                    result: res.rows,
+                    result: result,
                     name: query
                 }, 
                 undefined
@@ -63,13 +49,9 @@ export const runQuery = async (query: string, userId: string) => {
         });
 
         for(let i = 0; i < NUMBER_OF_RETRIES; i++) {
-            sqlQuery = await getQuery(client, embeddings, query, databaseResource.id);
-            //@TO DO: Use ExecuteQuery here
+            sqlQuery = await getQuery(embeddings, query, databaseResource.id, databaseResource.type);
             try {
-                const res: QueryResult<TableRow> = await client.query<TableRow>(
-                    sqlQuery
-                )
-
+                const results = await executeQuery(databaseResource, sqlQuery);
                 const savedQuery = await prisma.savedQuery.create({
                     data: {
                         databaseResourceId: databaseResource.id,
@@ -79,18 +61,16 @@ export const runQuery = async (query: string, userId: string) => {
                     }
                 });
 
-                await client.end();
                 return [
                     {
                         query: savedQuery,
-                        result: res.rows,
+                        result: results,
                         name: query
                     }, 
                     undefined
                 ];
             }
             catch(e) {
-                await client.end();
                 if(i === NUMBER_OF_RETRIES - 1) {
                     return [
                         undefined, 

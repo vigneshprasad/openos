@@ -2,8 +2,7 @@ import { prisma } from "~/server/db";
 
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type ResourceSchemaEmbeddings } from "@prisma/client";
-import { Client } from "pg";
+import { type DatabaseResource, type ResourceSchemaEmbeddings } from "@prisma/client";
 
 import moment from "moment";
 import { executeQuery } from "~/utils/executeQuery";
@@ -37,13 +36,6 @@ export const getActiveUserReport = async (query: string, userId: string) => {
             }
         ]
     }
-    
-    const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
-    const client = new Client({
-        connectionString: dbUrl,
-        ssl: { rejectUnauthorized: false, }
-    });
-    await client.connect();
 
     const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
         where: {
@@ -90,7 +82,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
         if(activitySavedQuery.feedback === 1) {
             activityPrompt = activitySavedQuery.query;
         } else {
-            activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries, databaseResource.id);
+            activityPrompt = await processPrompt(activityString, embeddings, timeSeries, databaseResource.id, databaseResource.type);
             activityPrompt = activityPrompt.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             activitySavedQuery = await prisma.savedQuery.update({
                 where: {
@@ -102,7 +94,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
             });
         }
     } else {
-        activityPrompt = await processPrompt(activityString, client, embeddings, timeSeries, databaseResource.id);
+        activityPrompt = await processPrompt(activityString, embeddings, timeSeries, databaseResource.id, databaseResource.type);
         activityPrompt = activityPrompt.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         activitySavedQuery = await prisma.savedQuery.create({
             data: {
@@ -114,7 +106,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
         });
     }
 
-    const activeUsers: ActiveUsers[] = await getActiveUsers(client, embeddings, timeSeries, activityPrompt);
+    const activeUsers: ActiveUsers[] = await getActiveUsers(databaseResource, embeddings, timeSeries, activityPrompt);
 
     const dailyActiveUsers: ExcelCell[] = [{value: 'Daily Active Users (DAUs)', query: activitySavedQuery}];
     const dailyActiveUsersGrowth: ExcelCell[] = [{value: 'Growth %'}];
@@ -172,8 +164,6 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     reportTable.push(monthlyActiveUsers);
     reportTable.push(monthlyActiveUsersGrowth);
 
-    await client.end();
-
     const reportTableWithProjections = await getProphetProjectionsReport(
         reportTable,
         REPORT_PROJECTIONS,
@@ -190,7 +180,7 @@ export const getActiveUserReport = async (query: string, userId: string) => {
     ]
 }
 
-const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[], query: string) : Promise<ActiveUsers[]> => {
+const getActiveUsers = async (databaseResource:DatabaseResource, embeddings:ResourceSchemaEmbeddings[], timeSeries: Date[], query: string) : Promise<ActiveUsers[]> => {
     const result: ActiveUsers[] = [{
         date: timeSeries[0] as Date,
         dau: 0,
@@ -214,7 +204,7 @@ const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings
                     const date1 = moment(timeSeries[i - 1]).add(j + 1, 'days').format('YYYY-MM-DD');
                     const sqlQuery = query.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
                     try {
-                        const step1Result = await executeQuery(client, sqlQuery);
+                        const step1Result = await executeQuery(databaseResource, sqlQuery);
                         dauTotal += (Number(step1Result[0]?.count));
                     } catch (error) {
                         if(i !== timeSeries.length - 1) continue;
@@ -226,7 +216,7 @@ const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings
                     const date1 = moment(timeSeries[i - 1]).add((j + 1) * 7, 'days').format('YYYY-MM-DD');
                     const sqlQuery = query.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
                     try {
-                        const step1Result = await executeQuery(client, sqlQuery);
+                        const step1Result = await executeQuery(databaseResource, sqlQuery);
                         wauTotal += (Number(step1Result[0]?.count));
                     } catch (error) {
                         if(i !== timeSeries.length - 1) continue;
@@ -237,7 +227,7 @@ const getActiveUsers = async (client:Client, embeddings:ResourceSchemaEmbeddings
                 const sqlQuery = query.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
                 let mauTotal = 0;
                 try {
-                    const step1Result = await executeQuery(client, sqlQuery);
+                    const step1Result = await executeQuery(databaseResource, sqlQuery);
                     mauTotal = Number(step1Result[0]?.count);
                 }
                 catch (error) {

@@ -2,8 +2,7 @@ import { prisma } from "~/server/db";
 
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type ResourceSchemaEmbeddings } from "@prisma/client";
-import { Client } from "pg";
+import { type DatabaseResource, type ResourceSchemaEmbeddings } from "@prisma/client";
 
 import moment from "moment";
 import { getQuery } from "~/utils/getQuery";
@@ -43,13 +42,6 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
             }
         ]
     }
-    
-    const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
-    const client = new Client({
-        connectionString: dbUrl,
-        ssl: { rejectUnauthorized: false, }
-    });
-    await client.connect();
 
     const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
         where: {
@@ -62,7 +54,7 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     const {
         data: usersBySource,
         query: usersBySourceQuery 
-    } = await getUserBySource(client, embeddings, timeSeries, databaseResource.id);
+    } = await getUserBySource(databaseResource, embeddings, timeSeries);
     
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
@@ -140,8 +132,6 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
     reportTable.push(totalAcquisition);
     reportTable.push(percentOrganicUsers);
 
-    await client.end();
-
     const reportTableWithProjections = await getProphetProjectionsReport(
         reportTable,
         REPORT_PROJECTIONS,
@@ -158,12 +148,11 @@ export const getUserAcquisitionReport = async (query: string, userId: string) =>
 }
 
 export const getUserBySource = async (
-    client:Client, 
+    databaseResource:DatabaseResource, 
     embeddings:ResourceSchemaEmbeddings[], 
-    timeSeries: Date[], 
-    databaseResourceId: string): Promise<{
+    timeSeries: Date[], ): Promise<{
     data: UsersBySource[],
-    query: UsersBySourceQuery
+    query: UsersBySourceQuery,
 }> => {
     
     const userBySource:UsersBySource[] = [{
@@ -178,10 +167,10 @@ export const getUserBySource = async (
     const fbPrompt = `Get number of users with source Facebook that joined from ${timeSeries0} to ${timeSeries1}`
     const organicPrompt = `Get number of users without any source that joined from ${timeSeries0} to ${timeSeries1}`
     const totalPrompt = `Get number of users with that joined from ${timeSeries0} to ${timeSeries1}`
-    let fbSqlQuery = await getQuery(client, embeddings, fbPrompt, databaseResourceId);
+    let fbSqlQuery = await getQuery(embeddings, fbPrompt, databaseResource.id, databaseResource.type);
     let googleSqlQuery = fbSqlQuery.replace("Facebook", "Google").replace('facebook', 'google');
-    let organicSqlQuery = await getQuery(client, embeddings, organicPrompt, databaseResourceId);
-    let totalSqlQuery = await getQuery(client, embeddings, totalPrompt, databaseResourceId);
+    let organicSqlQuery = await getQuery(embeddings, organicPrompt, databaseResource.id, databaseResource.type);
+    let totalSqlQuery = await getQuery(embeddings, totalPrompt, databaseResource.id, databaseResource.type);
 
     if(!fbSqlQuery || !googleSqlQuery || !totalSqlQuery || !organicSqlQuery) {
         return {
@@ -229,22 +218,22 @@ export const getUserBySource = async (
             let organicCount = 0;
             let totalCount = 0;
             try {
-                const fbResult = await executeQuery(client, fbQuery);
+                const fbResult = await executeQuery(databaseResource, fbQuery);
                 fbCount = fbResult[0]?.count as number;
             } catch (error) {
             }
             try {
-                const googleResult = await executeQuery(client, googleQuery);
+                const googleResult = await executeQuery(databaseResource, googleQuery);
                 googleCount = googleResult[0]?.count as number;
             } catch (error) {
             }
             try {
-                const organicResult = await executeQuery(client, organicQuery);
+                const organicResult = await executeQuery(databaseResource, organicQuery);
                 organicCount = organicResult[0]?.count as number;
             } catch (error) {
             }
             try {
-                const totalResult = await executeQuery(client, totalQuery);
+                const totalResult = await executeQuery(databaseResource, totalQuery);
                 totalCount = totalResult[0]?.count as number;
             } catch (error) {
             }

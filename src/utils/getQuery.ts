@@ -1,14 +1,18 @@
 import { type ResourceSchemaEmbeddings } from "@prisma/client";
-import { type Client } from "pg";
 import { createContext } from "./createContext";
 import { openai } from "~/server/services/openai";
 import { COMPLETIONS_MODEL } from "~/constants/openAi";
 import { prisma } from "~/server/db";
 import moment from "moment";
 
-export const getQuery = async (client:Client, embeddings:ResourceSchemaEmbeddings[], query: string, databaseResourceId: string) : Promise<string> => {
+export const getQuery = async (
+    embeddings:ResourceSchemaEmbeddings[], 
+    query: string, 
+    databaseResourceId: string,
+    databaseType: string,
+) : Promise<string> => {
            
-    let prompt = "### Postgres SQL table with their properties\n#\n";
+    let prompt = `###${databaseType} table with their properties\n#\n`;
     const schemaString = await createContext(
         query,
         embeddings,

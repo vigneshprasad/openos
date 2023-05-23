@@ -1,8 +1,7 @@
 import { prisma } from "~/server/db";
 import { getMonthlyTimeSeries } from "~/utils/getTimeSeries";
 import { type ExcelCell } from "~/types/types";
-import { type SavedQuery, type ResourceSchemaEmbeddings } from "@prisma/client";
-import { Client } from "pg";
+import { type SavedQuery, type ResourceSchemaEmbeddings, type DatabaseResource } from "@prisma/client";
 import moment from "moment";
 import { processPrompt } from "~/utils/processPrompt";
 import { executeQuery } from "~/utils/executeQuery";
@@ -42,13 +41,6 @@ export const getRetentionReport = async (query: string, userId: string) => {
         ]
     }
 
-    const dbUrl = `postgresql://${databaseResource?.username}:${databaseResource?.password}@${databaseResource?.host}:${databaseResource?.port}/${databaseResource?.dbName}?sslmode=require`;
-    const client = new Client({
-        connectionString: dbUrl,
-        ssl: { rejectUnauthorized: false, }
-    });
-    await client.connect();
-
     const embeddings = await prisma.resourceSchemaEmbeddings.findMany({
         where: {
             databaseResourceId: databaseResource.id
@@ -77,7 +69,7 @@ export const getRetentionReport = async (query: string, userId: string) => {
     const {
         data: retentionData,
         query: retentionDataQuery
-    } = await getRetentionData(client, embeddings, timeSeries, activityDescription.activity, databaseResource.id);
+    } = await getRetentionData(databaseResource, embeddings, timeSeries, activityDescription.activity);
 
     const reportTable: ExcelCell[][] = [];
     const reportHeader: ExcelCell[] = [{value: 'Name'}]
@@ -118,8 +110,6 @@ export const getRetentionReport = async (query: string, userId: string) => {
     reportTable.push(d14Retention);
     reportTable.push(d30Retention);
 
-    await client.end();
-
     const reportTableWithProjections = await getProphetProjectionsReport(
         reportTable,
         REPORT_PROJECTIONS,
@@ -136,11 +126,10 @@ export const getRetentionReport = async (query: string, userId: string) => {
 }
 
 const getRetentionData = async (
-    client:Client, 
-    embeddings:ResourceSchemaEmbeddings[], 
+    databaseResource: DatabaseResource, 
+    embeddings: ResourceSchemaEmbeddings[], 
     timeSeries: Date[], 
-    activityDescription: string,
-    databaseResourceId: string) : Promise<{
+    activityDescription: string) : Promise<{
     data: RetentionData[],
     query?: SavedQuery
 }> => {
@@ -162,12 +151,12 @@ const getRetentionData = async (
 
     let userListQuery = await processPrompt(
         `Get emails and created at of users that joined between ${timeSeries0} and ${timeSeries1} from user table`,
-        client, embeddings, timeSeries, databaseResourceId
+        embeddings, timeSeries, databaseResource.id, databaseResource.type
     );
     
     let userList;
     try {
-        userList = await executeQuery(client, userListQuery);
+        userList = await executeQuery(databaseResource, userListQuery);
     } catch (error) {
         console.log(error);
         return {
@@ -181,7 +170,7 @@ const getRetentionData = async (
     let retentionActivityPrompt, retentionActivitySavedQuery;
     retentionActivitySavedQuery = await prisma.savedQuery.findFirst({
         where: {
-            databaseResourceId: databaseResourceId,
+            databaseResourceId: databaseResource.id,
             reportKey: 'Retention Activity',
         }
     });
@@ -192,7 +181,7 @@ const getRetentionData = async (
         } else {
             retentionActivityPrompt = await processPrompt(
                 `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
-                client, embeddings, timeSeries, databaseResourceId
+                embeddings, timeSeries, databaseResource.id, databaseResource.type
             );
             retentionActivityPrompt = retentionActivityPrompt.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
             retentionActivitySavedQuery = await prisma.savedQuery.update({
@@ -207,12 +196,12 @@ const getRetentionData = async (
     } else {
         retentionActivityPrompt = await processPrompt(
             `${activityDescription} by user with email ${dummyIdentifier} between ${timeSeries0} and ${timeSeries1}`,
-            client, embeddings, timeSeries, databaseResourceId
+            embeddings, timeSeries, databaseResource.id, databaseResource.type
         );
         retentionActivityPrompt = retentionActivityPrompt.replaceAll(timeSeries0, '<DATE-1>').replaceAll(timeSeries1, '<DATE-2>')
         retentionActivitySavedQuery = await prisma.savedQuery.create({
             data: {
-                databaseResourceId: databaseResourceId,
+                databaseResourceId: databaseResource.id,
                 reportKey: 'Retention Activity',
                 query: retentionActivityPrompt,
                 feedback: 0
@@ -239,7 +228,7 @@ const getRetentionData = async (
         const date1 = moment(timeSeries[i]).format('YYYY-MM-DD');
 
         const userListQueryNew = userListQuery.replaceAll('<DATE-1>', date0).replaceAll('<DATE-2>', date1);
-        const userList = await executeQuery(client, userListQueryNew);
+        const userList = await executeQuery(databaseResource, userListQueryNew);
 
         let d0Count = 0;
         let d1Count = 0;
@@ -270,11 +259,11 @@ const getRetentionData = async (
             const activityQueryD30 = retentionActivityPrompt.replaceAll('<DATE-1>', d30Start).replaceAll('<DATE-2>', d30End).replaceAll(dummyIdentifier, identifier);
 
             try {
-                const activityCountD0 = await executeQuery(client, activityQueryD0);
-                const activityCountD1 = await executeQuery(client, activityQueryD1);
-                const activityCountD7 = await executeQuery(client, activityQueryD7);
-                const activityCountD14 = await executeQuery(client, activityQueryD14);
-                const activityCountD30 = await executeQuery(client, activityQueryD30);
+                const activityCountD0 = await executeQuery(databaseResource, activityQueryD0);
+                const activityCountD1 = await executeQuery(databaseResource, activityQueryD1);
+                const activityCountD7 = await executeQuery(databaseResource, activityQueryD7);
+                const activityCountD14 = await executeQuery(databaseResource, activityQueryD14);
+                const activityCountD30 = await executeQuery(databaseResource, activityQueryD30);
 
                 if(activityCountD0.length > 0 && (activityCountD0[0] as UserCount).count > 0 ) d0Count++;
                 if(activityCountD1.length > 0 && (activityCountD1[0] as UserCount).count > 0) d1Count++;

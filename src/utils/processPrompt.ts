@@ -1,14 +1,13 @@
 import { type ResourceSchemaEmbeddings } from "@prisma/client";
 import moment from "moment";
-import { type Client } from "pg";
 import { getQuery } from "./getQuery";
 
 export const processPrompt = async (
     query: string, 
-    client:Client, 
     embeddings:ResourceSchemaEmbeddings[], 
     timeSeries: Date[], 
     databaseResourceId: string,
+    databaseResourceType: string,
     removeDate?: boolean
 ): Promise<string> => {
     const timeSeries0 = moment(timeSeries[0]).format("YYYY-MM-DD");
@@ -20,6 +19,6 @@ export const processPrompt = async (
     } else {
         prompt = query + ` from ${timeSeries0} to ${timeSeries1}`
     }
-    const sqlQuery = await getQuery(client, embeddings, prompt, databaseResourceId);
+    const sqlQuery = await getQuery(embeddings, prompt, databaseResourceId, databaseResourceType);
     return sqlQuery;
 }

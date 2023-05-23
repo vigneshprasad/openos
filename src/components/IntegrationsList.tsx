@@ -3,6 +3,7 @@ import { DatabaseResourceForm } from "./DatabaseResourceForm"
 import { StatementUploadForm } from "./StatementUploadForm"
 import { RazorpayResourceForm } from "./RazorpayResourceForm"
 import { StripeResourceForm } from "./StripeResourceForm"
+import { MARIADB, POSTGRES, MYSQL } from "~/constants/dbTypes"
 
 const INTEGRATIONS = [
     {
@@ -11,7 +12,7 @@ const INTEGRATIONS = [
         description: "Connect your database to create reports & retrieve data",
         imageSrc: "/postgresql.png",
         url: "https://www.postgresql.org/",
-        button: <DatabaseResourceForm type="PostgreSQL" />
+        button: <DatabaseResourceForm type={POSTGRES} />
     },
     {
         key: "mysql",
@@ -19,7 +20,7 @@ const INTEGRATIONS = [
         description: "Connect your database to create reports & retrieve data",
         imageSrc: "/mysql.png",
         url: "https://www.mysql.com/",
-        button: <DatabaseResourceForm type="MySQL" />
+        button: <DatabaseResourceForm type={MYSQL} />
     },
     {
         key: "mariadb",
@@ -27,7 +28,7 @@ const INTEGRATIONS = [
         description: "Connect your database to create reports & retrieve data",
         imageSrc: "/mariadb.png",
         url: "https://mariadb.org/",
-        button: <DatabaseResourceForm type="MariaDB" />
+        button: <DatabaseResourceForm type={MARIADB} />
     },
     {
         key: "razorpay",
