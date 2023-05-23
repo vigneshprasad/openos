@@ -1,4 +1,4 @@
-import React, { type SetStateAction, useState, useRef, useEffect } from "react"
+import React, { type SetStateAction, useState, useRef, useEffect, useImperativeHandle } from "react"
 import { type CommandSuggestion, commands } from "~/constants/commandAutocomplete";
 
 interface IProps {
@@ -9,11 +9,14 @@ interface IProps {
 
 export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
     {command, loading, setCommand}, ref) => {
-    
+
     const [suggestions, setSuggestions] = useState<CommandSuggestion[]>([])
     const [suggestionIndex, setSuggestionIndex] = useState(0);
     const [suggestionsActive, setSuggestionsActive] = useState(false);
+    const localInputRef = useRef<HTMLInputElement>(null);
     const selectRef = useRef<HTMLDivElement>(null);
+
+    useImperativeHandle(ref, () => localInputRef.current as HTMLInputElement);
 
     const handleClickOutside = (event: Event): void => {
         if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
@@ -81,10 +84,13 @@ export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
 
         // ENTER
         else if (e.key === "Enter") {
-            e.preventDefault();
-            setCommand(suggestions[suggestionIndex]?.command ?? "");
-            setSuggestionIndex(0);
-            setSuggestionsActive(false);
+            if (suggestionsActive && suggestions) {
+                setCommand(suggestions[suggestionIndex]?.command ?? "");
+                setSuggestions([]);
+                setSuggestionIndex(0);
+                setSuggestionsActive(false);
+                e.preventDefault();
+            }
         }
     };
     
@@ -92,7 +98,7 @@ export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
     return (
         <div>
             <input
-                ref={ref}
+                ref={localInputRef}
                 type="text"
                 className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
                 font-normal placeholder:text-sm placeholder:text-[#616161]"
