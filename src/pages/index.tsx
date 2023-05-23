@@ -73,7 +73,6 @@ const Home: NextPage = () => {
 
     const runQuery = api.commandRouter.runCommand.useMutation({
         onSuccess: async (res) => {
-            setCommand("");
             const dataResult = res as unknown as CommandDataType;
             if(dataResult.type === COMPLEX_REPORT_LOADING) {
                 if(!dataResult.output[0]) {
@@ -108,6 +107,8 @@ const Home: NextPage = () => {
                 setData([...data, dataResult]);
                 setLoading(false);
             }
+
+            setCommand("");
         },
         onError: () => {
             setLoading(false);
@@ -147,7 +148,6 @@ const Home: NextPage = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         setLoading(true);
         runQuery.mutate({ query: command });
         commandHistoryMutation.mutate()
