@@ -1,5 +1,6 @@
 import Image from "next/image";
-import React from "react";
+import React, { useMemo, useState } from "react";
+import { api } from "~/utils/api";
 
 type CommandHistory = {
     createdAt: Date,
@@ -10,20 +11,30 @@ type CommandHistory = {
     type: string
 }
 
-interface IProps {
-  commands?: CommandHistory[];
-  selectCommandFromHistory: (command: string) => void;
-}
 
-export const CommandHistorySection: React.FC<IProps> = ({commands, selectCommandFromHistory}) => {
+export const CommandHistorySection: React.FC = () => {
+
+    const [commandHistory, setCommandHistory] = useState<CommandHistory[]>([]);
+
+    const commandHistoryMutation = api.commandHistory.getAll.useMutation({
+        onSuccess: (data) => {
+            setCommandHistory(data)
+        },
+        onError: () => {
+            return null;
+        }
+    })
+
+    useMemo(() => commandHistoryMutation.mutate(), [])
+
     return (
         <div className="grid grid-rows-[max-content_1fr] grid-cols-1 bg-[#1C1B1D] border border-solid 
             border-[#333333] border-l-0">
-            <div className="p-3 border-b border-solid border-b-[#333333]">
+            <div className="h-12 p-3 border-b border-solid border-b-[#333333]">
                 <text className="text-sm text-[#838383] font-medium">Command History</text>
             </div>
             <div className="overflow-auto">
-                {commands && commands?.length === 0 ? (
+                {commandHistory && commandHistory?.length === 0 ? (
                     <div className="w-[80%] mx-auto mt-[70px]">
                         <Image 
                             src="/command_history_empty.png" 
@@ -42,11 +53,10 @@ export const CommandHistorySection: React.FC<IProps> = ({commands, selectCommand
                         </div>
                     </div>) : (
                     <div className="py-5 flex flex-col gap-2">
-                        {commands?.map((command, index) => (
+                        {commandHistory?.map((command, index) => (
                             <div 
                                 className="pl-3 pr-5 flex gap-4 items-center cursor-pointer hover:bg-[#373737]"
                                 key={index}
-                                onClick={() => selectCommandFromHistory(command.input)}
                             >
                                 <p className="min-w-[15px] text-xs text-[#616161]">{index + 1}</p>
                                 <div className="px-2 py-1 truncate">

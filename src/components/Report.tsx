@@ -37,7 +37,7 @@ const Report: React.FC<Props> = ({ props }) => {
                         <p>{dataRaw.heading}</p>
                     </div>
                     <table>
-                        <thead>
+                        <thead className="report-table">
                             <tr>
                                 {dataRaw.sheet[0] && dataRaw.sheet[0].map(
                                     (cell, index) => (
@@ -50,7 +50,7 @@ const Report: React.FC<Props> = ({ props }) => {
                                 }
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="report-table">
                             {grid.map((row, i) => (
                                 <tr key={i}>
                                     {row.map((cell, j) => (

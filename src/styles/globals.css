@@ -201,7 +201,7 @@ input {
   font-size: 12px;
   font-weight: 400;
   color: #616161;
-  background-color: #1C1B1D;
+  background-color: #1c1b1d;
 }
 
 th {
@@ -259,8 +259,8 @@ table td:nth-child(1) {
   display: none;
 }
 
-thead tr th:first-child,
-tbody tr td:first-child {
+.report-table thead tr th:first-child,
+.report-table tbody tr td:first-child {
   min-width: 250px;
 }
 
