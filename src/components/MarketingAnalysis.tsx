@@ -124,212 +124,207 @@ export const MarketingAnalysisTerminal: React.FC = () => {
 
     return (
         <div className="p-5 bg-[#0A0A0A] grid grid-rows-[1fr_max-content] grid-cols-1 gap-5 overflow-hidden">
-            {data.length === 0 ? <div>
-                <div className="grid grid-rows-2 gap-5">
-                    <div className="grid grid-cols-2 gap-5">
-                        <div className="tableDiv hide-scrollbar max-w-max min-w-full">
-                            <div className="table-heading flex gap-1">
-                                <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
-                                <p>Return on Advertisment Spend</p>
-                            </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th className="w-fit whitespace-nowrap"></th>
-                                        <th className="w-fit whitespace-nowrap">No.</th>
-                                        <th className="w-fit whitespace-nowrap">CAC</th>
-                                        <th className="w-full whitespace-nowrap">Cohorts of Users</th>
-                                        <th className="w-full whitespace-nowrap	">Total Spend</th>
-                                        <th className="w-full whitespace-nowrap	">Total Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">1</td>
-                                        <td className="w-fit whitespace-nowrap">60</td>
-                                        <td className="w-fit whitespace-nowrap">₹ 150</td>
-                                        <td className="w-full whitespace-nowrap">Facebook Campaign: Test Campaign</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 10000</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 5600</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">2</td>
-                                        <td className="w-fit whitespace-nowrap">84</td>
-                                        <td className="w-fit whitespace-nowrap">₹ 135</td>
-                                        <td className="w-full whitespace-nowrap">Facebook Campaign: Test 2 Campaign</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 14000</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 9400</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">3</td>
-                                        <td className="w-fit whitespace-nowrap">54</td>
-                                        <td className="w-fit whitespace-nowrap">₹ 150</td>
-                                        <td className="w-full whitespace-nowrap">Twitter Campaign</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 3000</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 800</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+            <div className="hide-scrollbar overflow-auto flex flex-col gap-5">
+                <div>
+                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
+                        <div className="table-heading flex gap-1">
+                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                            <p>Return on Advertisment Spend</p>
                         </div>
-                        <div className="tableDiv hide-scrollbar max-w-max min-w-full">
-                            <div className="table-heading flex gap-1">
-                                <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
-                                <p>Predicted LTV of Users by Campaign</p>
-                            </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th className="w-fit whitespace-nowrap"></th>
-                                        <th className="w-fit whitespace-nowrap">No.</th>
-                                        <th className="w-fit whitespace-nowrap">Certainty</th>
-                                        <th className="w-full whitespace-nowrap">Cohorts of Users</th>
-                                        <th className="w-full whitespace-nowrap	">ARPU</th>
-                                        <th className="w-full whitespace-nowrap	">Predicted LTV</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">1</td>
-                                        <td className="w-fit whitespace-nowrap">60</td>
-                                        <td className="w-fit whitespace-nowrap">86%</td>
-                                        <td className="w-full whitespace-nowrap">Facebook Campaign: Test Campaign</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 100</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 500</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">2</td>
-                                        <td className="w-fit whitespace-nowrap">54</td>
-                                        <td className="w-fit whitespace-nowrap">83%</td>
-                                        <td className="w-full whitespace-nowrap">Twitter Campaign: Test Campaign</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 50</td>
-                                        <td className="w-full whitespace-nowrap	">₹ 400</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="w-fit whitespace-nowrap"></th>
+                                    <th className="w-fit whitespace-nowrap">No.</th>
+                                    <th className="w-fit whitespace-nowrap">CAC</th>
+                                    <th className="w-full whitespace-nowrap">Cohorts of Users</th>
+                                    <th className="w-full whitespace-nowrap	">Total Spend</th>
+                                    <th className="w-full whitespace-nowrap	">Total Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">1</td>
+                                    <td className="w-fit whitespace-nowrap">60</td>
+                                    <td className="w-fit whitespace-nowrap">₹ 150</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Campaign: Test Campaign</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 10000</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 5600</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">2</td>
+                                    <td className="w-fit whitespace-nowrap">84</td>
+                                    <td className="w-fit whitespace-nowrap">₹ 135</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Campaign: Test 2 Campaign</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 14000</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 9400</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">3</td>
+                                    <td className="w-fit whitespace-nowrap">54</td>
+                                    <td className="w-fit whitespace-nowrap">₹ 150</td>
+                                    <td className="w-full whitespace-nowrap">Twitter Campaign</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 3000</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 800</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
+                        <div className="table-heading flex gap-1">
+                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                            <p>Predicted LTV of Users by Campaign</p>
                         </div>
-                        <div className="tableDiv hide-scrollbar max-w-max min-w-full">
-                            <div className="table-heading flex gap-1">
-                                <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
-                                <p>Likelihood to Churn</p>
-                            </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th className="w-fit whitespace-nowrap"></th>
-                                        <th className="w-fit whitespace-nowrap">No.</th>
-                                        <th className="w-fit whitespace-nowrap">Certainty</th>
-                                        <th className="w-full whitespace-nowrap">Cohorts of Users</th>
-                                        <th className="w-full whitespace-nowrap	">Current Retention</th>
-                                        <th className="w-full whitespace-nowrap	">Probability of Churn</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">1</td>
-                                        <td className="w-fit whitespace-nowrap">60</td>
-                                        <td className="w-fit whitespace-nowrap">86%</td>
-                                        <td className="w-full whitespace-nowrap">Facebook</td>
-                                        <td className="w-full whitespace-nowrap	">26%</td>
-                                        <td className="w-full whitespace-nowrap	">72%</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="w-fit whitespace-nowrap">2</td>
-                                        <td className="w-fit whitespace-nowrap">54</td>
-                                        <td className="w-fit whitespace-nowrap">83%</td>
-                                        <td className="w-full whitespace-nowrap">Twitter</td>
-                                        <td className="w-full whitespace-nowrap	">33%</td>
-                                        <td className="w-full whitespace-nowrap	">80%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="w-fit whitespace-nowrap"></th>
+                                    <th className="w-fit whitespace-nowrap">No.</th>
+                                    <th className="w-fit whitespace-nowrap">Certainty</th>
+                                    <th className="w-full whitespace-nowrap">Cohorts of Users</th>
+                                    <th className="w-full whitespace-nowrap	">ARPU</th>
+                                    <th className="w-full whitespace-nowrap	">Predicted LTV</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">1</td>
+                                    <td className="w-fit whitespace-nowrap">60</td>
+                                    <td className="w-fit whitespace-nowrap">86%</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Campaign: Test Campaign</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 100</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 500</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">2</td>
+                                    <td className="w-fit whitespace-nowrap">54</td>
+                                    <td className="w-fit whitespace-nowrap">83%</td>
+                                    <td className="w-full whitespace-nowrap">Twitter Campaign: Test Campaign</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 50</td>
+                                    <td className="w-full whitespace-nowrap	">₹ 400</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
+                        <div className="table-heading flex gap-1">
+                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                            <p>Likelihood to Churn</p>
                         </div>
-                    </div>    
-                </div>
-            </div> : (
-                <div className="hide-scrollbar overflow-auto flex flex-col gap-5">
-                    {data.map((item, index) => {
-                        const [key, value] = item.input.split(":")
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="w-fit whitespace-nowrap"></th>
+                                    <th className="w-fit whitespace-nowrap">No.</th>
+                                    <th className="w-fit whitespace-nowrap">Certainty</th>
+                                    <th className="w-full whitespace-nowrap">Cohorts of Users</th>
+                                    <th className="w-full whitespace-nowrap	">Current Retention</th>
+                                    <th className="w-full whitespace-nowrap	">Probability of Churn</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">1</td>
+                                    <td className="w-fit whitespace-nowrap">60</td>
+                                    <td className="w-fit whitespace-nowrap">86%</td>
+                                    <td className="w-full whitespace-nowrap">Facebook</td>
+                                    <td className="w-full whitespace-nowrap	">26%</td>
+                                    <td className="w-full whitespace-nowrap	">72%</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">2</td>
+                                    <td className="w-fit whitespace-nowrap">54</td>
+                                    <td className="w-fit whitespace-nowrap">83%</td>
+                                    <td className="w-full whitespace-nowrap">Twitter</td>
+                                    <td className="w-full whitespace-nowrap	">33%</td>
+                                    <td className="w-full whitespace-nowrap	">80%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>    
+                {data.map((item, index) => {
+                    const [key, value] = item.input.split(":")
 
-                        return <div className="p-4 bg-[#111] rounded-md" key={index}>
-                            <p className="text-sm text-[#F4BF4F]">
-                                <span className="text-[#fff]">{key}: </span>
-                                {value}
-                            </p>
+                    return <div className="p-4 bg-[#111] rounded-md" key={index}>
+                        <p className="text-sm text-[#F4BF4F]">
+                            <span className="text-[#fff]">{key}: </span>
+                            {value}
+                        </p>
 
-                            {
-                                item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
-                            }
-                            {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
-                                    <div className="max-w-max">
-                                        <CSVLink className="w-fit-content" data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
-                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                            text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer">
-                                                <p>Download CSV</p>
-                                            </button>
-                                        </CSVLink>
-                                    </div>
-                            }
-                            {
-                                item.type === FINANCIAL_DATA && <RazorpayData key={index} props={item.output} />
-                            }
-                            {
-                                item.type === CREATE_REPORT && <Report key={index} props={item.output} />
-                            }
-                            {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
-                                    <div className="max-w-max">
-                                        <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
-                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                            text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer">
-                                                <p>Download CSV</p>
-                                            </button>
-                                        </CSVLink>
-                                    </div>
-                            }   
-                            {
-                                item.type === COMPLEX_REPORT && 
-                                    item.output.map((report, index2) => {
-                                        const simpleReport = report as unknown as SimpleReportType;
-                                        if(simpleReport) {
-                                            return <Report key={index2} props={simpleReport} />
-                                        } 
-                                    })
-                            }
-                            {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
-                                    <div className="max-w-max">
-                                        <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
-                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                            text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer">
-                                                <p>Download CSV</p>
-                                            </button>
-                                        </CSVLink>
-                                    </div>
-                            }   
-                            {
-                                item.type === UNKNOWN_COMMAND && 
-                                    <ErrorBox
-                                        title="Incorrect command entered"
-                                        description='The command you entered seems to be in the wrong format. Correct format eg “get-data: followed by your command“'
-                                    />
-                            }
-                            {
-                                item.type === GET_HELP && 
-                                    <p className="text-white"> {item.output as unknown as string} </p>
-                            }
-                        </div>
-                    })}
+                        {
+                            item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
+                        }
+                        {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
+                                <div className="max-w-max">
+                                    <CSVLink className="w-fit-content" data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
+                                        <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
+                                        text-[#838383] font-normal text-xs flex gap-1.5
+                                        hover:bg-[#434144] cursor-pointer">
+                                            <p>Download CSV</p>
+                                        </button>
+                                    </CSVLink>
+                                </div>
+                        }
+                        {
+                            item.type === FINANCIAL_DATA && <RazorpayData key={index} props={item.output} />
+                        }
+                        {
+                            item.type === CREATE_REPORT && <Report key={index} props={item.output} />
+                        }
+                        {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
+                                <div className="max-w-max">
+                                    <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
+                                        <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
+                                        text-[#838383] font-normal text-xs flex gap-1.5
+                                        hover:bg-[#434144] cursor-pointer">
+                                            <p>Download CSV</p>
+                                        </button>
+                                    </CSVLink>
+                                </div>
+                        }   
+                        {
+                            item.type === COMPLEX_REPORT && 
+                                item.output.map((report, index2) => {
+                                    const simpleReport = report as unknown as SimpleReportType;
+                                    if(simpleReport) {
+                                        return <Report key={index2} props={simpleReport} />
+                                    } 
+                                })
+                        }
+                        {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
+                                <div className="max-w-max">
+                                    <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
+                                        <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
+                                        text-[#838383] font-normal text-xs flex gap-1.5
+                                        hover:bg-[#434144] cursor-pointer">
+                                            <p>Download CSV</p>
+                                        </button>
+                                    </CSVLink>
+                                </div>
+                        }   
+                        {
+                            item.type === UNKNOWN_COMMAND && 
+                                <ErrorBox
+                                    title="Incorrect command entered"
+                                    description='The command you entered seems to be in the wrong format. Correct format eg “get-data: followed by your command“'
+                                />
+                        }
+                        {
+                            item.type === GET_HELP && 
+                                <p className="text-white"> {item.output as unknown as string} </p>
+                        }
+                    </div>
+                })}
 
-                    {loading && 
-                        <div className="w-full flex justify-center">
-                            <FadingCubesLoader />
-                        </div>
-                    }
+                {loading && 
+                    <div className="w-full flex justify-center">
+                        <FadingCubesLoader />
+                    </div>
+                }
 
-                    <div ref={scrollRef} />
-                </div>
-            )}
+                <div ref={scrollRef} />
+            </div>
 
             <div className="w-full bg-[#1C1B1D] border border-solid border-[#333] rounded-md">
                 <div className="px-3 py-1 border-b border-solid border-b-[#333] flex justify-between items-center">

@@ -52,3 +52,12 @@ export type TransactionClassification = {
     input: string
     category: string
 }
+
+export type PredictCommandInput = {
+    command: string,
+    type: string,
+    event: string,
+    event2?: string,
+    repeat?: number,
+    period: number,
+}

@@ -192,7 +192,6 @@ input {
   font-weight: 400;
   line-height: 16px;
   color: #c4c4c4;
-  text-align: center;
 }
 
 .tableDiv .table-heading {
@@ -202,6 +201,10 @@ input {
   font-weight: 400;
   color: #616161;
   background-color: #1c1b1d;
+}
+
+.report-table .tableDiv {
+  text-align: center;
 }
 
 th {
