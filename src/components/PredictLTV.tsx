@@ -1,4 +1,5 @@
 import React, { useState, type SetStateAction } from "react";
+import { PREDICT_LTV } from "~/constants/commandConstants";
 import { type PredictCommandInput } from "~/types/types";
 
 interface IProps {
@@ -16,7 +17,7 @@ export const PredictLTV: React.FC<IProps> = ({ setInput }) => {
         setEvent(value);
         setInput({
             command: `Predict LTV For users that perform ${value} atleast ${repeatName} after ${period} days from signing up`,
-            type: "predict-ltv",
+            type: PREDICT_LTV,
             event: value,
             period: Number(period),
             repeat: Number(repeat),
@@ -30,7 +31,7 @@ export const PredictLTV: React.FC<IProps> = ({ setInput }) => {
         setRepeatName(text ? text : "");
         setInput({
             command: `Predict LTV For users that perform ${event} atleast ${text ? text : ""} after ${period} days from signing up`,
-            type: "predict-ltv",
+            type: PREDICT_LTV,
             event: event,
             period: Number(period),
             repeat: Number(number ? number : ""),
@@ -42,7 +43,7 @@ export const PredictLTV: React.FC<IProps> = ({ setInput }) => {
         setPeriod(value);
         setInput({
             command: `Predict LTV For users that perform ${event} atleast ${repeatName} after ${value} days from signing up`,
-            type: "predict-ltv",
+            type: PREDICT_LTV,
             event: event,
             period: Number(value),
             repeat: Number(repeat),
@@ -90,12 +91,10 @@ export const PredictLTV: React.FC<IProps> = ({ setInput }) => {
                 className="py-2 px-1 bg-[#272628] border border-solid border-[#333] shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] 
                 flex-col rounded-md" onChange={handlePeriodChange}>
                     <option disabled selected value=""> -- </option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="7">7</option>
-                    <option value="14">14</option>
                     <option value="30">30</option>
+                    <option value="60">60</option>
+                    <option value="90">90</option>
+                    <option value="365">365</option>
                 </select>
             </span>
             <span className="px-1">

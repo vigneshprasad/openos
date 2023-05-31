@@ -1,4 +1,5 @@
 import React, { useState, type SetStateAction } from "react";
+import { PREDICT_CHURN } from "~/constants/commandConstants";
 import { type PredictCommandInput } from "~/types/types";
 
 interface IProps {
@@ -16,7 +17,7 @@ export const PredictChurn: React.FC<IProps> = ({ setInput }) => {
         setEvent(value);
         setInput({
             command: `Predict churn for a user that does ${value} atleast ${repeatName} in ${period} days`,
-            type: "predict-churn",
+            type: PREDICT_CHURN,
             event: value,
             period: Number(period),
             repeat: Number(repeat),
@@ -30,7 +31,7 @@ export const PredictChurn: React.FC<IProps> = ({ setInput }) => {
         setRepeatName(text ? text : "");
         setInput({
             command: `Predict LTV For users that perform ${event} atleast ${text ? text : ""} after ${period} days`,
-            type: "predict-ltv",
+            type: PREDICT_CHURN,
             event: event,
             period: Number(period),
             repeat: Number(number ? number : ""),
@@ -42,7 +43,7 @@ export const PredictChurn: React.FC<IProps> = ({ setInput }) => {
         setPeriod(value);
         setInput({
             command: `Predict churn for a user that does ${event} atleast ${repeatName} in ${value} days`,
-            type: "predict-churn",
+            type: PREDICT_CHURN,
             event: event,
             period: Number(value),
             repeat: Number(repeat),

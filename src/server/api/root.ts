@@ -8,6 +8,7 @@ import { savedQueryRouter } from "./routers/savedQuery";
 import { userRouter } from "./routers/user";
 import { commandHistoryRouter } from "./routers/commandHistory";
 import { stripeResourceRouter } from "./routers/stripeResource";
+import { predictiveAnalysisCommandRouter } from "./routers/predictiveAnalysisCommand";
 
 /**
  * This is the primary router for your server.
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   savedQuery: savedQueryRouter,
   user: userRouter,
   commandHistory: commandHistoryRouter,
+  predictiveAnalysisCommand: predictiveAnalysisCommandRouter,
 });
 
 // export type definition of API

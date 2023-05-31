@@ -37,6 +37,12 @@ export type Error = {
 export type ExcelSheet = {
     heading: string;
     sheet: ExcelCell[][]
+    graph?: {
+        labels: string[];
+        data: number[];
+        title: string;
+        type: string;
+    }
 }
 
 export type ExcelCell = {

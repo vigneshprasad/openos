@@ -34,9 +34,7 @@ export const MainTerminal: React.FC = () => {
     const selectCommand = useCallback((command: string) => {
         setCommand((prevCommand) => `${command}: ${prevCommand}`)
         inputFocusRef.current?.focus()
-    }, [inputFocusRef, setCommand])
-
-    
+    }, [inputFocusRef, setCommand])    
 
     useEffect(() => {
         if (scrollRef.current && (loading || data)) {

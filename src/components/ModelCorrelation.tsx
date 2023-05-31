@@ -1,4 +1,5 @@
 import React, { useState, type SetStateAction } from "react";
+import { MODEL_CORRELATION } from "~/constants/commandConstants";
 import { type PredictCommandInput } from "~/types/types";
 
 interface IProps {
@@ -15,7 +16,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
         setEvent(value);
         setInput({
             command: `Model Correlation for ${value} and ${event2} over period of ${period} days`,
-            type: "predict-likelihood",
+            type: MODEL_CORRELATION,
             event: value,
             event2: event2,
             period: Number(period),
@@ -27,7 +28,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
         setEvent2(value);
         setInput({
             command: `Model Correlation for ${event} and ${value} over period of ${period} days`,
-            type: "predict-likelihood",
+            type: MODEL_CORRELATION,
             event: event,
             event2: value,
             period: Number(period),
@@ -39,7 +40,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
         setPeriod(value);
         setInput({
             command: `Model Correlation for ${event} and ${event2} over period of ${value} days`,
-            type: "predict-likelihood",
+            type: MODEL_CORRELATION,
             event: event,
             event2: event2,
             period: Number(value),

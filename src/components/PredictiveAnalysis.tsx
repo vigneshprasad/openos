@@ -1,20 +1,17 @@
-import { CSVLink } from "react-csv";
 import { useCallback, useEffect, useRef, useState } from "react";
-import RazorpayData from "~/components/RazorpayData";
-import QueryResult from "~/components/QueryResult";
-import { COMPLEX_REPORT, DATABASE_QUERY, FINANCIAL_DATA, CREATE_REPORT, COMPLEX_REPORT_LOADING, UNKNOWN_COMMAND, GET_HELP, PREDICTIVE_ANALYSIS_COMMANDS_LIST, PREDICT_LTV, MODEL_CORRELATION, PREDICT_CHURN, PREDICT_LIKELIHOOD } from "~/constants/commandConstants";
+import {  UNKNOWN_COMMAND, PREDICTIVE_ANALYSIS_COMMANDS_LIST, PREDICT_LTV, MODEL_CORRELATION, PREDICT_CHURN, PREDICT_LIKELIHOOD } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
-import type { CommandResultType, ExcelSheet, PredictCommandInput, QueryAndResult, SimpleReportType } from "../types/types";
-import Report from "~/components/Report";
+import type { CommandResultType, PredictCommandInput} from "../types/types";
 import Image from "next/image";
 import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
-import { convertComplexReportToExcel, convertDatabaseQueryResultToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import { ErrorBox } from "~/components/ErrorBox";
 import { PredictLTV } from "./PredictLTV";
 import { PredictChurn } from "./PredictChurn";
 import { PredictLikelihood } from "./PredictLikelihood";
 import { ModelCorrelation } from "./ModelCorrelation";
+import GraphReport from "./GraphReport";
+import Report from "./Report";
 
 type CommandDataType = {
     input: string,
@@ -31,6 +28,8 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
         command: "",
         type: "",
         event: "",
+        event2: "",
+        repeat: 0,
         period: 0,
     });
     const [data, setData] = useState<CommandDataType[]>([]);
@@ -47,52 +46,13 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
         }
     }, [loading, data])
 
-    const runSimpleQuery = api.commandRouter.runCommand.useMutation({
-        onSuccess: (data) => {
-            return data;
-        },
-        onError: () => {
-            return null;
-        }
-    })
 
-    const runQuery = api.commandRouter.runCommand.useMutation({
-        onSuccess: async (res) => {
+    const runQuery = api.predictiveAnalysisCommand.runCommand.useMutation({
+        onSuccess: (res) => {
             setCommand("");
             const dataResult = res as unknown as CommandDataType;
-            if(dataResult.type === COMPLEX_REPORT_LOADING) {
-                if(!dataResult.output[0]) {
-                    setLoading(false);
-                    return;
-                }
-                const commands:string[] = dataResult.output[0] as unknown as string[];
-                const complexReport:CommandDataType = {
-                    input: command,
-                    id: dataResult.id,
-                    createdAt: dataResult.createdAt,
-                    output: [[], undefined],
-                    feedback: dataResult.feedback,
-                    type: COMPLEX_REPORT,
-                }
-                const prevCommands = data;
-                let simpleReports:SimpleReportType[] = [];
-                for(let i = 0; i < commands.length; i++) {
-                    const command = commands[i] as string;
-                    if(!commands[i]) continue;
-                    const simpleResult = await runSimpleQuery.mutateAsync({ query: command });
-                    const simpleResultCommandResponse = simpleResult as unknown as CommandDataType;
-                    if(!simpleResultCommandResponse 
-                        || simpleResultCommandResponse.type !== CREATE_REPORT
-                        || !simpleResultCommandResponse.output) continue;
-                    simpleReports = [...simpleReports, simpleResultCommandResponse.output as SimpleReportType]
-                    complexReport.output = simpleReports as unknown as CommandResultType;
-                    setData([...prevCommands, complexReport]);
-                }
-                setLoading(false);
-            } else {
-                setData([...data, dataResult]);
-                setLoading(false);
-            }
+            setData([...data, dataResult]);
+            setLoading(false);
         },
         onError: () => {
             setLoading(false);
@@ -103,7 +63,14 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
         e.preventDefault();
 
         setLoading(true);
-        runQuery.mutate({ query: input.command });
+        runQuery.mutate({
+            command: input.command,
+            type: input.type,
+            event: input.event,
+            period: input.period,
+            event2: input.event2 ? input.event2 : "",
+            repeat: input.repeat ? input.repeat : 0,
+        });
     };
 
     return (
@@ -342,74 +309,29 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
                 </div>
                 {data.map((item, index) => {
                     const [key, value] = item.input.split(":")
-
                     return <div className="p-4 bg-[#111] rounded-md" key={index}>
                         <p className="text-sm text-[#F4BF4F]">
                             <span className="text-[#fff]">{key}: </span>
                             {value}
                         </p>
-
                         {
-                            item.type === DATABASE_QUERY && <QueryResult key={index} props={item.output} />
-                        }
-                        {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
-                                <div className="max-w-max">
-                                    <CSVLink className="w-fit-content" data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
-                                        <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                        text-[#838383] font-normal text-xs flex gap-1.5
-                                        hover:bg-[#434144] cursor-pointer">
-                                            <p>Download CSV</p>
-                                        </button>
-                                    </CSVLink>
-                                </div>
+                            item.type === PREDICT_LTV && <GraphReport key={index} props={item.output} />
+                        }  
+                        {
+                            item.type === PREDICT_CHURN && <GraphReport key={index} props={item.output} />
                         }
                         {
-                            item.type === FINANCIAL_DATA && <RazorpayData key={index} props={item.output} />
+                            item.type === PREDICT_LIKELIHOOD && <GraphReport key={index} props={item.output} />
                         }
                         {
-                            item.type === CREATE_REPORT && <Report key={index} props={item.output} />
-                        }
-                        {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
-                                <div className="max-w-max">
-                                    <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
-                                        <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                        text-[#838383] font-normal text-xs flex gap-1.5
-                                        hover:bg-[#434144] cursor-pointer">
-                                            <p>Download CSV</p>
-                                        </button>
-                                    </CSVLink>
-                                </div>
-                        }   
-                        {
-                            item.type === COMPLEX_REPORT && 
-                                item.output.map((report, index2) => {
-                                    const simpleReport = report as unknown as SimpleReportType;
-                                    if(simpleReport) {
-                                        return <Report key={index2} props={simpleReport} />
-                                    } 
-                                })
-                        }
-                        {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
-                                <div className="max-w-max">
-                                    <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
-                                        <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                        text-[#838383] font-normal text-xs flex gap-1.5
-                                        hover:bg-[#434144] cursor-pointer">
-                                            <p>Download CSV</p>
-                                        </button>
-                                    </CSVLink>
-                                </div>
-                        }   
+                            item.type === MODEL_CORRELATION && <Report key={index} props={item.output} />
+                        }  
                         {
                             item.type === UNKNOWN_COMMAND && 
                                 <ErrorBox
                                     title="Incorrect command entered"
                                     description='The command you entered seems to be in the wrong format. Correct format eg “get-data: followed by your command“'
                                 />
-                        }
-                        {
-                            item.type === GET_HELP && 
-                                <p className="text-white"> {item.output as unknown as string} </p>
                         }
                     </div>
                 })}

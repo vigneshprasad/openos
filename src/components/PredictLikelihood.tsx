@@ -1,4 +1,5 @@
 import React, { useState, type SetStateAction } from "react";
+import { PREDICT_LIKELIHOOD } from "~/constants/commandConstants";
 import { type PredictCommandInput } from "~/types/types";
 
 interface IProps {
@@ -15,7 +16,7 @@ export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
         setEvent(value);
         setInput({
             command: `Predict likelihood that a user that does ${value} will do ${event2} within ${period} days`,
-            type: "predict-likelihood",
+            type: PREDICT_LIKELIHOOD,
             event: value,
             event2: event2,
             period: Number(period),
@@ -27,7 +28,7 @@ export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
         setEvent2(value);
         setInput({
             command: `Predict likelihood that a user that does ${event} will do ${value} within ${period} days`,
-            type: "predict-likelihood",
+            type: PREDICT_LIKELIHOOD,
             event: event,
             event2: value,
             period: Number(period),
@@ -39,7 +40,7 @@ export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
         setPeriod(value);
         setInput({
             command: `Predict likelihood that a user that does ${event} will do ${event2} within ${value} days`,
-            type: "predict-likelihood",
+            type: PREDICT_LIKELIHOOD,
             event: event,
             event2: event2,
             period: Number(value),

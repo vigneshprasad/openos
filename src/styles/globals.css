@@ -270,3 +270,7 @@ table td:nth-child(1) {
 tbody tr td:first-child .textAlignLeft {
   justify-content: start;
 }
+
+.chartjs-tooltip {
+  display: none;
+}
