@@ -3,6 +3,8 @@ import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image";
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
+import { AnalyticsEvents } from "~/utils/analytics/types";
 
 export const MixpanelResourceForm: React.FC = () => {
 
@@ -16,6 +18,7 @@ export const MixpanelResourceForm: React.FC = () => {
     const [open, setOpen] = useState(false);
 
     const { data } = api.mixpanelResource.getByUserId.useQuery()
+    const { track }  = useAnalytics();
 
     useEffect(() => {
         if (data) setSuccess(true)
@@ -24,6 +27,9 @@ export const MixpanelResourceForm: React.FC = () => {
     const mixpanelResource = api.mixpanelResource.create.useMutation({
         onSuccess: (data) => {
             if(data[0]) {
+                track(AnalyticsEvents.resource_added, {
+                    ...data[0]
+                })
                 setSuccess(true);
                 setError(false);
                 setLoading(false);
@@ -41,6 +47,11 @@ export const MixpanelResourceForm: React.FC = () => {
         setLoading(true);
         setSuccess(false);
         setError(false);
+        track(AnalyticsEvents.resource_form_submitted, {
+            type: "Mixpanel",
+            projectId: projectId,
+            username: username,
+        });
         void mixpanelResource.mutateAsync({
             projectId: projectId,
             username: username,

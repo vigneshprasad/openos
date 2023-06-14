@@ -3,6 +3,8 @@ import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image";
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
+import { AnalyticsEvents } from "~/utils/analytics/types";
 
 interface IProps {
     type: string
@@ -24,12 +26,17 @@ export const DatabaseResourceForm: React.FC<IProps> = ({type}) => {
 
     const {data} = api.databaseResource.getByType.useQuery(type)
 
+    const { track } = useAnalytics();
+
     useEffect(() => {
         if (data) setSuccess(true)
     }, [data])
 
     const createDatabaseResource = api.databaseResource.create.useMutation({
-        onSuccess: () => {
+        onSuccess: (data) => {
+            track(AnalyticsEvents.resource_added, {
+                ...data
+            });
             setSuccess(true);
             setError(false);
             setLoading(false);
@@ -48,6 +55,14 @@ export const DatabaseResourceForm: React.FC<IProps> = ({type}) => {
         setLoading(true);
         setSuccess(false);
         setError(false);
+        track(AnalyticsEvents.resource_form_submitted, {
+            type: "Database",
+            name: name,
+            host: host,
+            port: port,
+            dbName: dbName,
+            databaseType: type,
+        })
         void createDatabaseResource.mutateAsync({
             name: name,
             host: host,

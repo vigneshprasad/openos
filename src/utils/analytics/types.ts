@@ -1,3 +1,17 @@
 export enum AnalyticsEvents {
     run_command = "run_command",
+    sign_up_button_clicked = "sign_up_button_clicked",
+    sign_up_success = "sign_up_success",
+    role_form_submitted = "role_form_submitted",
+    role_added = "role_added",
+    resource_form_submitted = "resource_form_submitted",
+    resource_added = "resource_added",
+    integrations_next_button_clicked = "integrations_next_button_clicked",
+    command_palette_clicked = "command_palette_clicked",
+    download_csv_clicked = "download_csv_clicked",
+    main_tab_clicked = "main_tab_clicked",
+    predictive_analysis_tab_clicked = "predictive_analysis_tab_clicked",
+    marketing_analysis_tab_clicked = "marketing_analysis_tab_clicked",
+    report_preview_button_clicked = "report_preview_button_clicked",
+    report_run_button_clicked = "report_run_button_clicked",
 }

@@ -3,9 +3,12 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useCallback } from "react"
 import { SAVED_TEMPLATES } from "~/constants/reportConstants"
+import useAnalytics from "~/utils/analytics/AnalyticsContext"
+import { AnalyticsEvents } from "~/utils/analytics/types"
 
 export const SavedTemplates: React.FC = () => {
     const router = useRouter();
+    const { track } = useAnalytics();
 
     const executeTemplate = useCallback(async (command: string) => {
         if (command && router) {
@@ -50,7 +53,10 @@ export const SavedTemplates: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex gap-5 items-center">
-                                    <Link href={template.preview} target="_blank">
+                                    <Link href={template.preview} target="_blank" 
+                                        onClickCapture={() => track(AnalyticsEvents.report_preview_button_clicked, {
+                                        template: template.title
+                                    })}>
                                         <p className="text-sm font-normal text-[#5EA3FB] cursor-pointer hover:underline">
                                             Preview
                                         </p>
@@ -58,7 +64,12 @@ export const SavedTemplates: React.FC = () => {
                                     <button 
                                         className="py-[7.5px] px-3 bg-[#333134] rounded-md max-h-9 text-sm font-normal 
                                             text-[#fff] cursor-pointer hover:bg-[#373737]"
-                                        onClick={() => executeTemplate(template.command)}
+                                        onClick={() => {
+                                            track(AnalyticsEvents.report_run_button_clicked, {
+                                                template: template.title
+                                            });
+                                            void executeTemplate(template.command)
+                                        }}
                                     >
                                         Use Template
                                     </button>

@@ -4,6 +4,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 // import { type Transaction } from "@prisma/client";
 import Image from "next/image";
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
+import { AnalyticsEvents } from "~/utils/analytics/types";
 
 export const StatementUploadForm: React.FC = () => {    
     const [name, setName] = useState<string>("");
@@ -16,13 +18,17 @@ export const StatementUploadForm: React.FC = () => {
     const [open, setOpen] = useState(false);
 
     const {data} = api.bankStatement.getByUserId.useQuery();
+    const { track } = useAnalytics();
 
     useEffect(() => {
         if (data) setSuccess(true)
     }, [data])
     
     const bankStatement = api.bankStatement.create.useMutation({
-        onSuccess: () => {
+        onSuccess: (data) => {
+            track(AnalyticsEvents.resource_added, {
+                ...data
+            })
             setSuccess(true);
             setError(false);
             setLoading(false);
@@ -69,6 +75,10 @@ export const StatementUploadForm: React.FC = () => {
         })
         const url = result.url.split('?')[0];
         if(result.status === 200 && url) {
+            track(AnalyticsEvents.resource_form_submitted, {
+                type: "Bank Statement",
+                name: name,
+            });
             void await bankStatement.mutateAsync({
                 name: name,
                 url: url,

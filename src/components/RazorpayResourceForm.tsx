@@ -3,6 +3,8 @@ import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image";
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
+import { AnalyticsEvents } from "~/utils/analytics/types";
 
 export const RazorpayResourceForm: React.FC = () => {
 
@@ -17,12 +19,17 @@ export const RazorpayResourceForm: React.FC = () => {
 
     const {data} = api.razorpayResource.getByUserId.useQuery()
 
+    const { track } = useAnalytics();
+
     useEffect(() => {
         if (data) setSuccess(true)
     }, [data])
 
     const razorpayResource = api.razorpayResource.create.useMutation({
-        onSuccess: () => {
+        onSuccess: (data) => {
+            track(AnalyticsEvents.resource_added, {
+                ...data
+            });
             setSuccess(true);
             setError(false);
             setLoading(false);
@@ -40,6 +47,11 @@ export const RazorpayResourceForm: React.FC = () => {
         setLoading(true);
         setSuccess(false);
         setError(false);
+        track(AnalyticsEvents.resource_form_submitted, {
+            type: "Razorpay",
+            name: name,
+            keyId: keyId,
+        })
         void razorpayResource.mutateAsync({
             name: name,
             keyId: keyId,

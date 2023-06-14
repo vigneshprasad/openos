@@ -3,6 +3,8 @@ import { api } from "~/utils/api";
 import * as Dialog from '@radix-ui/react-dialog'
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image"; 
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
+import { AnalyticsEvents } from "~/utils/analytics/types";
 
 export const StripeResourceForm: React.FC = () => {
 
@@ -15,6 +17,8 @@ export const StripeResourceForm: React.FC = () => {
 
     const { data } = api.stripeResource.getByUserId.useQuery()
 
+    const { track } = useAnalytics();
+
     useEffect(() => {
         if (data) setSuccess(true)
     }, [data])
@@ -22,6 +26,9 @@ export const StripeResourceForm: React.FC = () => {
     const stripeResource = api.stripeResource.create.useMutation({
         onSuccess: (data) => {
             if(data[0]) {
+                track(AnalyticsEvents.resource_added, {
+                    ...data[0]
+                })
                 setSuccess(true);
                 setError(false);
                 setLoading(false);
@@ -39,6 +46,10 @@ export const StripeResourceForm: React.FC = () => {
         setLoading(true);
         setSuccess(false);
         setError(false);
+        track(AnalyticsEvents.resource_form_submitted, {
+            type: "Stripe",
+            name: name,
+        });
         void stripeResource.mutateAsync({
             name: name,
             secret: secret,

@@ -120,7 +120,8 @@ export const MainTerminal: React.FC = () => {
         e.preventDefault();
 
         track(AnalyticsEvents.run_command, {
-            command: command
+            command: command,
+            terminal: "main"
         })
 
         setLoading(true);
@@ -163,7 +164,8 @@ export const MainTerminal: React.FC = () => {
                                         <CSVLink className="w-fit-content" data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
                                             <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                             text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer">
+                                            hover:bg-[#434144] cursor-pointer" 
+                                            onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}>
                                                 <p>Download CSV</p>
                                             </button>
                                         </CSVLink>
@@ -180,7 +182,8 @@ export const MainTerminal: React.FC = () => {
                                         <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
                                             <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                             text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer">
+                                            hover:bg-[#434144] cursor-pointer"
+                                            onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}>
                                                 <p>Download CSV</p>
                                             </button>
                                         </CSVLink>
@@ -200,7 +203,8 @@ export const MainTerminal: React.FC = () => {
                                         <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
                                             <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
                                             text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer">
+                                            hover:bg-[#434144] cursor-pointer"
+                                            onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}>
                                                 <p>Download CSV</p>
                                             </button>
                                         </CSVLink>
@@ -239,7 +243,12 @@ export const MainTerminal: React.FC = () => {
                                 className="py-1 px-2 bg-[#262626] rounded-md cursor-pointer
                                 hover:bg-[#464646]"
                                 key={index}
-                                onClick={() => selectCommand(command)}
+                                onClick={() => {
+                                    track(AnalyticsEvents.command_palette_clicked, {
+                                        command
+                                    })
+                                    selectCommand(command)
+                                }}
                             >
                                 <text className="text-xs text-[#C4C4C4] leading-[150%]">{command}</text>
                             </div>

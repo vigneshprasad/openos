@@ -12,6 +12,8 @@ import { PredictLikelihood } from "./PredictLikelihood";
 import { ModelCorrelation } from "./ModelCorrelation";
 import GraphReport from "./GraphReport";
 import Report from "./Report";
+import { AnalyticsEvents } from "~/utils/analytics/types";
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
 
 type CommandDataType = {
     input: string,
@@ -35,6 +37,8 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
     const [data, setData] = useState<CommandDataType[]>([]);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null)
+
+    const { track } = useAnalytics();
 
     const selectCommand = useCallback((command: string) => {
         setCommand(command);
@@ -353,7 +357,14 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
                                 className="py-1 px-2 bg-[#262626] rounded-md cursor-pointer
                                 hover:bg-[#464646]"
                                 key={index}
-                                onClick={() => selectCommand(command)}
+                                onClick={
+                                    () => {
+                                        track(AnalyticsEvents.command_palette_clicked, {
+                                            command
+                                        })
+                                        selectCommand(command)
+                                    }
+                                }
                             >
                                 <text className="text-xs text-[#C4C4C4] leading-[150%]">{command}</text>
                             </div>
