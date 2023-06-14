@@ -119,7 +119,10 @@ export const MarketingAnalysisTerminal: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+        track(AnalyticsEvents.run_command, {
+            command: command,
+            terminal: "marketing analysis"
+        })
         setLoading(true);
         runQuery.mutate({ query: command });
     };

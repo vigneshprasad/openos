@@ -66,6 +66,11 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        track(AnalyticsEvents.run_command, {
+            command: command,
+            terminal: "predictive analysis"
+        })
+
         setLoading(true);
         runQuery.mutate({
             command: input.command,
