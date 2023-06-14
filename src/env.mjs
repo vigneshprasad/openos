@@ -26,6 +26,7 @@ const server = z.object({
   AWS_SECRET_ACCESS_KEY: z.string(),
   CUSTOMER_IO_API_KEY: z.string(),
   SLACK_BOT_TOKEN: z.string(),
+  NEXT_PUBLIC_SEGMENT_KEY: z.string(),
 });
 
 /**
@@ -54,6 +55,7 @@ const processEnv = {
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
   CUSTOMER_IO_API_KEY: process.env.CUSTOMER_IO_API_KEY,
   SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN,
+  NEXT_PUBLIC_SEGMENT_KEY: process.env.NEXT_PUBLIC_SEGMENT_KEY,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
