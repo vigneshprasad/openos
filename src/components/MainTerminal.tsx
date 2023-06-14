@@ -13,6 +13,8 @@ import { convertComplexReportToExcel, convertDatabaseQueryResultToExcel, convert
 import { ErrorBox } from "~/components/ErrorBox";
 import { useRouter } from "next/router";
 import AutoComplete from "~/components/AutoComplete";
+import useAnalytics from "~/utils/analytics/AnalyticsContext";
+import { AnalyticsEvents } from "~/utils/analytics/types";
 
 type CommandDataType = {
     input: string,
@@ -30,6 +32,7 @@ export const MainTerminal: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null)
     const inputFocusRef = useRef<HTMLInputElement>(null)
+    const { track } = useAnalytics();
 
     const selectCommand = useCallback((command: string) => {
         setCommand((prevCommand) => `${command}: ${prevCommand}`)
@@ -115,6 +118,10 @@ export const MainTerminal: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        track(AnalyticsEvents.run_command, {
+            command: command
+        })
 
         setLoading(true);
         runQuery.mutate({ query: command });

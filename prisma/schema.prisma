@@ -57,6 +57,7 @@ model User {
     Transaction         Transaction[]
     CommandHistory      CommandHistory[]
     StripeResource      StripeResource[]
+    MixpanelResource    MixpanelResource[]
 }
 
 model VerificationToken {
@@ -102,6 +103,22 @@ model RazorpayResource {
     status         Boolean
     account_number String?
     user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model MixpanelResource {
+    id         String    @id @default(cuid())
+    project_id String
+    username   String
+    password   String
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    deletedAt  DateTime?
+    url        String    @default("https://api.mixpanel.com")
+    userId     String
+    status     Boolean
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
 }

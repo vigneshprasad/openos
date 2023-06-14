@@ -9,6 +9,7 @@ import { userRouter } from "./routers/user";
 import { commandHistoryRouter } from "./routers/commandHistory";
 import { stripeResourceRouter } from "./routers/stripeResource";
 import { predictiveAnalysisCommandRouter } from "./routers/predictiveAnalysisCommand";
+import { mixpanelResourceRouter } from "./routers/mixpanelResource";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ import { predictiveAnalysisCommandRouter } from "./routers/predictiveAnalysisCom
 export const appRouter = createTRPCRouter({
   databaseResource: databaseResourceRouter,
   razorpayResource: razorpayResourceRouter,
+  mixpanelResource: mixpanelResourceRouter,
   stripeResource: stripeResourceRouter,
   commandRouter: commandRouter,
   aws: awsRouter,

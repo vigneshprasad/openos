@@ -1,0 +1,1 @@
+export const SEGMENT_KEY = process.env.NEXT_PUBLIC_SEGMENT_KEY as string;

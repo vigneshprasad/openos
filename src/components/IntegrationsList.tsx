@@ -4,6 +4,7 @@ import { StatementUploadForm } from "./StatementUploadForm"
 import { RazorpayResourceForm } from "./RazorpayResourceForm"
 import { StripeResourceForm } from "./StripeResourceForm"
 import { MARIADB, POSTGRES, MYSQL } from "~/constants/dbTypes"
+import { MixpanelResourceForm } from "./MixpanelResourceForm"
 
 const INTEGRATIONS = [
     {
@@ -53,6 +54,14 @@ const INTEGRATIONS = [
         imageSrc: "/bank.png",
         url: "",
         button: <StatementUploadForm />
+    },
+    {
+        key: "mixpanel",
+        title: "Mixpanel",
+        description: "Simple and powerful analytics tool",
+        imageSrc: "/mixpanel.webp",
+        url: "https://mixpanel.com/",
+        button: <MixpanelResourceForm />
     },
 ]
 
