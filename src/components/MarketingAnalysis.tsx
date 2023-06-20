@@ -134,119 +134,192 @@ export const MarketingAnalysisTerminal: React.FC = () => {
                     <div className="tableDiv hide-scrollbar max-w-max min-w-full">
                         <div className="table-heading flex gap-1">
                             <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
-                            <p>Return on Advertisment Spend</p>
+                            <p>Predict Churn by Source</p>
                         </div>
                         <table>
                             <thead>
                                 <tr>
                                     <th className="w-fit whitespace-nowrap"></th>
-                                    <th className="w-fit whitespace-nowrap">No.</th>
-                                    <th className="w-fit whitespace-nowrap">CAC</th>
-                                    <th className="w-full whitespace-nowrap">Cohorts of Users</th>
-                                    <th className="w-full whitespace-nowrap	">Total Spend</th>
-                                    <th className="w-full whitespace-nowrap	">Total Revenue</th>
+                                    <th className="w-full whitespace-nowrap">Source</th>
+                                    <th className="w-full whitespace-nowrap">Predicted Acquisition</th>
+                                    <th className="w-full whitespace-nowrap">Predicted Churn Rate</th>
+                                    <th className="w-full whitespace-nowrap	">Past Churn</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td className="w-fit whitespace-nowrap">1</td>
-                                    <td className="w-fit whitespace-nowrap">60</td>
-                                    <td className="w-fit whitespace-nowrap">₹ 150</td>
-                                    <td className="w-full whitespace-nowrap">Facebook Campaign: Test Campaign</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 10000</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 5600</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Ads</td>
+                                    <td className="w-full whitespace-nowrap">1000</td>
+                                    <td className="w-full whitespace-nowrap">75%</td>
+                                    <td className="w-full whitespace-nowrap	">65%</td>
                                 </tr>
                                 <tr>
                                     <td className="w-fit whitespace-nowrap">2</td>
-                                    <td className="w-fit whitespace-nowrap">84</td>
-                                    <td className="w-fit whitespace-nowrap">₹ 135</td>
-                                    <td className="w-full whitespace-nowrap">Facebook Campaign: Test 2 Campaign</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 14000</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 9400</td>
+                                    <td className="w-full whitespace-nowrap">Google Ads</td>
+                                    <td className="w-full whitespace-nowrap">800</td>
+                                    <td className="w-full whitespace-nowrap	">85%</td>
+                                    <td className="w-full whitespace-nowrap	">45%</td>
                                 </tr>
                                 <tr>
                                     <td className="w-fit whitespace-nowrap">3</td>
-                                    <td className="w-fit whitespace-nowrap">54</td>
-                                    <td className="w-fit whitespace-nowrap">₹ 150</td>
-                                    <td className="w-full whitespace-nowrap">Twitter Campaign</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 3000</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 800</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
-                        <div className="table-heading flex gap-1">
-                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
-                            <p>Predicted LTV of Users by Campaign</p>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th className="w-fit whitespace-nowrap"></th>
-                                    <th className="w-fit whitespace-nowrap">No.</th>
-                                    <th className="w-fit whitespace-nowrap">Certainty</th>
-                                    <th className="w-full whitespace-nowrap">Cohorts of Users</th>
-                                    <th className="w-full whitespace-nowrap	">ARPU</th>
-                                    <th className="w-full whitespace-nowrap	">Predicted LTV</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="w-fit whitespace-nowrap">1</td>
-                                    <td className="w-fit whitespace-nowrap">60</td>
-                                    <td className="w-fit whitespace-nowrap">86%</td>
-                                    <td className="w-full whitespace-nowrap">Facebook Campaign: Test Campaign</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 100</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 500</td>
+                                    <td className="w-full whitespace-nowrap">Email Campaign</td>
+                                    <td className="w-full whitespace-nowrap">1200</td>
+                                    <td className="w-full whitespace-nowrap	">70%</td>
+                                    <td className="w-full whitespace-nowrap	">50%</td>
                                 </tr>
                                 <tr>
-                                    <td className="w-fit whitespace-nowrap">2</td>
-                                    <td className="w-fit whitespace-nowrap">54</td>
-                                    <td className="w-fit whitespace-nowrap">83%</td>
-                                    <td className="w-full whitespace-nowrap">Twitter Campaign: Test Campaign</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 50</td>
-                                    <td className="w-full whitespace-nowrap	">₹ 400</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
-                        <div className="table-heading flex gap-1">
-                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
-                            <p>Likelihood to Churn</p>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th className="w-fit whitespace-nowrap"></th>
-                                    <th className="w-fit whitespace-nowrap">No.</th>
-                                    <th className="w-fit whitespace-nowrap">Certainty</th>
-                                    <th className="w-full whitespace-nowrap">Cohorts of Users</th>
-                                    <th className="w-full whitespace-nowrap	">Current Retention</th>
-                                    <th className="w-full whitespace-nowrap	">Probability of Churn</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="w-fit whitespace-nowrap">1</td>
-                                    <td className="w-fit whitespace-nowrap">60</td>
-                                    <td className="w-fit whitespace-nowrap">86%</td>
-                                    <td className="w-full whitespace-nowrap">Facebook</td>
-                                    <td className="w-full whitespace-nowrap	">26%</td>
-                                    <td className="w-full whitespace-nowrap	">72%</td>
-                                </tr>
-                                <tr>
-                                    <td className="w-fit whitespace-nowrap">2</td>
-                                    <td className="w-fit whitespace-nowrap">54</td>
-                                    <td className="w-fit whitespace-nowrap">83%</td>
-                                    <td className="w-full whitespace-nowrap">Twitter</td>
-                                    <td className="w-full whitespace-nowrap	">33%</td>
+                                    <td className="w-fit whitespace-nowrap">4</td>
+                                    <td className="w-full whitespace-nowrap">Organic</td>
+                                    <td className="w-full whitespace-nowrap">1500</td>
                                     <td className="w-full whitespace-nowrap	">80%</td>
+                                    <td className="w-full whitespace-nowrap	">30%</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
+                        <div className="table-heading flex gap-1">
+                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                            <p>Predict ARPU by Source</p>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="w-fit whitespace-nowrap"></th>
+                                    <th className="w-full whitespace-nowrap">Source</th>
+                                    <th className="w-full whitespace-nowrap">Predicted ARPU</th>
+                                    <th className="w-full whitespace-nowrap">Predicted Cost Per User</th>
+                                    <th className="w-full whitespace-nowrap	">Past ARPU</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">1</td>
+                                    <td className="w-full whitespace-nowrap">Google Ads</td>
+                                    <td className="w-full whitespace-nowrap">$65</td>
+                                    <td className="w-full whitespace-nowrap">$60</td>
+                                    <td className="w-full whitespace-nowrap	">25</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">2</td>
+                                    <td className="w-full whitespace-nowrap">Email Campaign</td>
+                                    <td className="w-full whitespace-nowrap">$43</td>
+                                    <td className="w-full whitespace-nowrap">$45</td>
+                                    <td className="w-full whitespace-nowrap	">17.8</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">3</td>
+                                    <td className="w-full whitespace-nowrap">Organic</td>
+                                    <td className="w-full whitespace-nowrap">$39</td>
+                                    <td className="w-full whitespace-nowrap">$55</td>
+                                    <td className="w-full whitespace-nowrap	">21.8</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">4</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Ads</td>
+                                    <td className="w-full whitespace-nowrap">$30</td>
+                                    <td className="w-full whitespace-nowrap">$30</td>
+                                    <td className="w-full whitespace-nowrap	">15</td>
+                                </tr>          
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
+                        <div className="table-heading flex gap-1">
+                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                            <p>Predict ROI by Source</p>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="w-fit whitespace-nowrap"></th>
+                                    <th className="w-full whitespace-nowrap">Source</th>
+                                    <th className="w-full whitespace-nowrap">Predicted ROI</th>
+                                    <th className="w-full whitespace-nowrap">Predicted Total Revenue</th>
+                                    <th className="w-full whitespace-nowrap	">Past Total Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">1</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Ads</td>
+                                    <td className="w-full whitespace-nowrap">200%</td>
+                                    <td className="w-full whitespace-nowrap">$50</td>
+                                    <td className="w-full whitespace-nowrap	">$100</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">2</td>
+                                    <td className="w-full whitespace-nowrap">Google Ads</td>
+                                    <td className="w-full whitespace-nowrap">150%</td>
+                                    <td className="w-full whitespace-nowrap">$60</td>
+                                    <td className="w-full whitespace-nowrap	">$90</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">3</td>
+                                    <td className="w-full whitespace-nowrap">Email Campaign</td>
+                                    <td className="w-full whitespace-nowrap">180%</td>
+                                    <td className="w-full whitespace-nowrap">$45</td>
+                                    <td className="w-full whitespace-nowrap	">$72</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">4</td>
+                                    <td className="w-full whitespace-nowrap">Organic</td>
+                                    <td className="w-full whitespace-nowrap">220%</td>
+                                    <td className="w-full whitespace-nowrap">$55</td>
+                                    <td className="w-full whitespace-nowrap	">$110</td>
+                                </tr>          
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="tableDiv hide-scrollbar max-w-max min-w-full">
+                        <div className="table-heading flex gap-1">
+                            <Image src="/svg/report_icon.svg" alt="Report icon" width={12} height={12} />
+                            <p>Predicted Increase in Active Users</p>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="w-fit whitespace-nowrap"></th>
+                                    <th className="w-full whitespace-nowrap">Source</th>
+                                    <th className="w-full whitespace-nowrap">Change in DAU</th>
+                                    <th className="w-full whitespace-nowrap">Change in WAU</th>
+                                    <th className="w-full whitespace-nowrap	">Change in MAU</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">1</td>
+                                    <td className="w-full whitespace-nowrap">Facebook Ads</td>
+                                    <td className="w-full whitespace-nowrap">1000 ➚</td>
+                                    <td className="w-full whitespace-nowrap">5000 ➚</td>
+                                    <td className="w-full whitespace-nowrap	">20000 ➚</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">2</td>
+                                    <td className="w-full whitespace-nowrap">Google Ads</td>
+                                    <td className="w-full whitespace-nowrap">800 ➚</td>
+                                    <td className="w-full whitespace-nowrap">4000 ➚</td>
+                                    <td className="w-full whitespace-nowrap	">15000 ➚</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">3</td>
+                                    <td className="w-full whitespace-nowrap">Email Campaign</td>
+                                    <td className="w-full whitespace-nowrap">1200 ➚</td>
+                                    <td className="w-full whitespace-nowrap">6000 ➚</td>
+                                    <td className="w-full whitespace-nowrap	">25000 ➚</td>
+                                </tr>
+                                <tr>
+                                    <td className="w-fit whitespace-nowrap">4</td>
+                                    <td className="w-full whitespace-nowrap">Organic</td>
+                                    <td className="w-full whitespace-nowrap">1500 ➚</td>
+                                    <td className="w-full whitespace-nowrap">4500 ➚</td>
+                                    <td className="w-full whitespace-nowrap	">18000 ➚</td>
+                                </tr>          
+                            </tbody>
+                        </table>
+                    </div>
+                    
                 </div>    
                 {data.map((item, index) => {
                     const [key, value] = item.input.split(":")
