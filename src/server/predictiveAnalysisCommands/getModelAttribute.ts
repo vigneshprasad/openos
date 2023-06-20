@@ -1,4 +1,4 @@
-export const getLikelihoodEvent = (event: string, event2: string, period:number) => {
+export const getModelAttribute = (event: string, event2: string, period:number) => {
     return [
         {
             heading: `Likelihood of ${event2} (96% Model Certainty)`,

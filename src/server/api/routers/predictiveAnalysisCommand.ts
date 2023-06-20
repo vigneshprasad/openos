@@ -7,10 +7,10 @@ import {
 
 import { returnCommandResult } from "~/utils/returnCommandResult";
 import { type CommandResultType } from "~/types/types";
-import { MODEL_CORRELATION, PREDICT_CHURN, PREDICT_LIKELIHOOD, PREDICT_LTV, UNKNOWN_COMMAND } from "~/constants/commandConstants";
+import { MODEL_CORRELATION, MODEL_EVENT, MODEL_ATTRIBUTE, PREDICT_LTV, UNKNOWN_COMMAND } from "~/constants/commandConstants";
 import { getLTVPrediction } from "~/server/predictiveAnalysisCommands/getLTVPrediction";
-import { getChurnPrediction } from "~/server/predictiveAnalysisCommands/getChurnPrediction";
-import { getLikelihoodEvent } from "~/server/predictiveAnalysisCommands/getLikelihoodEvent";
+import { getModelEvent } from "~/server/predictiveAnalysisCommands/getModelEvent";
+import { getModelAttribute } from "~/server/predictiveAnalysisCommands/getModelAttribute";
 import { getModelCorrelation } from "~/server/predictiveAnalysisCommands/getModelCorrelation";
 
 export const predictiveAnalysisCommandRouter = createTRPCRouter({
@@ -58,16 +58,16 @@ export const predictiveAnalysisCommandRouter = createTRPCRouter({
                     result,
                     ctx.session.user.id,
                 );
-            case PREDICT_CHURN:
-                result = getChurnPrediction(event, repeat, period) as CommandResultType;
+            case MODEL_EVENT:
+                result = getModelEvent(event, repeat, period) as CommandResultType;
                 return await returnCommandResult(
                     type,
                     command,
                     result,
                     ctx.session.user.id,
                 )
-            case PREDICT_LIKELIHOOD:
-                result = getLikelihoodEvent(event, event2, period) as CommandResultType;
+            case MODEL_ATTRIBUTE:
+                result = getModelAttribute(event, event2, period) as CommandResultType;
                 return await returnCommandResult(
                     type,
                     command,

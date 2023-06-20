@@ -1,4 +1,4 @@
-export const getChurnPrediction = (event: string, repeat: number, period:number) => {
+export const getModelEvent = (event: string, repeat: number, period:number) => {
     return [
         {
             heading: 'Churn Prediction (84% Model Certainty)',
