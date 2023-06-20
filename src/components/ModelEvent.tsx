@@ -1,37 +1,40 @@
 import React, { useState, type SetStateAction } from "react";
-import { PREDICT_LIKELIHOOD } from "~/constants/commandConstants";
+import { MODEL_EVENT } from "~/constants/commandConstants";
 import { type PredictCommandInput } from "~/types/types";
 
 interface IProps {
     setInput: (value: SetStateAction<PredictCommandInput>) => void
 }
 
-export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
+export const ModelEvent: React.FC<IProps> = ({ setInput }) => {
     const [event, setEvent] = useState<string>("");
-    const [event2, setEvent2] = useState<string>("");
+    const [repeat, setRepeat] = useState<string>("");
+    const [repeatName, setRepeatName] = useState<string>("");
     const [period, setPeriod] = useState<string>("");
 
     const handleEventChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { value } = e.target;
         setEvent(value);
         setInput({
-            command: `Predict likelihood that a user that does ${value} will do ${event2} within ${period} days`,
-            type: PREDICT_LIKELIHOOD,
+            command: `Predict churn for a user that does ${value} atleast ${repeatName} within ${period} days of signing up`,
+            type: MODEL_EVENT,
             event: value,
-            event2: event2,
             period: Number(period),
+            repeat: Number(repeat),
         });
     }
 
-    const handleEvent2Change = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleRepeatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { value } = e.target;
-        setEvent2(value);
+        const [number, text] = value.split(',');
+        setRepeat(number ? number : "");
+        setRepeatName(text ? text : "");
         setInput({
-            command: `Predict likelihood that a user that does ${event} will do ${value} within ${period} days`,
-            type: PREDICT_LIKELIHOOD,
+            command: `Predict churn for a user that does ${value} atleast ${repeatName} within ${period} days of signing up`,
+            type: MODEL_EVENT,
             event: event,
-            event2: value,
             period: Number(period),
+            repeat: Number(number ? number : ""),
         });
     }
 
@@ -39,21 +42,22 @@ export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
         const { value } = e.target;
         setPeriod(value);
         setInput({
-            command: `Predict likelihood that a user that does ${event} will do ${event2} within ${value} days`,
-            type: PREDICT_LIKELIHOOD,
+            command: `Predict churn for a user that does ${event} atleast ${repeatName} within ${period} days of signing up`,
+            type: MODEL_EVENT,
             event: event,
-            event2: event2,
             period: Number(value),
+            repeat: Number(repeat),
         });
     }
+    
 
     return (
         <div className="w-full px-0 py-[9px] pb-[18px] text-sm font-normal text-[#616161]">
             <span className="px-1 text-[#FFF]"> 
-                Predict likelihood
+                Predict churn
             </span>
             <span className="px-1"> 
-                that a user that does  
+                for a user that does  
             </span>
             <span className="px-1">
                 <select name="event" id="event" 
@@ -67,21 +71,20 @@ export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
                 </select>
             </span>
             <span className="px-1">
-                will also do
+                atleast
             </span>
             <span className="px-1">
-                <select name="event2" id="event2" 
+                <select name="repeat" id="repeat" 
                 className="py-2 px-1 bg-[#272628] border border-solid border-[#333] shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] 
-                flex-col rounded-md" onChange={handleEvent2Change}>
+                flex-col rounded-md" onChange={handleRepeatChange}>
                     <option disabled selected value=""> -- </option>
-                    <option value="watch stream">Watch stream</option>
-                    <option value="rsvp">RSVP</option>
-                    <option value="make a purchase">Make a purchase</option>
-                    <option value="send a chat">Send a chat</option>
+                    <option value="1,once">Once</option>
+                    <option value="2,twice">Twice</option>
+                    <option value="3,thrice">Thrice</option>
                 </select>
             </span>
             <span className="px-1">
-                within
+                within 
             </span>
             <span className="px-1">
                 <select name="period" id="period" 
@@ -97,7 +100,7 @@ export const PredictLikelihood: React.FC<IProps> = ({ setInput }) => {
                 </select>
             </span>
             <span className="px-1">
-                days.
+                day of signing up.
             </span>
         </div>
     )

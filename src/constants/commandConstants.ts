@@ -7,9 +7,9 @@ export const EXPENSE_CLASSIFIER = 'expense-classifier';
 export const ASK_ANALYST = 'ask-analyst';
 export const GET_HELP = 'get-help';
 export const UNKNOWN_COMMAND = 'unknown-command';
-export const PREDICT_LTV = "predict-ltv"
-export const PREDICT_LIKELIHOOD = "predict-likelihood"
-export const PREDICT_CHURN = "predict-churn"
+export const PREDICT_LTV = "model-ltv"
+export const MODEL_ATTRIBUTE = "model-attribute"
+export const MODEL_EVENT = "model-event"
 export const MODEL_CORRELATION = "model-correlation"
 
 export const COMMANDS_LIST = [
@@ -22,7 +22,7 @@ export const COMMANDS_LIST = [
 
 export const PREDICTIVE_ANALYSIS_COMMANDS_LIST = [
     PREDICT_LTV,
-    PREDICT_CHURN,
-    PREDICT_LIKELIHOOD,
+    MODEL_EVENT,
+    MODEL_ATTRIBUTE,
     MODEL_CORRELATION
 ]

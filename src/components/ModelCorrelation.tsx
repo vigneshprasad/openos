@@ -15,7 +15,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
         const { value } = e.target;
         setEvent(value);
         setInput({
-            command: `Model Correlation for ${value} and ${event2} over period of ${period} days`,
+            command: `Predict the correlation between ${value} and ${event2} over the next ${period} days`,
             type: MODEL_CORRELATION,
             event: value,
             event2: event2,
@@ -27,7 +27,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
         const { value } = e.target;
         setEvent2(value);
         setInput({
-            command: `Model Correlation for ${event} and ${value} over period of ${period} days`,
+            command: `Predict the correlation between ${event} and ${value} over the next ${period} days`,
             type: MODEL_CORRELATION,
             event: event,
             event2: value,
@@ -39,7 +39,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
         const { value } = e.target;
         setPeriod(value);
         setInput({
-            command: `Model Correlation for ${event} and ${event2} over period of ${value} days`,
+            command: `Predict the correlation between ${event} and ${event2} over period of ${value} days`,
             type: MODEL_CORRELATION,
             event: event,
             event2: event2,
@@ -51,10 +51,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
     return (
         <div className="w-full px-0 py-[9px] pb-[18px] text-sm font-normal text-[#616161]">
             <span className="px-1 text-[#FFF]"> 
-                Model correlation
-            </span>
-            <span className="px-1"> 
-                for
+                Predict the correlation between
             </span>
             <span className="px-1">
                 <select name="event" id="event" 
@@ -82,7 +79,7 @@ export const ModelCorrelation: React.FC<IProps> = ({ setInput }) => {
                 </select>
             </span>
             <span className="px-1">
-                over period of
+                over the next
             </span>
             <span className="px-1">
                 <select name="period" id="period" 

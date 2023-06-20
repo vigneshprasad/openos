@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {  UNKNOWN_COMMAND, PREDICTIVE_ANALYSIS_COMMANDS_LIST, PREDICT_LTV, MODEL_CORRELATION, PREDICT_CHURN, PREDICT_LIKELIHOOD } from "~/constants/commandConstants";
+import {  UNKNOWN_COMMAND, PREDICTIVE_ANALYSIS_COMMANDS_LIST, PREDICT_LTV, MODEL_CORRELATION, MODEL_EVENT, MODEL_ATTRIBUTE } from "~/constants/commandConstants";
 import { api } from "~/utils/api";
 import type { CommandResultType, PredictCommandInput} from "../types/types";
 import Image from "next/image";
@@ -7,8 +7,8 @@ import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { ErrorBox } from "~/components/ErrorBox";
 import { PredictLTV } from "./PredictLTV";
-import { PredictChurn } from "./PredictChurn";
-import { PredictLikelihood } from "./PredictLikelihood";
+import { ModelEvent } from "./ModelEvent";
+import { ModelAttribute } from "./ModelAttribute";
 import { ModelCorrelation } from "./ModelCorrelation";
 import GraphReport from "./GraphReport";
 import Report from "./Report";
@@ -397,13 +397,13 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
                             {value}
                         </p>
                         {
-                            item.type === PREDICT_LTV && <GraphReport key={index} props={item.output} />
+                            item.type === MODEL_EVENT && <GraphReport key={index} props={item.output} />
                         }  
                         {
-                            item.type === PREDICT_CHURN && <GraphReport key={index} props={item.output} />
+                            item.type === PREDICT_LTV && <GraphReport key={index} props={item.output} />
                         }
                         {
-                            item.type === PREDICT_LIKELIHOOD && <GraphReport key={index} props={item.output} />
+                            item.type === MODEL_ATTRIBUTE && <GraphReport key={index} props={item.output} />
                         }
                         {
                             item.type === MODEL_CORRELATION && <Report key={index} props={item.output} />
@@ -464,8 +464,8 @@ export const PredictiveAnalysisTerminal: React.FC = () => {
                             :
                             <div>
                                 {command === PREDICT_LTV && <PredictLTV setInput={setInput}/>}
-                                {command === PREDICT_CHURN && <PredictChurn setInput={setInput} />}
-                                {command === PREDICT_LIKELIHOOD && <PredictLikelihood setInput={setInput} />}
+                                {command === MODEL_EVENT && <ModelEvent setInput={setInput} />}
+                                {command === MODEL_ATTRIBUTE && <ModelAttribute setInput={setInput} />}
                                 {command === MODEL_CORRELATION && <ModelCorrelation setInput={setInput} />}
                             </div>
                             
