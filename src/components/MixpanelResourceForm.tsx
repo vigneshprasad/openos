@@ -12,7 +12,7 @@ export const MixpanelResourceForm: React.FC = () => {
     const [username, setUsername] = useState<string>("");
     const [secret, setSecret] = useState<string>("");
     const [success, setSuccess] = useState(false);
-    const [url, setUrl] = useState("https://api.mixpanel.com")
+    const [region, setRegion] = useState("US")
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -56,7 +56,7 @@ export const MixpanelResourceForm: React.FC = () => {
             projectId: projectId,
             username: username,
             secret: secret,
-            url: url,
+            region: region,
         });
     };
 
@@ -116,12 +116,12 @@ export const MixpanelResourceForm: React.FC = () => {
                         </fieldset>
                         <fieldset className="Fieldset">
                             <label className="Label">
-                                <span>URL</span>
+                                <span>Region</span>
                                 <input
                                     className="Input"
                                     type="text"
-                                    value={url}
-                                    onChange={(e) => setUrl(e.target.value)}
+                                    value={region}
+                                    onChange={(e) => setRegion(e.target.value)}
                                 />
                             </label>
                         </fieldset>

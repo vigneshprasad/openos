@@ -115,7 +115,7 @@ model MixpanelResource {
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
     deletedAt  DateTime?
-    url        String    @default("https://api.mixpanel.com")
+    region     String    @default("US")
     userId     String
     status     Boolean
     user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)

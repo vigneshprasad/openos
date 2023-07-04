@@ -29,8 +29,8 @@ export const mixpanelResourceRouter = createTRPCRouter({
         secret: z.string({
           required_error: "Secret is required"
         }),
-        url: z.string({
-            required_error: "URL is required"
+        region: z.string({
+            required_error: "Region is required"
         }),
     }))
     .mutation(async ({ ctx, input }) => { 
@@ -44,8 +44,8 @@ export const mixpanelResourceRouter = createTRPCRouter({
             }
         };
 
-
-        const response = await fetch(`${input.url}/api/2.0/events/names?project_id=${input.projectId}&type=general`, options)
+        const url = input.region === 'EU' ? "eu.mixpanel" : "mixpanel"
+        const response = await fetch(`https://${url}.com/api/2.0/events/names?project_id=${input.projectId}&type=general`, options)
         if(response.status !== 200) {
             return [
                 undefined,
@@ -66,7 +66,7 @@ export const mixpanelResourceRouter = createTRPCRouter({
                 password: input.secret,
                 status: true,
                 userId: ctx.session.user.id,
-                url: input.url,
+                region: input.region,
             },
         });
 
