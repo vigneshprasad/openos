@@ -58,6 +58,8 @@ model User {
     CommandHistory      CommandHistory[]
     StripeResource      StripeResource[]
     MixpanelResource    MixpanelResource[]
+    DataModel           DataModel[]
+    FeatureImportance   FeatureImportance[]
 }
 
 model VerificationToken {
@@ -262,4 +264,74 @@ model SQLQueryModification {
     databaseResource   DatabaseResource @relation(fields: [databaseResourceId], references: [id], onDelete: Cascade)
 
     @@index([databaseResourceId])
+}
+
+model DataModel {
+    id                  String              @id @default(cuid())
+    createdAt           DateTime            @default(now())
+    updatedAt           DateTime            @updatedAt
+    deletedAt           DateTime?
+    userId              String
+    user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+    type                String
+    name                String
+    userFilter          String
+    predictionTimeframe String
+    eventA              String
+    eventB              String?
+    eventAFrequency     Int?
+    predictionWindow    Int
+    FeatureImportance   FeatureImportance[]
+    UserPrediction      UserPrediction[]
+    Cohorts             Cohorts[]
+
+    @@index([userId])
+}
+
+model FeatureImportance {
+    id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    deletedAt   DateTime?
+    userId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+    dataModelId String
+    featureName String
+    importance  Float
+    type        String
+
+    @@index([userId])
+    @@index([dataModelId])
+}
+
+model UserPrediction {
+    id             String    @id @default(cuid())
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+    deletedAt      DateTime?
+    dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+    dataModelId    String
+    userDistinctId String
+    dateOfEvent    String
+    probability    Float
+    userData       Json
+    actualResult   Int?
+
+    @@index([dataModelId])
+}
+
+model Cohorts {
+    id             String    @id @default(cuid())
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+    deletedAt      DateTime?
+    dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+    dataModelId    String
+    name           String
+    attributeName  String
+    attributeValue String
+    status         Boolean
+
+    @@index([dataModelId])
 }

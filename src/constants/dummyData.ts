@@ -1,3 +1,5 @@
+import { PREMADE_MODEL } from "./modelTypes"
+
 export const userAcquisitionData = 
 [
     {
@@ -1206,4 +1208,177 @@ export const marketingSpentData =
       "heading": "Marketing Spend"
     },
     null
+]
+
+export const dummyModel = {
+    id: "dummy",
+    createdAt: new Date("2023-07-01"),
+    updatedAt: new Date("2023-07-01"),
+    userId: "dummy-user",
+    type: PREMADE_MODEL,
+    name: "This model should predict for each new user from Facebook, the likelihood that an active customer - defined as a customer who has performed workshop attended, at least once every week will stop performing the event over the next 30 days ",
+    userFilter: "from Facebook",
+    predictionTimeframe: 7,
+    eventA: "workshop attended",
+    eventB: null,
+    eventAFrequency: 1,
+    predictionWindow: 30,
+}
+
+export const dummyFeatures = [
+    {
+        id: "dummy-feature-1",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        userId: "dummy-user",
+        dataModelId: "dummy",
+        featureName: "device_price",
+        type: "characteristic",
+        importance: 0.131,
+    },
+    {
+        id: "dummy-feature-1",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        userId: "dummy-user",
+        dataModelId: "characteristic",
+        featureName: "location",
+
+        importance: 0.094,
+    },
+    {
+        id: "dummy-feature-1",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        userId: "dummy-user",
+        dataModelId: "event",
+        featureName: "email_verified",
+        importance: 0.062,
+    }
+]
+
+export const dummyChurnGraph = [
+    {
+        userDistinctId: "user-1",
+        y: 0.83,
+        x: "30000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.85,
+        x: "50000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.76,
+        x: "40000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.42,
+        x: "20000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.30,
+        x: "15000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.13,
+        x: "7000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.91,
+        x: "90000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.53,
+        x: "25000"
+    },
+    {
+        userDistinctId: "user-1",
+        y: 0.66,
+        x: "5000"
+    },
+]
+
+export const dummyUserList = "created,email,name,phone,college,current_company,current_role,linkedin_url,source,started_working_from,target_role,resume_url,pain_points,work_experience,visited_date,utm_campaign,utm_content,utm_medium,utm_term,goals,expected_preparation_duration,long_term_mentorship_help,problems_for_goals,target_companies_MAANG,target_companies_Product_Based,target_companies_Startups,target_companies_Service_Based,target_companies_Consultation_Firms,target_domain_Backend_Developer,target_domain_Fullstack_Developer,user_category_Working_Professional,user_category_Fresher,utm_source_linkedin,update_reminder_triggered,viewed,sms_drafted,first_website_visit,filter_applied,show_more_clicked,profile_visited,tab_changed,view_profile_clicked,login/signup_started,login_started,login_completed,phone_verification_started,otp_sent,otp_verification_started,page_visit,search_started,trial_doc_visited,trial_completed,feedback_form_shown,sorting_applied,otp_invalidated,filter_clicked,login/signup_cancelled,signup_completed,otp_verified,book_package_clicked,checkout_started,checkout_cancelled,payment_started,payment_completed,package_purchased,trial_booked,sms_sent,sms_delivered,button_clicked,chat_notification_received,chat_message_sent,profile_completion_started,sorting_clicked,checkout_step_active,myinterviewdoc_opened,session_notification_exit,reminder_to_attend_cycle_start,recording_started,session_completed,trial_doc_closed,group_session_registration,email_delivered,email_opened,login/signup_started1,mentee_onboarding_done,potential_mentor_assigned,session_joined_by_mentee,session_joined_by_mentor,whiteboard_opened,mentor_dashboard_visited,session_feedback_form_wrong_iframe_tally_url,checkout_button_clicked,notion_page_visited,offering_enabled,upgrade_plan_visited,plan_selected,coupon_applied,availability_updated,filter_cleared,trial_nav_next,trial_nav_back,agenda_clicked,survey_seen,email_converted,email_link_clicked,checkout_completed,city_mp,region_mp,chrome,safari,edge\n2023-07-01T16:38:23,sourabhbhandari2002@gmail.com,Sourabh Bhandari,+919650591173,,,,https://www.linkedin.com/feed/,,,Senior,https://firebasestorage.googleapis.com/v0/b/preplaced-upload-prod/o/resume%2Fcandidate-profile%2FSourabh%20Bhandari0.4743674387697867?alt=media&token=fe952532-f828-4aee-b687-ea9477893f26,,,,page_home,srikanth,organic,success_story,['Switch to a better job'],2 to 3 months,Correct path,Teach skills,Accountability,Motivation & Support system,Solve doubts,Resume & Referrals,Lack of continuity in my job search efforts and also getting the calls for interviews.,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,1,1,0,0,0,0,1,0,1,1,0,1,0,0,1,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,Delhi,National Capital Territory of Delhi,1,0,0\n2023-07-12T11:29:28,abinjohn001@gmail.com,Abin John,+919605328329,,,,,,,Junior,,,,,,,,,['Switch to a better job'],I do not have a fixed timeline,Correct path,Teach skills,Solve doubts,I haven't got any chance to work on a project. I am looking to get direction to learn the skills required for real projects.,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n2023-07-08T16:55:13,guttidata@gmail.com,vishu gutti,+919880038284,,,,https://www.linkedin.com/in/vishudata/,,,Senior,https://firebasestorage.googleapis.com/v0/b/preplaced-upload-prod/o/resume%2Fcandidate-profile%2Fvishu%20gutti0.9866398617969725?alt=media&token=a067c0b7-bb11-4e7a-b565-cbdb67ec08e4,,,,page_home,deepak_post,inf,yearsof_experience_as_data_analyst,['Switch to a new domain'],2 to 3 months,Correct path,Teach skills,Accountability,Motivation & Support system,Solve doubts,Resume & Referrals,i need to have a clear path. i feel mentor is needed here. i need help on how to prepare for interviews.,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,1,1,0,0,1,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,Bengaluru,Karnataka,1,0,0\n2023-07-05T10:07:47,nadeem.khan@preplaced.in,Nadeem Khan Mentee,+918827254360,asdasd,Preplaced,['asdasd'],https://www.linkedin.com/in/nadeemkhanrtm/,['Google'],2020,Junior,https://firebasestorage.googleapis.com/v0/b/preplaced-upload-dev/o/resume%2Fcandidate-profile%2FNadeem%20Khan%20Mentor0.7952235806929364?alt=media&token=707f0656-d938-4ed5-bf04-5085fd2bac4f,asd,0,Fri, 11 Nov 2022 12:55:34 GMT,product_home_page,aman_chowdhary,influencer,freshers_layoffs,['Switch to a better job'],I do not have a fixed timeline,Correct path,Testing TesingTesting TesingTesting TesingTesting TesingTesting TesingTesting TesingTesting TesingTesting TesingTesting Tesing,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,Bhopal,Madhya Pradesh,1,0,0\n"
+
+export const dummyCohortsData = [
+    {
+        name: "Campaign - Insta Influencer July 2023",
+        predictedChurn: 0.75,
+        actualChurn: 0.8,
+        deviation: 0.05,
+        userList: dummyUserList
+    },
+    {
+        name: "Campaign - Organic Referral",
+        predictedChurn: 0.66,
+        actualChurn: 0.65,
+        deviation: 0.01,
+        userList: dummyUserList
+    },
+    {
+        name: "Phone - Apple Devices",
+        predictedChurn: 0.15,
+        actualChurn: 0.14,
+        deviation: 0.01,
+        userList: dummyUserList
+    },
+    {
+        name: "Location - Tier 2 Cities",
+        predictedChurn: 0.66,
+        actualChurn: 0.65,
+        deviation: 0.01,
+        userList: dummyUserList
+    },
+]
+
+export const dummyChurnByDate = [
+    {
+        date: "2023-07-01",
+        users: 80,
+        predictedChurn: 0.75,
+        actualChurn: 0.8
+    },
+    {
+        date: "2023-07-02",
+        users: 100,
+        predictedChurn: 0.7,
+        actualChurn: 0.83
+    },
+    {
+        date: "2023-07-03",
+        users: 80,
+        predictedChurn: 0.8,
+        actualChurn: 0.6
+    },
+    {
+        date: "2023-07-04",
+        users: 80,
+        predictedChurn: 0.77,
+        actualChurn: 0.65
+    },
+    {
+        date: "2023-07-05",
+        users: 80,
+        predictedChurn: 0.84,
+        actualChurn: 0.79
+    },
+    {
+        date: "2023-07-06",
+        users: 80,
+        predictedChurn: 0.63,
+        actualChurn: 0.71
+    },
+    {
+        date: "2023-07-07",
+        users: 80,
+        predictedChurn: 0.71,
+        actualChurn: 0.66
+    }
 ]
