@@ -275,6 +275,7 @@ model DataModel {
     user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
     type                String
     name                String
+    description         String
     userFilter          String
     predictionTimeframe String
     eventA              String
