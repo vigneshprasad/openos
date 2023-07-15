@@ -28,9 +28,8 @@ export const CommandHistorySection: React.FC = () => {
     useMemo(() => commandHistoryMutation.mutate(), [])
 
     return (
-        <div className="grid grid-rows-[max-content_1fr] grid-cols-1 bg-[#1C1B1D] border border-solid 
-            border-[#333333] border-l-0">
-            <div className="h-12 p-3 border-b border-solid border-b-[#333333]">
+        <div className="grid grid-rows-[max-content_1fr] grid-cols-1">
+            <div className="h-12 p-3 border-b border-solid border-b-slate-200">
                 <text className="text-sm text-[#838383] font-medium">Command History</text>
             </div>
             <div className="overflow-auto">
@@ -55,12 +54,12 @@ export const CommandHistorySection: React.FC = () => {
                     <div className="py-5 flex flex-col gap-2">
                         {commandHistory?.map((command, index) => (
                             <div 
-                                className="pl-3 pr-5 flex gap-4 items-center cursor-pointer hover:bg-[#373737]"
+                                className="pl-3 pr-5 flex gap-4 items-center cursor-pointer hover:bg-slate-100 text-[#616161]"
                                 key={index}
                             >
-                                <p className="min-w-[15px] text-xs text-[#616161]">{index + 1}</p>
+                                <p className="min-w-[15px] text-xs">{index + 1}</p>
                                 <div className="px-2 py-1 truncate">
-                                    <p className="text-xs text-[#C4C4C4]">{command.input}</p>
+                                    <p className="text-xs">{command.input}</p>
                                 </div>
                             </div>
                         ))}

@@ -13,7 +13,7 @@ const SIDENAV_ITEMS = [
   {
     key: "terminal",
     icon: {
-      active: <TerminalIcon color="#4191F6" />,
+      active: <TerminalIcon className="text-primary"/>,
       inactive: <TerminalIcon color="#747474" />
     },
     route: "/"
@@ -21,7 +21,7 @@ const SIDENAV_ITEMS = [
   {
     key: "integrations",
     icon: {
-      active: <IntegrationsIcon color="#4191F6" />,
+      active: <IntegrationsIcon className="text-primary" />,
       inactive: <IntegrationsIcon color="#747474" />
     },
     route: "/integrations"
@@ -29,7 +29,7 @@ const SIDENAV_ITEMS = [
   {
     key: "customization",
     icon: {
-      active: <CustomizationIcon color="#4191F6" />,
+      active: <CustomizationIcon className="text-primary"/>,
       inactive: <CustomizationIcon color="#747474" />
     },
     route: "/customization"
@@ -38,16 +38,16 @@ const SIDENAV_ITEMS = [
 
 export const SideNavbar: React.FC<IProps> = ({activeKey}) => {
   return (
-    <div className="w-11 p-1 bg-[#1C1B1D] border border-solid border-[#333]
-      border-l-0 border-b-0 flex-col gap-3 items-center">
+    <div className="w-16 p-1
+      border-l-0 border-b-0 flex flex-col gap-4 items-center">
         {SIDENAV_ITEMS.map(({key, icon, route}) => {
             const active = activeKey === key
 
             return (
                 <Link href={route} key={key}>
-                    <div className="p-2 flex flex-col gap-1 items-center">
+                    <div className={`p-3 flex flex-col gap-1 items-center ${active ? "bg-primary/10":"bg-light-theme" } rounded-full`}>
                         {active ? icon.active : icon.inactive}
-                        {active && <div className="w-1 h-1 bg-[#4191F6]" />}
+                        {/* {active && <div className="w-1 h-1 bg-[#4191F6]" />} */}
                     </div>
                 </Link>
             )

@@ -19,7 +19,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                         <div className="pt-2 flex justify-between items-start">
                             <div>
                                 <h3 className="text-[#616161] text-sm">Your question was converted to SQL as</h3>
-                                <h3 className="pt-1 text-white text-sm">{data.query.query}</h3>
+                                <h3 className="pt-1 text-sm">{data.query.query}</h3>
                             </div>
                             <QueryFeedback queryProp={data.query}/>
                         </div>
@@ -67,7 +67,7 @@ const QueryResult: React.FC<Props> = ({ props }) => {
                                                 <p className="text-sm text-[#838383] first-letter:uppercase">
                                                     {data.name}:
                                                 </p>
-                                                <p className="text-sm text-[#fff]">
+                                                <p className="text-sm">
                                                     {data.result[0]?.count}
                                                 </p>
                                             </tr>
