@@ -273,3 +273,7 @@ tbody tr td:first-child .textAlignLeft {
 .chartjs-tooltip {
   display: none;
 }
+
+.apexcharts-toolbar {
+  display: none !important;
+}
