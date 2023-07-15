@@ -1210,7 +1210,7 @@ export const marketingSpentData =
     null
 ]
 
-export const dummyModel = {
+export const dummyModel = [{
     id: "dummy",
     createdAt: new Date("2023-07-01"),
     updatedAt: new Date("2023-07-01"),
@@ -1224,7 +1224,7 @@ export const dummyModel = {
     eventB: null,
     eventAFrequency: 1,
     predictionWindow: 30,
-}
+}]
 
 export const dummyFeatures = [
     {
