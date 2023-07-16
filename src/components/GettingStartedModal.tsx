@@ -47,7 +47,7 @@ export const GettingStartedModal: React.FC = () => {
         <Dialog.Portal>
           <Dialog.Overlay className="DialogOverlay" />
           <Dialog.Content className="DialogContent w-[90vw] min-w-[800px] max-w-max">
-              <div className="p-[10px] flex items-center justify-between border-b-[1px] border-solid border-[#373737]">
+              <div className="p-[10px] flex items-center justify-between border-b-[1px] border-solid border-[#F9F9FC]">
                 <text className="text-sm text-[#C4C4C4]">Getting Started</text>
                 <text className="text-sm text-[#616161]">{activeStage} of {steps.length}</text>
               </div>
@@ -55,7 +55,7 @@ export const GettingStartedModal: React.FC = () => {
               {activeStage === formStages.UserDetails && (
                 <div className="w-[50%] mx-auto pt-[48px] pb-4 grid grid-cols-1 grid-rows-[max-content_1fr] gap-[40px]">
                   <div>
-                    <h1 className="text-2xl leading-400 text-[#fff]">Welcome to Open OS!</h1>
+                    <h1 className="text-2xl leading-400 text-[#242533]">Welcome to Open OS!</h1>
                     <p className="pt-2 text-sm text-[#616161]">Tell us a little about yourself. 
                     This helps us customize the product for you</p>
                   </div>
@@ -71,7 +71,7 @@ export const GettingStartedModal: React.FC = () => {
               {activeStage === formStages.Integrations && (
                 <div className="w-[70%] mx-auto pt-[48px] pb-4 grid grid-cols-1 grid-rows-[max-content_1fr] gap-6">
                   <div>
-                    <h1 className="text-2xl leading-400 text-[#fff]">Connect your data sources 🛠️</h1>
+                    <h1 className="text-2xl leading-400 text-[#242533]">Connect your data sources 🛠️</h1>
                     <p className="pt-2 text-sm text-[#616161]">
                         Connect at-least one data source to get started.
                     </p>

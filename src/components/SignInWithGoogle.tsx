@@ -6,8 +6,8 @@ import { AnalyticsEvents } from "~/utils/analytics/types";
 export const SignInWithGoogle: React.FC = () => {
     const { track } = useAnalytics();
     return (
-        <button className="w-full h-[40px] px-2 flex-row bg-[#0B0B0B] gap-2 items-center justify-center rounded-md 
-        hover:cursor-pointer hover:bg-[#373737]" 
+        <button className="w-full h-[40px] px-2 flex-row gap-2 items-center justify-center rounded-md 
+        hover:cursor-pointer border-[#888] border-solid border-2" 
             onClick={() => {
                 track(AnalyticsEvents.sign_up_button_clicked, {})
                 void signIn('google', { callbackUrl: '/' })
@@ -15,7 +15,7 @@ export const SignInWithGoogle: React.FC = () => {
         }
         >
             <Image src="/svg/google_g_icon.svg" alt="Google icon" width={40} height={40} />
-            <text className="text-sm text-[#fff]">Sign in with Google</text>
+            <text className="text-sm">Sign in with Google</text>
         </button>
     )
 }

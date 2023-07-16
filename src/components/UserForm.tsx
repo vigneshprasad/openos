@@ -65,9 +65,7 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
                     type="text"
                     value={name}
                     placeholder="What do we call you?"
-                    className="block w-full mt-1 px-3 py-2 bg-[#0B0B0B] rounded-md border border-solid 
-                    border-[#0B0B0B] focus:border-solid focus:border-[#373737] text-sm font-medium
-                    text-[#fff] placeholder:text-sm placeholder:text-[#838383] placeholder:font-medium"
+                    className="block w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg p-2 pl-3"
                     onChange={(e) => setName(e.target.value)}
                 />
             </label>
@@ -81,19 +79,17 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
                     onValueChange={(value) => setRole(value)} required
                 >
                     <Select.Trigger
-                        className="w-full mt-1 px-3 py-2 inline-flex items-center justify-between bg-[#0B0B0B] 
-                        rounded-md border border-solid border-[#0B0B0B] focus:border-solid focus:border-[#373737] 
-                        text-sm font-medium text-[#fff] data-[placeholder]:text-[#838383]"
+                        className="w-full mt-1 px-3 py-2 inline-flex items-center justify-between bg-slate-50 rounded-lg p-2 pl-3"
                         aria-label="Role"
                     >
                         <Select.Value placeholder="Select what you do" />
-                        <Select.Icon className="text-[#fff]">
+                        <Select.Icon>
                             <ChevronDownIcon />
                         </Select.Icon>
                     </Select.Trigger>
                     <Select.Portal className="absolute w-full top-10 left">
                         <Select.Content 
-                        className="overflow-hidden bg-[#1A1A1A] rounded-md border border-solid border-[#373737]
+                        className="overflow-hidden bg-slate-50
                             shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
                         >
                             <Select.Viewport>
@@ -102,7 +98,7 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
                                         <SelectItem
                                             key={i}
                                             value={role.toLowerCase()}
-                                            className="px-2 py-1 text-[#fff] hover:bg-[#373737] rounded-md cursor-pointer">
+                                            className="px-2 py-1 hover:bg-[#ECEBF9] rounded-md cursor-pointer">
                                             {role}
                                         </SelectItem>
                                     ))}
@@ -118,7 +114,7 @@ export const UserForm = React.forwardRef<HTMLFormElement, IProps>(({
             }
 
             <div className="flex justify-center">
-                <button className="Button primary w-[92px]" type="submit">
+                <button className="bg-primary/10 text-primary rounded-md mt-3 py-2 px-3 font-normal text-md flex gap-1.5 hover:bg-primary/20 cursor-pointer" type="submit">
                     Next
                 </button>
             </div>

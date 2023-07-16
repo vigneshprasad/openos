@@ -11,10 +11,10 @@ const Auth: NextPage = () => {
         <meta name="description" content="Tools to make your life easier" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen grid grid-cols-3 bg-[#0A0A0A]">
+      <main className="min-h-screen grid grid-cols-3 bg-homepage">
         <div className="col-span-2 flex flex-col justify-center relative">
           <div className="w-inherit absolute right-0">
-            <h1 className="text-[32px] leading-[48px] font-medium text-[#fff]">
+            <h1 className="text-[32px] leading-[48px] font-medium">
               Retrieve, analyse, model & forecast <br /> your{" "}
               <span className="text-[#F4BF4F]">data & finances.</span>
             </h1>
@@ -25,13 +25,13 @@ const Auth: NextPage = () => {
           </div>
         </div>
 
-        <div className="col-span-1 py-[80px] px-[70px] bg-[#000] border-l border-l-[#202020] 
-            border-solid shadow-[-12px_0px_16px_0px_rgba(10,10,10,0.82)] z-10">
+        <div className="col-span-1 py-[80px] px-[70px] border-l
+            border-solid shadow-[-12px_0px_16px_0px_rgba(10,10,10,0.1)] z-10">
           <div className="h-[100%] w-[95%] grid grid-cols-1 grid-rows-[1fr_max-content] gap-10 justify-center">
             <div className="flex flex-col gap-[48px]">
               <Image src="/halo_logo.png" alt="Halo logo" width={42} height={42} />
               <div className="pt-[22px]">
-                <h2 className="text-2xl font-medium text-[#fff]">Login to Open OS</h2>
+                <h2 className="text-2xl font-medium">Login to Open OS</h2>
                 <p className="pt-[8px] text-sm font-medium text-[#747474]">
                   If you do not have an account, we will create one for you upon sign in. 
                 </p>

@@ -104,7 +104,7 @@ export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
                 type="text"
                 className="w-full px-0 py-[9px] pb-[9px] text-sm bg-white
                 font-normal placeholder:text-sm placeholder:text-[#616161]"
-                placeholder="Start by typing the command eg. run-query"
+                placeholder="Start by typing the command eg. get-data"
                 value={command}
                 disabled={loading}
                 onKeyDown={handleKeyDown}
