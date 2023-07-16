@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { type Prisma } from "@prisma/client";
 import { dummyChurnByDate, dummyChurnGraph, dummyCohortsData, dummyFeatures, dummyModel } from "~/constants/dummyData";
+import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 
 type Cohort = {
     name: string,
@@ -231,6 +232,50 @@ export const dataModelRouter = createTRPCRouter({
                     userList: userList.toString()
                 });
             }
+        }),
+
+    create: protectedProcedure
+        .input(z.object({ 
+            name: z.string({
+              required_error: "Name is required"
+            }),
+            description: z.string({
+              required_error: "Description is required"
+            }),
+            type: z.string({
+              required_error: "Type is required"
+            }),
+            userFilter: z.string(),
+            predictionTimeframe: z.string(),
+            eventA: z.string({
+                required_error: "Event A is required"
+            }),
+            eventB: z.string({ }),
+            eventAFrequency: z.string({}),
+            predictionWindow: z.string({}),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const slackMessage = 
+                `Data Model Requested.\n
+                    Name: ${input.name}\n
+                    Description: ${input.description}`
+            await sendResourceAddedMessage(slackMessage, ctx.session.user)
+
+            return await ctx.prisma.dataModel.create({
+                data: {
+                    name: input.name,
+                    description: input.description,
+                    type: input.type,
+                    userFilter: input.userFilter,
+                    predictionTimeframe: input.predictionTimeframe,
+                    eventA: input.eventA,
+                    eventB: input.eventB,
+                    eventAFrequency: input.eventAFrequency as unknown as number,
+                    predictionWindow: input.predictionWindow as unknown as number,
+                    userId: ctx.session.user.id,
+                    completionStatus: false,
+                },
+            });
         })
 
 })

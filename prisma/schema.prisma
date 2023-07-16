@@ -281,6 +281,7 @@ model DataModel {
     eventB              String?
     eventAFrequency     Int?
     predictionWindow    Int?
+    completionStatus    Boolean             @default(false)
     FeatureImportance   FeatureImportance[]
     UserPrediction      UserPrediction[]
     Cohorts             Cohorts[]
