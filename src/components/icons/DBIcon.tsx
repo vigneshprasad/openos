@@ -1,15 +1,12 @@
-
-
 export default function DBIcon(
-    props: React.SVGProps<SVGSVGElement>
-  ): JSX.Element {
-      return (
-        <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-          <path d="M8.18327 7.35002C11.8284 7.35002 14.7833 5.87255 14.7833 4.05001C14.7833 2.22746 11.8284 0.75 8.18327 0.75C4.53818 0.75 1.58325 2.22746 1.58325 4.05001C1.58325 5.87255 4.53818 7.35002 8.18327 7.35002Z" stroke="#644DED" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14.7833 4.0498V13.9498C14.7833 15.7752 11.8236 17.2498 8.18327 17.2498C4.54295 17.2498 1.58325 15.7752 1.58325 13.9498V4.0498" stroke="#644DED" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14.7833 7.3501C14.7833 9.17542 11.8236 10.6501 8.18327 10.6501C4.54295 10.6501 1.58325 9.17542 1.58325 7.3501" stroke="#644DED" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14.7833 10.6499C14.7833 12.4752 11.8236 13.9499 8.18327 13.9499C4.54295 13.9499 1.58325 12.4752 1.58325 10.6499" stroke="#644DED" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        
-      )
-  }
+  props: React.SVGProps<SVGSVGElement>
+): JSX.Element {
+  return (
+    <svg width="17" height="20" viewBox="0 0 17 20" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path d="M8.20002 8.20002C12.1765 8.20002 15.4 6.58824 15.4 4.60001C15.4 2.61178 12.1765 1 8.20002 1C4.22356 1 1 2.61178 1 4.60001C1 6.58824 4.22356 8.20002 8.20002 8.20002Z" stroke="#242533" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M15.4 4.6001V15.4001C15.4 17.3914 12.1713 19.0001 8.20002 19.0001C4.22876 19.0001 1 17.3914 1 15.4001V4.6001" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M15.4 8.2002C15.4 10.1915 12.1713 11.8002 8.20002 11.8002C4.22876 11.8002 1 10.1915 1 8.2002" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M15.4 11.7998C15.4 13.7911 12.1713 15.3998 8.20002 15.3998C4.22876 15.3998 1 13.7911 1 11.7998" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  )
+}

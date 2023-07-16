@@ -140,7 +140,7 @@ export const MainTerminal: React.FC = () => {
                     <div className="w-[30%] h-max mx-auto pt-20">
                         <Image src="/svg/copilot.svg" alt="Terminal" width={100} height={100} className="mx-auto" />
                         <div className="pt-8">
-                            <h3 className="text-[#969696] text-sm font-medium text-center underline">Start by typing in any question that you want to ask </h3>
+                            <h3 className="text-[#969696] text-sm font-medium text-center underline">Start by typing a question eg. “List of users”</h3>
                             {/* <p className="pt-1 text-xs text-[#838383] text-center">
                                 Start by typing a syntax from the command pallet followed by natural language
                             </p> */}
@@ -232,7 +232,7 @@ export const MainTerminal: React.FC = () => {
                 </div>
             )}
 
-            <div className="w-full rounded-md shadow-xl bg-white">
+            <div className="w-[90%] rounded-md shadow-xl bg-white m-auto">
                 {/* <div className="px-3 py-1 border-b border-solid border-b-[#333] flex justify-between items-center">
                     <text className="text-xs text-[#616161] font-normal">Command Palette</text>
                     <div className="flex gap-1">
@@ -253,7 +253,7 @@ export const MainTerminal: React.FC = () => {
                         ))}
                     </div>
                 </div> */}
-                <div className="px-5 py-2">
+                <div className="px-5 py-4">
                     <form onSubmit={handleSubmit}> 
                         <fieldset>
                             <label className="relative">
