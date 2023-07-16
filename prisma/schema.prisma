@@ -59,7 +59,6 @@ model User {
     StripeResource      StripeResource[]
     MixpanelResource    MixpanelResource[]
     DataModel           DataModel[]
-    FeatureImportance   FeatureImportance[]
 }
 
 model VerificationToken {
@@ -276,12 +275,12 @@ model DataModel {
     type                String
     name                String
     description         String
-    userFilter          String
-    predictionTimeframe String
+    userFilter          String?
+    predictionTimeframe String?
     eventA              String
     eventB              String?
     eventAFrequency     Int?
-    predictionWindow    Int
+    predictionWindow    Int?
     FeatureImportance   FeatureImportance[]
     UserPrediction      UserPrediction[]
     Cohorts             Cohorts[]
@@ -294,15 +293,12 @@ model FeatureImportance {
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
     deletedAt   DateTime?
-    userId      String
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
     dataModelId String
     featureName String
     importance  Float
     type        String
 
-    @@index([userId])
     @@index([dataModelId])
 }
 
@@ -314,7 +310,7 @@ model UserPrediction {
     dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
     dataModelId    String
     userDistinctId String
-    dateOfEvent    String
+    dateOfEvent    DateTime
     probability    Float
     userData       Json
     actualResult   Int?

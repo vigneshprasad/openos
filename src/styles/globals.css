@@ -26,7 +26,7 @@ input {
 }
 
 .DialogContent {
-  background-color: #111;
+  background-color: #fff;
   border-radius: 6px;
   box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
     hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
@@ -48,13 +48,11 @@ input {
 .DialogTitle {
   margin: 0;
   font-weight: 500;
-  color: var(--mauve12);
   font-size: 17px;
 }
 
 .DialogDescription {
   margin: 10px 0 20px;
-  color: var(--mauve11);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -142,18 +140,15 @@ input {
 .Label {
   font-size: 14px;
   font-weight: 500;
-  color: #c4c4c4;
 }
 
 .Input {
   width: 100%;
-  background-color: #0b0b0b;
   margin-top: 4px;
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 14px;
   font-weight: 500;
-  color: #fff;
   border: 1px solid #0b0b0b;
 }
 
@@ -201,7 +196,7 @@ input {
   font-weight: 400;
   color: #616161;
   position: sticky;
-  left: 0
+  left: 0;
   /* background-color: #1c1b1d; */
 }
 
@@ -218,7 +213,7 @@ th {
 
 td {
   max-width: 300px;
-  text-overflow: ellipsis; 
+  text-overflow: ellipsis;
   @apply border border-border text-light-text;
   padding: 12px;
 }
