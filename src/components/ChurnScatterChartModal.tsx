@@ -29,6 +29,8 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
 
   const runChurnGraphMutation = api.dataModelRouter.getChurnGraph.useMutation({
     onSuccess: (churnGraphData) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       setChurnGraphData(churnGraphData);
     }
   });
