@@ -110,7 +110,7 @@ export const dataModelRouter = createTRPCRouter({
                     churnGraph.push({
                         userDistinctId: userPrediction.userDistinctId,
                         y: userPrediction.probability,
-                        x: userData[featureName]
+                        x: userData[featureName] as string
                     })
                 }
             }

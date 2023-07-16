@@ -28,7 +28,7 @@ const Home: NextPage = () => {
                     <div className="grid grid-rows-[max-content_1fr] grid-cols-1">
                         <div className="h-12 flex-row flex flex-basis-content p-1 bg-homepage-tab-background">
                             <div className="flex gap-2 items-center ml-3">
-                                <h3>Predicted churn for cohorts</h3>
+                                <h3 className="text-[#838383]">Talk to your database using natural language</h3>
                                 <div className="bg-success-badge px-3 py-1 rounded-full">Database</div>
                             </div>
                             {/* <div className={`${tab==="Main Tab" ? "bg-[#0A2950]" : "bg-[#041020]"} max-h-full w-[172px] px-2.5 py-2 rounded-md ml-2 cursor-pointer`} 
