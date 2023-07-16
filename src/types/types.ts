@@ -67,3 +67,8 @@ export type PredictCommandInput = {
     repeat?: number,
     period: number,
 }
+
+export type SelectOption = {
+    label: string;
+    value: string;
+}

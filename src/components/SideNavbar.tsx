@@ -2,8 +2,9 @@ import Link from "next/link";
 import IntegrationsIcon from "./icons/Integrations"
 import TerminalIcon from "./icons/Terminal"
 import CustomizationIcon from "./icons/Customization";
+import DBIcon from "./icons/DBIcon";
 
-export type SideNavKeys = "terminal" | "integrations" | "customization"
+export type SideNavKeys = "terminal" | "model" | "integrations" | "customization"
 
 type IProps = {
   activeKey: SideNavKeys;
@@ -17,6 +18,14 @@ const SIDENAV_ITEMS = [
       inactive: <TerminalIcon color="#747474" />
     },
     route: "/"
+  },
+  {
+    key: "model",
+    icon: {
+      active: <DBIcon className="text-primary"/>,
+      inactive: <DBIcon color="#747474" />
+    },
+    route: "/model"
   },
   {
     key: "integrations",
@@ -38,7 +47,7 @@ const SIDENAV_ITEMS = [
 
 export const SideNavbar: React.FC<IProps> = ({activeKey}) => {
   return (
-    <div className="w-16 p-1
+    <div className="w-16 p-1 bg-white sticky
       border-l-0 border-b-0 flex flex-col gap-4 items-center">
         {SIDENAV_ITEMS.map(({key, icon, route}) => {
             const active = activeKey === key
