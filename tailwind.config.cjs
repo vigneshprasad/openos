@@ -16,9 +16,9 @@ const config = {
         'predicted-churn-background': '#ECEBF9',
         'actual-churn-background': '#C0ECDF',
         'section-header': '#EFEFF5',
-        'churn-graph-prediction-color': '#4745A4',
-        'churn-graph-actual-color': '#F9BA33',
-        
+        'highlight': '#B5E5F4',
+        'disabled': '#B4B4B4',
+        'beta-background': '#F4E3B5'
       }
     },
   },

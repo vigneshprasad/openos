@@ -1,3 +1,4 @@
+import { Cohorts, DataModel, FeatureImportance } from "@prisma/client"
 import { PREMADE_MODEL } from "./modelTypes"
 
 export const userAcquisitionData = 
@@ -1210,27 +1211,29 @@ export const marketingSpentData =
     null
 ]
 
-export const dummyModel = [{
+export const dummyModel: DataModel[] = [{
     id: "dummy",
     createdAt: new Date("2023-07-01"),
     updatedAt: new Date("2023-07-01"),
+    deletedAt: null,
     userId: "dummy-user",
     type: PREMADE_MODEL,
     name: "Churn Prediction",
     description: "This model should predict for each new user from Facebook, the likelihood that an active customer - defined as a customer who has performed workshop attended, at least once every week will stop performing the event over the next 30 days ",
     userFilter: "from Facebook",
-    predictionTimeframe: 7,
+    predictionTimeframe: '7',
     eventA: "workshop attended",
     eventB: null,
     eventAFrequency: 1,
     predictionWindow: 30,
 }]
 
-export const dummyFeatures = [
+export const dummyFeatures: FeatureImportance[] = [
     {
         id: "dummy-feature-1",
         createdAt: new Date("2023-07-01"),
         updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
         userId: "dummy-user",
         dataModelId: "dummy",
         featureName: "device_price",
@@ -1238,22 +1241,25 @@ export const dummyFeatures = [
         importance: 0.131,
     },
     {
-        id: "dummy-feature-1",
+        id: "dummy-feature-2",
         createdAt: new Date("2023-07-01"),
         updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
         userId: "dummy-user",
         dataModelId: "characteristic",
         featureName: "location",
-
+        type: "feature",
         importance: 0.094,
     },
     {
-        id: "dummy-feature-1",
+        id: "dummy-feature-3",
         createdAt: new Date("2023-07-01"),
         updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
         userId: "dummy-user",
         dataModelId: "event",
         featureName: "email_verified",
+        type: "characteristic",
         importance: 0.062,
     }
 ]

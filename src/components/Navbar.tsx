@@ -11,10 +11,10 @@ export const Navbar: React.FC = () => {
             border-t border-solid border-[#333]">
             <Image src="/halo_logo.png" alt="Logo" width={24} height={24} />
             
-            <text className="font-bold text-[#fff]">
+            <text className="font-bold">
                 {sessionData?.user?.name ? `${sessionData.user.name}'s Dashboard` : ""} 
             </text> 
-            <div className="dropdown text-[#fff]">
+            <div className="dropdown ">
                 {sessionData?.user ? (
                     <label 
                         tabIndex={0}

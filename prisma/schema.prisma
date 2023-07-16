@@ -38,27 +38,27 @@ model Session {
 }
 
 model User {
-    id                  String                @id @default(cuid())
-    name                String?
-    email               String?               @unique
-    emailVerified       DateTime?
-    image               String?
-    role                String?
-    isOnboarded         Boolean               @default(false)
-    isDummy             Boolean?
-    createdAt           DateTime              @default(now())
-    accounts            Account[]
-    sessions            Session[]
-    DatabaseResource    DatabaseResource[]
-    RazorpayResource    RazorpayResource[]
-    BankStatement       BankStatement[]
-    funnelSteps         funnelSteps[]
-    ActivityDescription ActivityDescription[]
-    Transaction         Transaction[]
-    CommandHistory      CommandHistory[]
-    StripeResource      StripeResource[]
-    MixpanelResource    MixpanelResource[]
-    DataModel           DataModel[]
+  id                  String                @id @default(cuid())
+  name                String?
+  email               String?               @unique
+  emailVerified       DateTime?
+  image               String?
+  role                String?
+  isOnboarded         Boolean               @default(false)
+  isDummy             Boolean?
+  createdAt           DateTime              @default(now())
+  accounts            Account[]
+  sessions            Session[]
+  DatabaseResource    DatabaseResource[]
+  RazorpayResource    RazorpayResource[]
+  BankStatement       BankStatement[]
+  funnelSteps         funnelSteps[]
+  ActivityDescription ActivityDescription[]
+  Transaction         Transaction[]
+  CommandHistory      CommandHistory[]
+  StripeResource      StripeResource[]
+  MixpanelResource    MixpanelResource[]
+  DataModel           DataModel[]
 }
 
 model VerificationToken {
@@ -266,55 +266,55 @@ model SQLQueryModification {
 }
 
 model DataModel {
-    id                  String              @id @default(cuid())
-    createdAt           DateTime            @default(now())
-    updatedAt           DateTime            @updatedAt
-    deletedAt           DateTime?
-    userId              String
-    user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-    type                String
-    name                String
-    description         String
-    userFilter          String?
-    predictionTimeframe String?
-    eventA              String
-    eventB              String?
-    eventAFrequency     Int?
-    predictionWindow    Int?
-    completionStatus    Boolean             @default(false)
-    FeatureImportance   FeatureImportance[]
-    UserPrediction      UserPrediction[]
-    Cohorts             Cohorts[]
+  id                  String              @id @default(cuid())
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  deletedAt           DateTime?
+  userId              String
+  type                String
+  name                String
+  userFilter          String?
+  predictionTimeframe String?
+  eventA              String
+  eventB              String?
+  eventAFrequency     Int?
+  predictionWindow    Int?
+  description         String
+  completionStatus    Boolean             @default(false)
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  FeatureImportance   FeatureImportance[]
+  UserPrediction      UserPrediction[]
+  Cohorts             Cohorts[]
 
   @@index([userId])
 }
 
 model FeatureImportance {
-    id          String    @id @default(cuid())
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
-    deletedAt   DateTime?
-    dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
-    dataModelId String
-    featureName String
-    importance  Float
-    type        String
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  dataModelId String
+  featureName String
+  importance  Float
+  type        String
+  dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
 
-    @@index([dataModelId])
+  @@index([dataModelId])
 }
 
 model UserPrediction {
-    id             String    @id @default(cuid())
-    createdAt      DateTime  @default(now())
-    updatedAt      DateTime  @updatedAt
-    deletedAt      DateTime?
-    dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
-    dataModelId    String
-    userDistinctId String
-    dateOfEvent    DateTime
-    probability    Float
-    userData       Json
-    actualResult   Int?
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  dataModelId    String
+  userDistinctId String
+  dateOfEvent    DateTime
+  probability    Float
+  userData       Json
+  actualResult   Int?
+  dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
 
   @@index([dataModelId])
 }
