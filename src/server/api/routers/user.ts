@@ -34,6 +34,30 @@ export const userRouter = createTRPCRouter({
                 user,
             }
         }),
+
+    integrationList: protectedProcedure
+        .mutation(async ({ctx}) => {
+            const user = await ctx.prisma.user.findFirst({
+                where: {
+                    id: ctx.session.user.id
+                },
+                include: {
+                    DatabaseResource: true,
+                    RazorpayResource: true,
+                    BankStatement: true,
+                    StripeResource: true,
+                    MixpanelResource: true,
+                }
+            })
+
+            return {
+                database: user?.DatabaseResource.length !== 0,
+                razorpay: user?.RazorpayResource.length !== 0,
+                bankStatement: user?.BankStatement.length !== 0,
+                stripe: user?.StripeResource.length !== 0,
+                mixpanel: user?.MixpanelResource.length !== 0,
+            }
+        }),
   
     update: protectedProcedure
         .input(z.object({
