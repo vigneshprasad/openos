@@ -6,6 +6,7 @@ import { BaseLayout } from "~/components/BaseLayout";
 import ChurnComparisonChart from "~/components/ChurnComparisonChart";
 import CohortsSection from "~/components/CohortsSection";
 import FeaturesTable from "~/components/FeaturesTable";
+import { IntegrationStatus } from "~/components/IntegrationStatus";
 import Select from "~/components/Select";
 import { api } from "~/utils/api";
 
@@ -16,7 +17,6 @@ const Home: NextPage = () => {
 
     const [selectedModelId, setSelectedModelId] = useState<string>();
     const [selectedDate, setSelectedDate] = useState<Date>(yesterday);
-
 
     const { data: models } = api.dataModelRouter.getModels.useQuery();
 
@@ -55,21 +55,17 @@ const Home: NextPage = () => {
         setSelectedModelId(model.id);
     }, [models]);
 
-
     return (
         <>
             <Head>
                 <title>Open OS</title>
-                <meta name="description" content="Toolsyo to make your life easier" />
+                <meta name="description" content="Tools to to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <BaseLayout activeKey="models">
                 <div className="flex flex-col justify-start">
                     <div className="h-12 flex-row flex justify-between flex-basis-content p-2 bg-homepage-tab-background">
-                        <div className="flex gap-2 items-center ml-3">
-                            <h3 className="text-[#838383]">Insights from your prediction models</h3>
-                            <div className="bg-success-badge px-3 py-1 rounded-full">Database</div>
-                        </div>
+                        <IntegrationStatus />
                     <div className="flex gap-2">
                             <Select title="Pre-made models" options={modelOptions} value={selectedModelId} />
                             <Select title="Dates" options={availableDates} onChange={(selectedDate) => setSelectedDate(new Date(selectedDate))} />

@@ -36,7 +36,7 @@ export const userRouter = createTRPCRouter({
         }),
 
     integrationList: protectedProcedure
-        .mutation(async ({ctx}) => {
+        .query(async ({ctx}) => {
             const user = await ctx.prisma.user.findFirst({
                 where: {
                     id: ctx.session.user.id

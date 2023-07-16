@@ -14,7 +14,7 @@ const IntegrationsPage: NextPage = () => {
                     Supercharge your productivity and connect the tools you use everyday.
                 </p>
             </div>
-            <div className="hide-scrollbar mx-[20%] pt-5 flex flex-col gap-4 overflow-y-auto">
+            <div className="hide-scrollbar mx-[20%] pt-5 mb-16 flex flex-col gap-4 overflow-y-auto">
                 <IntegrationsList />
             </div>
         </div>

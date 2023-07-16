@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 import Typography from "~/Typography";
 import { BaseLayout } from "~/components/BaseLayout";
 import CreateModelForm from "~/components/CreateModalForm";
+import { IntegrationStatus } from "~/components/IntegrationStatus";
 import { PreviousModelsSection } from "~/components/PreviousModelsSection";
 
 export type ModelPredictionTabKeys = 'churn' | 'retention' | 'conversion' | 'frequency' | 'roas' | 'ltv';
@@ -65,10 +66,7 @@ const CreateModel = () => {
         </Head>
         <BaseLayout activeKey="create-model"> <div className="flex flex-col justify-start">
             <div className="flex-row flex justify-between flex-basis-content p-2 bg-homepage-tab-background gap-4">
-                <div className="flex gap-2 items-center ml-3">
-                    <h3 className="text-[#838383]">Build Predictive Models using natural language</h3>
-                    <div className="bg-success-badge px-3 py-1 rounded-full">Database</div>
-                </div>
+                <IntegrationStatus />
             </div>
             <div className="flex justify-between h-full">
                 <div className="flex w-full flex-col p-1 m-4 gap-8 items-center text-center">

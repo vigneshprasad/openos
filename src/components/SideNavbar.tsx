@@ -47,14 +47,14 @@ const SIDENAV_ITEMS = [
     },
     route: "/integrations"
   },
-  {
-    key: "customization",
-    icon: {
-      active: <EyeIcon className="text-primary"/>,
-      inactive: <EyeIcon color="#747474" />
-    },
-    route: "/customization"
-  }
+//   {
+//     key: "customization",
+//     icon: {
+//       active: <EyeIcon className="text-primary"/>,
+//       inactive: <EyeIcon color="#747474" />
+//     },
+//     route: "/customization"
+//   }
 ] 
 
 export const SideNavbar: React.FC<IProps> = ({activeKey}) => {

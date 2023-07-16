@@ -26,9 +26,8 @@ const ActualChurnCard = ({ value }: { value?: string | number }) => {
     <div>
       Actual Churn
     </div>
-    <div className="flex w-3/5 justify-between">
+    <div>
       <b>{value}%</b>
-      <span>+9.15%</span>
     </div>
   </div>
 }
@@ -117,7 +116,7 @@ const ChurnComparisonChart = ({
     <ActualChurnCard value={(churnsByDay[churnsByDay.length - 1]?.actualChurn || 0) * 100} />
     <div className="h-[400px] bg-white w-1/4 grow rounded-lg px-2">
       <div className='flex justify-between items-center text-sm px-4 mt-2'>
-        <div>Predicted Churn vs. Realized User Churn</div>
+        <div>Predicted Churn vs. Actual Churn</div>
         <div className='flex items-center gap-5'>
           <div className='flex gap-2 items-center'>
             <div className='h-3 w-3 rounded-full bg-predicted-churn-background' />
