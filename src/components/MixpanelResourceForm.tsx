@@ -5,6 +5,7 @@ import { CrossCircledIcon } from '@radix-ui/react-icons';
 import Image from "next/image";
 import useAnalytics from "~/utils/analytics/AnalyticsContext";
 import { AnalyticsEvents } from "~/utils/analytics/types";
+import { PrimaryButton } from "./PrimaryButton";
 
 export const MixpanelResourceForm: React.FC = () => {
 
@@ -64,18 +65,24 @@ export const MixpanelResourceForm: React.FC = () => {
         <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
                 {success ? 
-                    <button className="Button bg-[#262626] mt-1 h-9 flex text-[#49C179]" disabled>
-                        <Image src="/svg/green_tick.svg" alt="Green Tick" width={16} height={16} />
+                    <button className="bg-primary/10 text-[#49C179] rounded-md mt-3 py-2 px-3
+                    font-normal text-xs flex gap-1.5" disabled>
+                        <Image src="/svg/green_tick.svg" alt="Green Tick" width={15} height={15} />
                         Connected
                     </button> :
-                    <button className="Button secondary mt-1 h-9">Connect</button>
+                    <button className="bg-primary/10 text-primary rounded-md mt-3 py-2 px-3
+                    font-normal text-xs flex gap-1.5
+                    hover:bg-primary/20 cursor-pointer"
+                    >
+                        Connect
+                    </button>
                 }
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content className="DialogContent p-4">
                     <div className="pb-4 flex flex-row justify-between items-center">
-                        <text className="text-md text-[#fff]">Connect to Mixpanel</text>
+                        <text className="text-md text-[#242533]">Connect to Mixpanel</text>
                         <Dialog.Close asChild>
                             <CrossCircledIcon color="#C4C4C4" className="cursor-pointer" />
                         </Dialog.Close>
@@ -83,9 +90,9 @@ export const MixpanelResourceForm: React.FC = () => {
                     <form onSubmit={handleSubmit}>
                         <fieldset className="Fieldset">
                             <label className="Label">
-                                <span>Project Id</span>
+                                <span className="text-[#242533]">Project Id</span>
                                 <input
-                                    className="Input" 
+                                    className="bg-slate-50 rounded-lg p-2 pl-3 w-full" 
                                     type="text"
                                     value={projectId}
                                     onChange={(e) => setProjectId(e.target.value)}
@@ -94,9 +101,9 @@ export const MixpanelResourceForm: React.FC = () => {
                         </fieldset>
                         <fieldset className="Fieldset">
                             <label className="Label">
-                                <span>Username</span>
+                                <span className="text-[#242533]">Username</span>
                                 <input
-                                    className="Input" 
+                                    className="bg-slate-50 rounded-lg p-2 pl-3 w-full" 
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
@@ -105,9 +112,9 @@ export const MixpanelResourceForm: React.FC = () => {
                         </fieldset>
                         <fieldset className="Fieldset">
                             <label className="Label">
-                                <span>Password</span>
+                                <span className="text-[#242533]">Password</span>
                                 <input
-                                    className="Input"
+                                    className="bg-slate-50 rounded-lg p-2 pl-3 w-full" 
                                     type="text"
                                     value={secret}
                                     onChange={(e) => setSecret(e.target.value)}
@@ -116,9 +123,9 @@ export const MixpanelResourceForm: React.FC = () => {
                         </fieldset>
                         <fieldset className="Fieldset">
                             <label className="Label">
-                                <span>Region</span>
+                                <span className="text-[#242533]">Region</span>
                                 <input
-                                    className="Input"
+                                    className="bg-slate-50 rounded-lg p-2 pl-3 w-full" 
                                     type="text"
                                     value={region}
                                     onChange={(e) => setRegion(e.target.value)}
@@ -127,9 +134,9 @@ export const MixpanelResourceForm: React.FC = () => {
                         </fieldset>
                         <div className="flex justify-center">
                             {loading ?
-                                <button type="submit" disabled className="Button secondary">Loading...</button>
+                                <PrimaryButton type="submit" disabled className="mt-8">Loading...</PrimaryButton>
                                 :
-                                <button type="submit" className="Button primary">Connect</button>
+                                <PrimaryButton type="submit" className="mt-8">Connect</PrimaryButton>
                             }
                         </div>
                         <div className="flex justify-content-end mt-8">

@@ -7,7 +7,7 @@ interface IProps {
 
 export const ErrorBox: React.FC<IProps> = ({title, description}) => {
   return (
-    <div className="mt-4 p-4 bg-[#161517] rounded-md">
+    <div className="mt-4 p-4 bg-white rounded-md">
       <p className="text-xs text-[#B2B0B0]">
         {title}
       </p>

@@ -117,8 +117,8 @@ export const MarketingAnalysisTerminal: React.FC = () => {
         }
     }, [router.query.exec, command])
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
+        e?.preventDefault();
         track(AnalyticsEvents.run_command, {
             command: command,
             terminal: "marketing analysis"
@@ -437,6 +437,7 @@ export const MarketingAnalysisTerminal: React.FC = () => {
                                     loading={loading}
                                     setCommand={setCommand}
                                     ref={inputFocusRef}
+                                    handleSubmit={handleSubmit}
                                 />
                             </label>
                         </fieldset>                                   

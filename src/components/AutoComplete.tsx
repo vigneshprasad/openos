@@ -1,14 +1,16 @@
 import React, { type SetStateAction, useState, useRef, useEffect, useImperativeHandle } from "react"
+import Image from 'next/image';
 import { type CommandSuggestion, commands } from "~/constants/commandAutocomplete";
 
 interface IProps {
     command: string;
     loading: boolean;
-    setCommand: (value: SetStateAction<string>) => void
+    setCommand: (value: SetStateAction<string>) => void;
+    handleSubmit: () => void;
 }
 
 export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
-    {command, loading, setCommand}, ref) => {
+    {command, loading, setCommand, handleSubmit}, ref) => {
 
     const [suggestions, setSuggestions] = useState<CommandSuggestion[]>([])
     const [suggestionIndex, setSuggestionIndex] = useState(0);
@@ -100,7 +102,7 @@ export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
             <input
                 ref={localInputRef}
                 type="text"
-                className="w-full px-0 py-[9px] pb-[18px] text-sm text-[#fff] 
+                className="w-full px-0 py-[9px] pb-[9px] text-sm bg-white
                 font-normal placeholder:text-sm placeholder:text-[#616161]"
                 placeholder="Start by typing the command eg. run-query"
                 value={command}
@@ -108,9 +110,10 @@ export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
                 onKeyDown={handleKeyDown}
                 onChange={handleChange}
             />
+            <Image onClick={handleSubmit} src="/svg/submit.svg" alt="Enter" width={35} height={35} className="absolute right-0 top-0 cursor-pointer"/>
 
-            {suggestionsActive && <div className="absolute w-[400px] h-[max] max-h-[145px] overflow-y-auto py-1
-                bg-[#272628] border border-solid border-[#333] shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] 
+            {suggestionsActive && <div className="absolute w-[400px] h-[max] max-h-[145px] overflow-y-auto rounded-lg
+                border border-solid bg-white border-slate-200 shadow-[0px_4px_4px_rgba(0, 0, 0, 0.25)] 
                 flex-col gap-2 bottom-0"
                 style={{
                     left: (command.length * 10) + 10,
@@ -124,12 +127,12 @@ export const AutoComplete = React.forwardRef<HTMLInputElement, IProps>((
 
                     return (
                         <div 
-                            className={`px-3 py-1 flex justify-between items-center cursor-pointer 
-                            hover:bg-[#373737] ${index === suggestionIndex ? "bg-[#373737] active" : ""}`}
+                            className={`px-3 py-2 flex justify-between items-center cursor-pointer
+                            hover:bg-slate-300 ${index === suggestionIndex ? "bg-slate-200 active" : ""}`}
                             key={index}
                             onClick={() => handleClick(item.command)}
                         >
-                            <p className="text-[#fff] text-sm">
+                            <p className={`text-sm`}>
                                 {item.command}
                             </p>
                             <p className="text-xs text-[#C4C4C4]">{item.description}</p>

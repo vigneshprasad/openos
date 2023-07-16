@@ -7,7 +7,7 @@ export const Navbar: React.FC = () => {
     const src = sessionData?.user?.image ?? ""
 
     return (
-        <div className="h-12 navbar pl-2.5 py-2 pr-[18px] flex justify-between items-center bg-[#1C1B1D] 
+        <div className="h-12 navbar pl-2.5 py-2 pr-[18px] flex justify-between items-center  
             border-t border-solid border-[#333]">
             <Image src="/halo_logo.png" alt="Logo" width={24} height={24} />
             

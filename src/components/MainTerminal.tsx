@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import AutoComplete from "~/components/AutoComplete";
 import useAnalytics from "~/utils/analytics/AnalyticsContext";
 import { AnalyticsEvents } from "~/utils/analytics/types";
+import { PrimaryButton } from "./PrimaryButton";
 
 type CommandDataType = {
     input: string,
@@ -116,8 +117,8 @@ export const MainTerminal: React.FC = () => {
         }
     }, [router.query.exec, command])
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
+        e?.preventDefault();
 
         track(AnalyticsEvents.run_command, {
             command: command,
@@ -129,7 +130,7 @@ export const MainTerminal: React.FC = () => {
     };
 
     return (
-        <div className="p-5 bg-[#0A0A0A] grid grid-rows-[1fr_max-content] grid-cols-1 gap-5 overflow-hidden">
+        <div className="p-5 grid grid-rows-[1fr_max-content] grid-cols-1 gap-5 overflow-hidden bg-slate-50">
             {data.length === 0 ? <div>
                 {loading ? 
                     <div className="w-full flex justify-center">
@@ -137,12 +138,12 @@ export const MainTerminal: React.FC = () => {
                     </div> :
 
                     <div className="w-[30%] h-max mx-auto pt-20">
-                        <Image src="/terminal_empty.png" alt="Terminal" width={300} height={100} className="mx-auto" />
+                        <Image src="/svg/copilot.svg" alt="Terminal" width={100} height={100} className="mx-auto" />
                         <div className="pt-8">
-                            <h3 className="text-[#fff] text-sm font-medium text-center">Write your first command</h3>
-                            <p className="pt-1 text-xs text-[#838383] text-center">
+                            <h3 className="text-[#969696] text-sm font-medium text-center underline">Start by typing in any question that you want to ask </h3>
+                            {/* <p className="pt-1 text-xs text-[#838383] text-center">
                                 Start by typing a syntax from the command pallet followed by natural language
-                            </p>
+                            </p> */}
                         </div>
                     </div>}
             </div> : (
@@ -150,9 +151,9 @@ export const MainTerminal: React.FC = () => {
                     {data.map((item, index) => {
                         const [key, value] = item.input.split(":")
 
-                        return <div className="p-4 bg-[#111] rounded-md" key={index}>
-                            <p className="text-sm text-[#F4BF4F]">
-                                <span className="text-[#fff]">{key}: </span>
+                        return <div className="p-4 bg-primary/10 rounded-md" key={index}>
+                            <p className="text-sm">
+                                <span>{key}: </span>
                                 {value}
                             </p>
 
@@ -162,12 +163,11 @@ export const MainTerminal: React.FC = () => {
                             {   item.type === DATABASE_QUERY && item.output && item.output[0] && ((item.output[0] as QueryAndResult).result) &&
                                     <div className="max-w-max">
                                         <CSVLink className="w-fit-content" data={convertDatabaseQueryResultToExcel((item.output[0] as QueryAndResult).result)} target="_blank">
-                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                            text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer" 
-                                            onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}>
+                                            <PrimaryButton  
+                                                onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}
+                                            >
                                                 <p>Download CSV</p>
-                                            </button>
+                                            </PrimaryButton>
                                         </CSVLink>
                                     </div>
                             }
@@ -180,12 +180,11 @@ export const MainTerminal: React.FC = () => {
                             {   item.type === CREATE_REPORT && item.output && item.output[0] && (item.output[0] as ExcelSheet).sheet &&
                                     <div className="max-w-max">
                                         <CSVLink data={convertSimpleReportToExcel((item.output[0] as ExcelSheet).sheet)} target="_blank">
-                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                            text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer"
-                                            onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}>
+                                            <PrimaryButton
+                                                onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}
+                                            >
                                                 <p>Download CSV</p>
-                                            </button>
+                                            </PrimaryButton>
                                         </CSVLink>
                                     </div>
                             }   
@@ -201,12 +200,11 @@ export const MainTerminal: React.FC = () => {
                             {   item.type === COMPLEX_REPORT && item.output && (item.output as unknown as SimpleReportType[]) &&
                                     <div className="max-w-max">
                                         <CSVLink data={convertComplexReportToExcel((item.output as unknown as SimpleReportType[]))} target="_blank">
-                                            <button className="bg-[#333134] rounded-md mt-3 py-2 px-3
-                                            text-[#838383] font-normal text-xs flex gap-1.5
-                                            hover:bg-[#434144] cursor-pointer"
-                                            onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}>
+                                            <PrimaryButton
+                                                onClickCapture={() => track(AnalyticsEvents.download_csv_clicked)}
+                                            >
                                                 <p>Download CSV</p>
-                                            </button>
+                                            </PrimaryButton>
                                         </CSVLink>
                                     </div>
                             }   
@@ -234,8 +232,8 @@ export const MainTerminal: React.FC = () => {
                 </div>
             )}
 
-            <div className="w-full bg-[#1C1B1D] border border-solid border-[#333] rounded-md">
-                <div className="px-3 py-1 border-b border-solid border-b-[#333] flex justify-between items-center">
+            <div className="w-full rounded-md shadow-xl bg-white">
+                {/* <div className="px-3 py-1 border-b border-solid border-b-[#333] flex justify-between items-center">
                     <text className="text-xs text-[#616161] font-normal">Command Palette</text>
                     <div className="flex gap-1">
                         {COMMANDS_LIST.map((command, index) => (
@@ -254,8 +252,8 @@ export const MainTerminal: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                </div>
-                <div className="pt-3 pb-2 pl-5 pr-10">
+                </div> */}
+                <div className="px-5 py-2">
                     <form onSubmit={handleSubmit}> 
                         <fieldset>
                             <label className="relative">
@@ -264,10 +262,11 @@ export const MainTerminal: React.FC = () => {
                                     loading={loading}
                                     setCommand={setCommand}
                                     ref={inputFocusRef}
+                                    handleSubmit={handleSubmit}
                                 />
                             </label>
                         </fieldset>                                   
-                        <div className="flex justify-end items-center gap-2">
+                        {/* <div className="flex justify-end items-center gap-2">
                             <button
                                 type="submit" 
                                 className="bg-[#333134] rounded-md py-2 px-3
@@ -278,7 +277,7 @@ export const MainTerminal: React.FC = () => {
                                 <Image src="/svg/enter.svg" alt="Enter" width={12} height={12} />
                             </button>
                             {loading && <Spinner />}
-                        </div>
+                        </div> */}
                     </form>
                 </div>
             </div>

@@ -26,8 +26,12 @@ const Home: NextPage = () => {
             <BaseLayout activeKey="terminal">
                 <div className="grid grid-cols-[3fr_1fr] grid-rows-1">
                     <div className="grid grid-rows-[max-content_1fr] grid-cols-1">
-                        <div className="h-12 flex-row flex flex-basis-content p-1 bg-[#131313] border border-solid border-[#333] border-l-0">
-                            <div className={`${tab==="Main Tab" ? "bg-[#0A2950]" : "bg-[#041020]"} max-h-full w-[172px] px-2.5 py-2 rounded-md ml-2 cursor-pointer`} 
+                        <div className="h-12 flex-row flex flex-basis-content p-1 bg-homepage-tab-background">
+                            <div className="flex gap-2 items-center ml-3">
+                                <h3>Predicted churn for cohorts</h3>
+                                <div className="bg-success-badge px-3 py-1 rounded-full">Database</div>
+                            </div>
+                            {/* <div className={`${tab==="Main Tab" ? "bg-[#0A2950]" : "bg-[#041020]"} max-h-full w-[172px] px-2.5 py-2 rounded-md ml-2 cursor-pointer`} 
                                 onClick={() => {
                                     track(AnalyticsEvents.main_tab_clicked);
                                     setTab("Main Tab")
@@ -47,7 +51,7 @@ const Home: NextPage = () => {
                                     setTab("Marketing Analysis Tab")
                                 }}>
                                 <text className="text-sm font-normal text-[#fff]">Marketing Analysis</text>
-                            </div>
+                            </div>  */}
                         </div>
                         { tab === "Main Tab" && <MainTerminal /> }
                         { tab === "Predictive Analysis Tab" && <PredictiveAnalysisTerminal /> }
@@ -55,7 +59,7 @@ const Home: NextPage = () => {
                     </div>
                     <CommandHistorySection />
                 </div>
-            </BaseLayout>  
+            </BaseLayout>
         </>
     );
 };

@@ -69,10 +69,10 @@ export const IntegrationsList: React.FC = () => {
     return (
         <>
             {INTEGRATIONS.map((integration) => (
-                <div className="h-max" key={integration.key}>
+                <div key={integration.key}>
                     <div 
                         className="min-h-[100px] py-3 pl-3 pr-4 grid grid-cols-[max-content_1fr_max-content]
-                        gap-4 items-start bg-[#1C1C1C] rounded-md"
+                        gap-4 items-start bg-[#FFF] rounded-md"
                     >
                         <Image
                             src={integration.imageSrc} 
@@ -82,10 +82,10 @@ export const IntegrationsList: React.FC = () => {
                             className="mt-1 rounded" 
                         />
                         <div>
-                            <h3 className="text-sm text-[#fff] font-semibold">
+                            <h3 className="text-sm font-semibold">
                                 {integration.title}
                             </h3>
-                            <p className="pt-1 pb-2 text-sm text-[#616161] font-medium">
+                            <p className="pt-1 pb-2 text-sm font-medium">
                                 {integration.description}
                             </p>
                             {integration.url && <a 
