@@ -47,6 +47,8 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
 
   const series = useMemo(() => [{
     name: 'Sample A',
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     data: [...churnGraphData.map((item) => [Number(item.x), Number(item.y)])]
   }], [churnGraphData])
   console.log({a: series[0]?.data})
@@ -69,6 +71,9 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
       // type: 'numeric',
       // categories: [dummyChurnByDate.map((item) => item.date)]
       type: 'numeric',
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       categories: [...churnGraphData.map((item) => Number(item.x)).sort()],
       tickAmount: 10,
       labels: {

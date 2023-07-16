@@ -19,6 +19,9 @@ const SelectItem: React.FC<ISelectItemProps> = React.forwardRef(({ children, cla
           className
         )}
         {...props}
+          
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         ref={forwardedRef}
       >
         <RadixSelect.ItemText>{children}</RadixSelect.ItemText>
