@@ -4,7 +4,7 @@ import { type Prisma } from "@prisma/client";
 import { dummyChurnByDate, dummyChurnGraph, dummyCohortsData, dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 
-type Cohort = {
+export type Cohort = {
     name: string,
     predictedChurn: number,
     actualChurn: number,
@@ -12,7 +12,7 @@ type Cohort = {
     userList: string,
 }
 
-type Churn = {
+export type Churn = {
     date: string,
     users: number,
     predictedChurn: number,
@@ -44,7 +44,7 @@ export const dataModelRouter = createTRPCRouter({
                 required_error: "Model Id is required"
             })  
         }))
-        .query(async ({ctx, input}) => {
+        .mutation(async ({ctx, input}) => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
@@ -72,7 +72,7 @@ export const dataModelRouter = createTRPCRouter({
                 required_error: "Date is required"
             })
         }))    
-        .query(async ({ctx, input}) => {
+        .mutation(async ({ctx, input}) => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
@@ -126,7 +126,7 @@ export const dataModelRouter = createTRPCRouter({
                 required_error: "Date is required"
             })
         }))    
-        .query(async ({ctx, input}) => {
+        .mutation(async ({ctx, input}) => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
@@ -177,7 +177,7 @@ export const dataModelRouter = createTRPCRouter({
                 required_error: "Model ID is required"
             }),
         }))
-        .query(async ({ctx, input}) => {
+        .mutation(async ({ctx, input}) => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,

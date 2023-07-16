@@ -2,7 +2,7 @@ import React from 'react';
 import * as RadixSelect from '@radix-ui/react-select';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import {twMerge} from 'tailwind-merge';
-import { SelectOption } from '~/types/types';
+import { type SelectOption } from '~/types/types';
 
 interface ISelectItemProps {
     className?: string;
@@ -33,18 +33,20 @@ SelectItem.displayName = 'SelectItem';
 interface IProps {
     title: string;
     options: SelectOption[];
+    value?: string;
 }
 
 const Select: React.FC<IProps> = ({
     title,
-    options
+    options,
+    value
 }) => (
-  <RadixSelect.Root>
+  <RadixSelect.Root value={value}>
     <RadixSelect.Trigger
       className="inline-flex items-center justify-center px-[15px] text-[13px] leading-none h-[35px] gap-[5px] bg-white text-violet11 shadow-[0_2px_10px] shadow-black/10 hover:bg-mauve3 focus:shadow-[0_0_0_2px] data-[placeholder]:text-primary border border-primary rounded-lg outline-none"
       aria-label="Food"
     >
-      <RadixSelect.Value placeholder={title} />
+      <RadixSelect.Value placeholder={title}/>
       <RadixSelect.Icon className="text-violet11">
         <ChevronDownIcon />
       </RadixSelect.Icon>

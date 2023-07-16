@@ -4,7 +4,7 @@ import TerminalIcon from "./icons/Terminal"
 import CustomizationIcon from "./icons/Customization";
 import DBIcon from "./icons/DBIcon";
 
-export type SideNavKeys = "terminal" | "model" | "integrations" | "customization"
+export type SideNavKeys = "terminal" | "model" | "create-model" |"integrations" | "customization" 
 
 type IProps = {
   activeKey: SideNavKeys;
@@ -26,6 +26,14 @@ const SIDENAV_ITEMS = [
       inactive: <DBIcon color="#747474" />
     },
     route: "/model"
+  },
+  {
+    key: "create-model",
+    icon: {
+      active: <DBIcon className="text-primary"/>,
+      inactive: <DBIcon color="#747474" />
+    },
+    route: "/create-model"
   },
   {
     key: "integrations",

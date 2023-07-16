@@ -1,47 +1,83 @@
+import type { FeatureImportance } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "~/components/BaseLayout";
 import ChurnComparisonChart from "~/components/ChurnComparisonChart";
 import { ChurnDetailsModal } from "~/components/ChurnModal";
 import Select from "~/components/Select";
+import { type Cohort } from "~/server/api/routers/dataModelRouter";
+import { api } from "~/utils/api";
 
-const CHURN_HISTORY = [
-    {
-        id: 1,
-        title: 'Nagpur location',
-        badge: 'Feature',
-    },
-    {
-        id: 2,
-        title: 'Apple Iphone Device',
-        badge: 'Characteristics',
-    },
-    {
-        id: 3,
-        title: 'Nagpur location',
-        badge: 'Feature',
-    },
-    {
-        id: 4,
-        title: 'Apple Iphone Device',
-        badge: 'Characteristics',
-    },
-    {
-        id: 5,
-        title: 'Apple Iphone Device',
-        badge: 'Characteristics',
-    },
-]
+const CohortsSection = ({
+    modelId
+}: {
+    modelId?: string
+}) => {
 
-const ChurnHistoryTable = () => {
+    const [features, setFeatures] = useState<Cohort[]>([]);
 
-    const [activeChurnId, setChurnId] = useState<number | null>(null);
+    const runGetCohorts = api.dataModelRouter.getCohorts.useMutation({
+        onSuccess: (cohorts) => {
+            setFeatures(cohorts);
+        }
+    })
+    useEffect(() => {
+        if (!modelId) return;
+        runGetCohorts.mutate({
+            modelId,
+        })
+    }, [modelId]);
 
+
+    return <div className="bg-white">
+        <table className="w-full">
+            <thead className="w-full border-none sticky">
+                <th>Event</th>
+                <th>Predicted Churn</th>
+                <th>Actual value</th>
+                <th>Deviation</th>
+                <th>Download List</th>
+            </thead>
+            <tbody className="w-full">
+                {features.map((row) => {
+                    return <tr key={row.name} className="w-full">
+                        <td className="">{row.name}</td>
+                        <td className="">{row.predictedChurn}</td>
+                        <td className="">{row.actualChurn}</td>
+                        <td className="">{row.deviation}</td>
+                        <td className="underline cursor-pointer ">details</td>
+                    </tr>
+                })}
+            </tbody>
+        </table>
+    </div>
+}
+
+const ChurnHistoryTable = ({
+    modelId
+}: {
+    modelId?: string
+}) => {
+
+    const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null);
+    const [features, setFeatures] = useState<FeatureImportance[]>([]);
+
+    const runGetFeatures = api.dataModelRouter.getFeatures.useMutation({
+        onSuccess: (data) => {
+            setFeatures(data);
+        }
+    })
     const handleOpenChange = () => {
-        setChurnId(null);
+        setSelectedFeatureId(null);
     }
+    useEffect(() => {
+        if (!modelId) return;
+        runGetFeatures.mutate({
+            modelId,
+        })
+    }, [modelId]);
 
     return <div className="bg-white flex flex-col gap-4 h-[250px] rounded-lg grow">
         <div className="flex gap-2 p-2">
@@ -50,49 +86,49 @@ const ChurnHistoryTable = () => {
         </div>
         <table className="w-full flex flex-col gap-2 overflow-y-scroll">
             <tbody className="w-full">
-                {CHURN_HISTORY.map((row) => {
+                {features.map((row) => {
                     return <tr key={row.id} className="w-full">
-                        <td className="border-x-0 w-full">{row.title}</td>
-                        <td className="border-x-0">{row.badge}</td>
-                        <td className="border-x-0 underline cursor-pointer" onClick={() => setChurnId(row.id)}>details</td>
+                        <td className="border-x-0 w-full">{row.featureName}</td>
+                        <td className="border-x-0">{row.type}</td>
+                        <td className="border-x-0 underline cursor-pointer" onClick={() => setSelectedFeatureId(row.id)}>details</td>
                     </tr>
                 })}
             </tbody>
         </table>
-        <ChurnDetailsModal isOpen={!!activeChurnId} handleOpenChange={handleOpenChange} />
-    </div>
-}
-
-const PredictedChurnCard = () => {
-    return <div className="h-[120px] w-[200px] bg-predicted-churn-background 
-            flex flex-col justify-center items-center rounded-2xl gap-4"
-    >
-        <div>
-            Predicted Churn
-        </div>
-        <div>
-            <b>30%</b>
-        </div>
-    </div>
-}
-
-const ActualChurnCard = () => {
-    return <div className="h-[120px] w-[200px] bg-actual-churn-background
-            flex flex-col justify-center items-center rounded-2xl gap-4"
-    >
-        <div>
-            Actual Churn
-        </div>
-        <div className="flex w-3/5 justify-between">
-            <b>--</b>
-            <span>+9.15%</span>
-        </div>
+        {selectedFeatureId && <ChurnDetailsModal
+            isOpen={!!selectedFeatureId}
+            modelId={modelId}
+            featureId={selectedFeatureId}
+            handleOpenChange={handleOpenChange}
+        />}
     </div>
 }
 
 
 
 const Home: NextPage = () => {
+
+    const [selectedModelId, setSelectedModelId] = useState<string>();
+
+
+    const { data: models } = api.dataModelRouter.getModels.useQuery();
+
+    useEffect(() => {
+        if (!models || !models.length) return;
+        const model = models[0];
+        if (!model) return;
+        setSelectedModelId(model.id);
+    }, [models]);
+
+    const modelOptions = useMemo(() => {
+        if (!models || !models.length) return [];
+        return models.map((model) => ({
+            label: model.name,
+            value: model.id,
+        }));
+    }, [models]);
+
+    const selectedModel = models?.find((model) => model.id === selectedModelId);
 
     return (
         <>
@@ -101,7 +137,7 @@ const Home: NextPage = () => {
                 <meta name="description" content="Toolsyo to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <BaseLayout activeKey="terminal">
+            <BaseLayout activeKey="model">
                 <div className="flex flex-col justify-start">
                     <div className="h-12 flex-row flex justify-between flex-basis-content p-2 bg-homepage-tab-background">
                         <div className="flex gap-2 items-center ml-3">
@@ -109,10 +145,7 @@ const Home: NextPage = () => {
                             <div className="bg-success-badge px-3 py-1 rounded-full">Database</div>
                         </div>
                         <div className="flex gap-2">
-                            <Select title="Pre-made models" options={[{
-                                label: '1',
-                                value: '1',
-                            }]} />
+                            <Select title="Pre-made models" options={modelOptions} value={selectedModelId} />
                             <Select title="Dates" options={[{
                                 label: '1',
                                 value: '1',
@@ -121,13 +154,11 @@ const Home: NextPage = () => {
                     </div>
                     <div className="flex flex-col p-1 mx-4 gap-5">
                         <div className="my-4 p-4 border border-border shadow-md rounded-lg">
-                            Model Description: Predicting whats the likelyhood that a user  who makes a purchase atleast twice, post signing up will churn within 90 days
+                            {selectedModel ? selectedModel.description : 'No model selected'}
                         </div>
                         <div className="flex justify-between gap-8 items-center">
-                            <ChurnHistoryTable />
-                            <PredictedChurnCard />
-                            <ActualChurnCard />
-                            <ChurnComparisonChart />
+                            <ChurnHistoryTable modelId={selectedModelId} />
+                            <ChurnComparisonChart modelId={selectedModelId} />
                         </div>
                         <div className="flex flex-col justify-between my-4">
                             <div className="bg-section-header flex flex-col gap-4 p-3 rounded-t-lg">
@@ -138,28 +169,7 @@ const Home: NextPage = () => {
                                 <h2 className="text-dark-text font-bold">Prediction Details</h2>
                                 <div className="text-subtext">Showing <span className="text-dark-text">top 6</span> cohorts</div>
                             </div>
-                            <div className="bg-white">
-                                <table className="w-full">
-                                    <thead className="w-full border-none sticky">
-                                        <th className="">Event</th>
-                                        <th className="">Predicted Churn</th>
-                                        <th className="">Actual value</th>
-                                        <th className="">Deviation</th>
-                                        <th className="">Download List</th>
-                                    </thead>
-                                    <tbody className="w-full">
-                                        {CHURN_HISTORY.map((row) => {
-                                            return <tr key={row.id} className="w-full">
-                                                <td className="">{row.title}</td>
-                                                <td className="">{row.badge}</td>
-                                                <td className="underline cursor-pointer ">details</td>
-                                                <td></td>
-                                                <td></td>
-                                            </tr>
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <CohortsSection modelId={selectedModelId} />
                         </div>
                     </div>
                 </div>
