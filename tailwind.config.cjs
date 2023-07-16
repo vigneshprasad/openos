@@ -18,7 +18,8 @@ const config = {
         'section-header': '#EFEFF5',
         'highlight': '#B5E5F4',
         'disabled': '#B4B4B4',
-        'beta-background': '#F4E3B5'
+        'beta-background': '#F4E3B5',
+        'light-grey': '#999999'
       }
     },
   },

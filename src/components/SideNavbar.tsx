@@ -3,8 +3,12 @@ import IntegrationsIcon from "./icons/Integrations"
 import TerminalIcon from "./icons/Terminal"
 import CustomizationIcon from "./icons/Customization";
 import DBIcon from "./icons/DBIcon";
+import SearchIcon from "./icons/Search";
+import GraphIcon from "./icons/Graph";
+import TargetIcon from "./icons/Target";
+import EyeIcon from "./icons/Eye";
 
-export type SideNavKeys = "terminal" | "model" | "create-model" |"integrations" | "customization" 
+export type SideNavKeys = "terminal" | "models" | "create-model" |"integrations" | "customization" 
 
 type IProps = {
   activeKey: SideNavKeys;
@@ -14,40 +18,40 @@ const SIDENAV_ITEMS = [
   {
     key: "terminal",
     icon: {
-      active: <TerminalIcon className="text-primary"/>,
-      inactive: <TerminalIcon color="#747474" />
+      active: <SearchIcon className="text-primary"/>,
+      inactive: <SearchIcon color="#747474" />
     },
     route: "/"
   },
   {
-    key: "model",
+    key: "models",
     icon: {
-      active: <DBIcon className="text-primary"/>,
-      inactive: <DBIcon color="#747474" />
+      active: <GraphIcon className="text-primary"/>,
+      inactive: <GraphIcon color="#747474" />
     },
-    route: "/model"
+    route: "/models"
   },
   {
     key: "create-model",
     icon: {
-      active: <DBIcon className="text-primary"/>,
-      inactive: <DBIcon color="#747474" />
+      active: <TargetIcon className="text-primary"/>,
+      inactive: <TargetIcon color="#747474" />
     },
     route: "/create-model"
   },
   {
     key: "integrations",
     icon: {
-      active: <IntegrationsIcon className="text-primary" />,
-      inactive: <IntegrationsIcon color="#747474" />
+      active: <DBIcon className="text-primary"/>,
+      inactive: <DBIcon color="#747474" />
     },
     route: "/integrations"
   },
   {
     key: "customization",
     icon: {
-      active: <CustomizationIcon className="text-primary"/>,
-      inactive: <CustomizationIcon color="#747474" />
+      active: <EyeIcon className="text-primary"/>,
+      inactive: <EyeIcon color="#747474" />
     },
     route: "/customization"
   }
