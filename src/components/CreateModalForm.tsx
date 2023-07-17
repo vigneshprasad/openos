@@ -43,17 +43,18 @@ const RetentionView = () => {
             <div className="flex flex-col gap-2 text-left">
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter a model name" onChange={(e) => setModelName(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter an attribute" onChange={(e) => setAttribute(e.target.value)} />
+                <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Prediction window" onChange={(e) => setPredictionWindow(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter an event name" onChange={(e) => setEventName(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter the event count (eg. twice)" onChange={(e) => setEventCount(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter a time interval" onChange={(e) => setInterval(e.target.value)} />
-                <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Prediction window" onChange={(e) => setPredictionWindow(e.target.value)} />
             </div>
         </div>
         <div className="px-4 py-5 bg-primary/10 w-[400px] h-[250px] border flex flex-col justify-center rounded-2xl text-lg">
             <span className="inline">Build <HighlightedText>{modelName ? modelName : '--'}</HighlightedText>
-                to predict if new users from  <HighlightedText>{attribute ? attribute : '--'}</HighlightedText> will stay active after <HighlightedText>{predictionWindow ? predictionWindow : '--'}</HighlightedText> days </span>. Active being defined as users performing&nbsp;
-                 <HighlightedText>{eventName ? eventName : '--'}</HighlightedText>, at least <HighlightedText>{eventCount ? eventCount : '--'}</HighlightedText> per&nbsp;
-               <HighlightedText>{interval ? interval : '--'}</HighlightedText>,
+                to predict if new users from  <HighlightedText>{attribute ? attribute : '--'}</HighlightedText> will stay active after
+                <HighlightedText>{predictionWindow ? predictionWindow : '--'}</HighlightedText> days. 
+                Active being defined as users performing <HighlightedText>{eventName ? eventName : '--'}</HighlightedText>, 
+                 least <HighlightedText>{eventCount ? eventCount : '--'}</HighlightedText> per <HighlightedText>{interval ? interval : '--'}</HighlightedText>.</span>
         </div></div>
 }
 
