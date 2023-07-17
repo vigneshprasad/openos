@@ -9,7 +9,7 @@ export type Cohort = {
     predictedChurn: number,
     actualChurn: number,
     deviation: number,
-    userList: string,
+    userList: Prisma.JsonObject[],
 }
 
 export type Churn = {
@@ -146,10 +146,6 @@ export const dataModelRouter = createTRPCRouter({
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    createdAt: {
-                        lte: input.date,
-                        gte: start_date,
-                    }
                 }
             });
             const churnByDate: Churn[] = [];
@@ -157,7 +153,7 @@ export const dataModelRouter = createTRPCRouter({
                 const date = new Date(start_date);
                 date.setDate(date.getDate() + i);
                 const usersPredictionsByDate = usersPredictions.filter((userPrediction) => {
-                    return userPrediction.createdAt.getDate() === date.getDate()
+                    return userPrediction.dateOfEvent.getDate() === date.getDate()
                 });
                 const usersChurned = usersPredictionsByDate.filter((userPrediction) => {
                     return userPrediction.probability < 0.5
@@ -169,7 +165,7 @@ export const dataModelRouter = createTRPCRouter({
                 churnByDate.push({
                     date: date.toDateString(),
                     users: usersPredictionsByDate.length,
-                    predictedChurn: usersChurned.length,
+                    predictedChurn: usersChurned.length / usersPredictionsByDate.length,
                     actualChurn: actualChurn.length > 0 ? actualChurn.length : undefined
                 })
             }
@@ -181,6 +177,9 @@ export const dataModelRouter = createTRPCRouter({
         .input(z.object({
             modelId: z.string({
                 required_error: "Model ID is required"
+            }),
+            date: z.date({
+                required_error: "Date is required"
             }),
         }))
         .mutation(async ({ctx, input}) => {
@@ -197,9 +196,15 @@ export const dataModelRouter = createTRPCRouter({
                     dataModelId: input.modelId, 
                 }
             })
+            const tomorrow = new Date(input.date.toDateString());
+            tomorrow.setDate(tomorrow.getDate() + 1);
             const userPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
+                    dateOfEvent: {
+                        gte: new Date(input.date.toDateString()),
+                        lt: new Date(tomorrow.toDateString())
+                    }
                 }
             })
             const cohortsData: Cohort[] = [
@@ -211,7 +216,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
                 let predictedChurn = 0;
                 let actualChurn = 0;
-                const userList = [];
+                const userList: Prisma.JsonObject[] = [];
                 for(let j = 0; j < userPredictions.length; j++) {
                     const userPrediction = userPredictions[j];
                     if (!userPrediction) {
@@ -220,6 +225,7 @@ export const dataModelRouter = createTRPCRouter({
                     const userData = userPrediction.userData as Prisma.JsonObject
                     if(userData && userData.hasOwnProperty(cohort.attributeName)) {
                         if(userData[cohort.attributeName] === cohort.attributeValue) {
+                            userList.push(userData);
                             if(userPrediction.probability < 0.5) {
                                 predictedChurn++;
                             }
@@ -227,7 +233,6 @@ export const dataModelRouter = createTRPCRouter({
                                 actualChurn++;
                             }
                         }
-                        userList.push(userPrediction.userData);
                     }
                 }
                 cohortsData.push({
@@ -235,7 +240,7 @@ export const dataModelRouter = createTRPCRouter({
                     predictedChurn: predictedChurn / userList.length,
                     actualChurn: actualChurn / userList.length,
                     deviation: predictedChurn - actualChurn / userList.length,
-                    userList: userList.toString()
+                    userList: userList
                 });
             }
             return cohortsData;

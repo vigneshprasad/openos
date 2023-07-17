@@ -7,8 +7,7 @@ import { type SelectOption } from '~/types/types';
 interface ISelectItemProps {
     className?: string;
     children: React.ReactNode;
-    value?: string;
-    
+    value?: string | Date;
 }
 
 const SelectItem: React.FC<ISelectItemProps> = React.forwardRef(({ children, className, ...props }, forwardedRef) => {
@@ -37,7 +36,7 @@ SelectItem.displayName = 'SelectItem';
 interface IProps {
     title: string;
     options: SelectOption[];
-    value?: string;
+    value?: string | Date;
     onChange?: (value: string) => void;
 }
 
@@ -47,7 +46,7 @@ const Select: React.FC<IProps> = ({
     value,
     onChange
 }) => (
-  <RadixSelect.Root value={value} onValueChange={onChange}>
+  <RadixSelect.Root value={value?.toString()} onValueChange={onChange}>
     <RadixSelect.Trigger
       className="inline-flex items-center justify-center px-[15px] text-[13px] leading-none h-[35px] gap-[5px] bg-white text-violet11 shadow-[0_2px_10px] shadow-black/10 hover:bg-mauve3 focus:shadow-[0_0_0_2px] data-[placeholder]:text-primary border border-primary rounded-lg outline-none"
       aria-label="Food"
@@ -64,7 +63,7 @@ const Select: React.FC<IProps> = ({
         </RadixSelect.ScrollUpButton>
         <RadixSelect.Viewport className="p-[5px]">
           <RadixSelect.Group>
-            {options.map((option) => (<SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>))}
+            {options.map((option) => (<SelectItem key={option.value.toString()} value={option.value}>{option.label}</SelectItem>))}
           </RadixSelect.Group>
         </RadixSelect.Viewport>
         <RadixSelect.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default">

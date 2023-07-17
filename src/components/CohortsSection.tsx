@@ -3,9 +3,10 @@ import { type Cohort } from "~/server/api/routers/dataModelRouter";
 import { api } from "~/utils/api";
 
 const CohortsSection = ({
-    modelId
+    modelId, date
 }: {
     modelId?: string
+    date?: Date
 }) => {
 
     const [features, setFeatures] = useState<Cohort[]>([]);
@@ -15,20 +16,23 @@ const CohortsSection = ({
             setFeatures(cohorts);
         }
     })
+    
     useEffect(() => {
-    if (!modelId) return;
+    if (!modelId || !date) return;
         runGetCohorts.mutate({
             modelId,
+            date
         })
-    }, [modelId]);
+    }, [modelId, date]);
 
 
     return <div className="bg-white">
         <table className="w-full">
             <thead className="w-full border-none sticky">
                 <th className="py-3">Event</th>
-                <th>Predicted Churn (Numerical)</th>
-                <th>Actual value (Numerical)</th>   
+                <th>Number of Users</th>
+                <th>Predicted Churn</th>
+                <th>Actual Value</th>   
                 <th>Deviation (%)</th>
                 {/* <th>Download List</th> */}
             </thead>
@@ -36,6 +40,7 @@ const CohortsSection = ({
                 {features.map((row) => {
                     return <tr key={row.name} className="w-full">
                         <td className="">{row.name}</td>
+                        <td className="text-center">{row.userList.length}</td>
                         <td className="text-center">{Math.round(row.predictedChurn * 100)}</td>
                         <td className="text-center">{Math.round(row.actualChurn  * 100)}</td>
                         <td className="text-center">{Math.round(row.deviation  * 100)}%</td>

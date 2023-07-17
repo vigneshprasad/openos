@@ -84,7 +84,6 @@ const CreateModel = () => {
                             )}>
                             {item.title}
                             {item.beta && <div className="absolute top-1 right-1 text-xs px-2 bg-beta-background rounded-2xl text-black">Beta</div>}
-                            {item.disabled && <div className="absolute top-1 right-1 px-2 text-green-600 text-lg rounded-2xl">$</div>}
                         </div>)}
                     </div>
                     <CreateModelForm model={activeTabKey} />

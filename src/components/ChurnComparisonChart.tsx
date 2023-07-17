@@ -32,6 +32,19 @@ const ActualChurnCard = ({ value }: { value?: string | number }) => {
   </div>
 }
 
+const TotalUsersCard = ({ value }: { value?: string | number }) => {
+  return <div className="h-[120px] w-[200px] bg-total-users-background
+          flex flex-col justify-center items-center rounded-2xl gap-4"
+  >
+    <div>
+      Total Users
+    </div>
+    <div>
+      <b>{value}</b>
+    </div>
+  </div>
+}
+
 const ChurnComparisonChart = ({
   modelId,
   date
@@ -46,6 +59,7 @@ const ChurnComparisonChart = ({
     onSuccess: (churnByDayData) => {
       console.log({ churnByDayData });
       setChurnsByDay(churnByDayData);
+      console.log('churnByDay', churnByDayData);
     }
   });
 
@@ -112,11 +126,13 @@ const ChurnComparisonChart = ({
   ), [churnsByDay]);
 
   return <>
-    <PredictedChurnCard value={(churnsByDay[churnsByDay.length - 1]?.predictedChurn || 0) * 100} />
-    <ActualChurnCard value={(churnsByDay[churnsByDay.length - 1]?.actualChurn || 0) * 100} />
+    <div className="flex flex-col gap-5">
+        <TotalUsersCard value={(churnsByDay[churnsByDay.length - 1]?.users || 0)} />
+        <PredictedChurnCard value={(churnsByDay[churnsByDay.length - 1]?.predictedChurn  || 0) * 100} />
+        <ActualChurnCard value={(churnsByDay[churnsByDay.length - 1]?.actualChurn || 0 / (churnsByDay[churnsByDay.length - 1]?.users || 0)) * 100} />
+    </div>
     <div className="h-[400px] bg-white w-1/4 grow rounded-lg px-2">
       <div className='flex justify-between items-center text-sm px-4 mt-2'>
-        <div>Predicted Churn vs. Actual Churn</div>
         <div className='flex items-center gap-5'>
           <div className='flex gap-2 items-center'>
             <div className='h-3 w-3 rounded-full bg-predicted-churn-background' />
@@ -126,7 +142,6 @@ const ChurnComparisonChart = ({
             <div className='h-3 w-3 rounded-full bg-actual-churn-background' />
             Actual
           </div>
-          <Select options={[]} title='Weekly' />
         </div>
       </div>
       <div className='w-[95%]'>

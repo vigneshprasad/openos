@@ -70,5 +70,5 @@ export type PredictCommandInput = {
 
 export type SelectOption = {
     label: string;
-    value: string;
+    value: string | Date;
 }

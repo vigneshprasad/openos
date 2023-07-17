@@ -51,9 +51,9 @@ const RetentionView = () => {
         </div>
         <div className="px-4 py-5 bg-primary/10 w-[400px] h-[250px] border flex flex-col justify-center rounded-2xl text-lg">
             <span className="inline">Build <HighlightedText>{modelName ? modelName : '--'}</HighlightedText>
-                to predict if new users from  <HighlightedText>{attribute ? attribute : '--'}</HighlightedText>, active being defined as users performing&nbsp;
+                to predict if new users from  <HighlightedText>{attribute ? attribute : '--'}</HighlightedText> will stay active after <HighlightedText>{predictionWindow ? predictionWindow : '--'}</HighlightedText> days </span>. Active being defined as users performing&nbsp;
                  <HighlightedText>{eventName ? eventName : '--'}</HighlightedText>, at least <HighlightedText>{eventCount ? eventCount : '--'}</HighlightedText> per&nbsp;
-               <HighlightedText>{interval ? interval : '--'}</HighlightedText>, will stay active after <HighlightedText>{predictionWindow ? predictionWindow : '--'}</HighlightedText> days </span>
+               <HighlightedText>{interval ? interval : '--'}</HighlightedText>,
         </div></div>
 }
 
@@ -86,7 +86,6 @@ const FrequencyView = () => {
     const [modelName, setModelName] = useState<string | null>(null);
     const [attribute, setAttribute] = useState<string | null>(null);
     const [eventAName, setEventAName] = useState<string | null>(null);
-    const [eventBName, setEventBName] = useState<string | null>(null);
     const [predictionWindow, setPredictionWindow] = useState<string | null>(null);
 
     return <div className="flex gap-10 items-center">
@@ -95,14 +94,12 @@ const FrequencyView = () => {
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter a model name" onChange={(e) => setModelName(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter an attribute" onChange={(e) => setAttribute(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter an event name" onChange={(e) => setEventAName(e.target.value)} />
-                <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Enter an event name" onChange={(e) => setEventBName(e.target.value)} />
                 <input type="text" className="bg-slate-50 rounded-lg p-2 pl-3" placeholder="Prediction window" onChange={(e) => setPredictionWindow(e.target.value)} />
             </div>
         </div>
         <div className="px-4 py-5 bg-primary/10 w-[400px] h-[250px] border flex flex-col justify-center rounded-2xl text-lg">
             <span className="inline">Build <HighlightedText>{modelName ? modelName : '--'}</HighlightedText>
-                to predict if new users from  <HighlightedText>{attribute ? attribute : '--'}</HighlightedText>, and their&nbsp;
-                 <HighlightedText>{eventAName ? eventAName : '--'}</HighlightedText> will do <HighlightedText>{eventBName ? eventBName : '--'}</HighlightedText> count over next&nbsp;
+                to predict if new users from  <HighlightedText>{attribute ? attribute : '--'}</HighlightedText>, will do <HighlightedText>{eventAName ? eventAName : '--'}</HighlightedText> over next&nbsp;
                   <HighlightedText>{predictionWindow ? predictionWindow : '--'}</HighlightedText> days </span>
         </div></div>
 }

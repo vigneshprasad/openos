@@ -15,6 +15,7 @@ const config = {
         'subtext': '#808192',
         'predicted-churn-background': '#ECEBF9',
         'actual-churn-background': '#C0ECDF',
+        'total-users-background': '#F8CCD4',
         'section-header': '#EFEFF5',
         'highlight': '#B5E5F4',
         'disabled': '#B4B4B4',

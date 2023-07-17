@@ -43,7 +43,7 @@ const Home: NextPage = () => {
             const dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
             return {
                 label: dateString,
-                value: dateString
+                value: date,
             }
         });
     }, [selectedModel]);
@@ -68,7 +68,7 @@ const Home: NextPage = () => {
                         <IntegrationStatus />
                     <div className="flex gap-2">
                             <Select title="Pre-made models" options={modelOptions} value={selectedModelId} />
-                            <Select title="Dates" options={availableDates} onChange={(selectedDate) => setSelectedDate(new Date(selectedDate))} />
+                            <Select title="Yesterday" options={availableDates} onChange={(selectedDate) => setSelectedDate(new Date(selectedDate))}/>
                         </div>
                     </div>
                     <div className="flex flex-col p-1 mx-4 gap-5">
@@ -88,12 +88,12 @@ const Home: NextPage = () => {
                                     {/* <div className="text-subtext">Last updated / 2022-06-19</div> */}
                                     {/* <Select options={[]} title="View" /> */}
                                 </div>
-                                <h2 className="text-dark-text font-bold">Prediction Details</h2>
+                                <h2 className="text-dark-text font-bold">Cohort Table</h2>
                                 <div className="text-subtext">Showing <span className="text-dark-text">top 6</span> cohorts</div>
                             </div>
                             {
                                 selectedModelId &&
-                                <CohortsSection modelId={selectedModelId} />
+                                <CohortsSection modelId={selectedModelId} date={selectedDate} />
                             }
                         </div>
                     </div>
