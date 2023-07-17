@@ -55,7 +55,6 @@ const MODEL_PREDICTION_TAB_ITEMS: ModelPredictionTabItem[] = [{
 }
 ]
 
-
 const CreateModel = () => {
     const [activeTabKey, setActiveTabKey] = useState<ModelPredictionTabKeys>('churn');
     return <>
@@ -88,7 +87,7 @@ const CreateModel = () => {
                             {item.disabled && <div className="absolute top-1 right-1 px-2 text-green-600 text-lg rounded-2xl">$</div>}
                         </div>)}
                     </div>
-                    <CreateModelForm />
+                    <CreateModelForm model={activeTabKey} />
                 </div>
                 <PreviousModelsSection /></div>
         </div></BaseLayout>
