@@ -75,10 +75,13 @@ const Home: NextPage = () => {
                         <div className="my-4 p-4 border border-border shadow-md rounded-lg">
                             {selectedModel ? selectedModel.description : 'No model selected'}
                         </div>
-                        <div className="flex justify-between gap-8 items-center">
-                            <FeaturesTable modelId={selectedModelId} date={selectedDate} />
-                            <ChurnComparisonChart modelId={selectedModelId} date={selectedDate} />
-                        </div>
+                        {
+                            selectedModelId &&
+                            <div className="flex justify-between gap-8 items-center">
+                                <FeaturesTable modelId={selectedModelId} date={selectedDate} />
+                                <ChurnComparisonChart modelId={selectedModelId} date={selectedDate} />
+                            </div>
+                        }
                         <div className="flex flex-col justify-between my-4">
                             <div className="bg-section-header flex flex-col gap-2 py-5 px-3 rounded-t-lg">
                                 <div className="flex items-center justify-between">
@@ -88,7 +91,10 @@ const Home: NextPage = () => {
                                 <h2 className="text-dark-text font-bold">Prediction Details</h2>
                                 <div className="text-subtext">Showing <span className="text-dark-text">top 6</span> cohorts</div>
                             </div>
-                            <CohortsSection modelId={selectedModelId} />
+                            {
+                                selectedModelId &&
+                                <CohortsSection modelId={selectedModelId} />
+                            }
                         </div>
                     </div>
                 </div>

@@ -27,9 +27,14 @@ export const dataModelRouter = createTRPCRouter({
                     id: ctx.session.user.id,
                 }
             });
+
             if(user?.isDummy) {
                 return dummyModel;
             }            
+
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools") {
+                return ctx.prisma.dataModel.findMany();
+            }
 
             return ctx.prisma.dataModel.findMany({
                 where: {
@@ -56,7 +61,8 @@ export const dataModelRouter = createTRPCRouter({
             return ctx.prisma.featureImportance.findMany({
                 where: {
                     dataModelId: input.modelId, 
-                }
+                },
+                take: 6,
             })
         }),
 
@@ -232,6 +238,7 @@ export const dataModelRouter = createTRPCRouter({
                     userList: userList.toString()
                 });
             }
+            return cohortsData;
         }),
 
     create: protectedProcedure

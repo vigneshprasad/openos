@@ -12,8 +12,6 @@ const CohortsSection = ({
 
     const runGetCohorts = api.dataModelRouter.getCohorts.useMutation({
         onSuccess: (cohorts) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             setFeatures(cohorts);
         }
     })
