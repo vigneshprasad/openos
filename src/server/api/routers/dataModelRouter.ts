@@ -235,10 +235,10 @@ export const dataModelRouter = createTRPCRouter({
             const userPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: new Date(input.date.toDateString()),
-                        lt: new Date(tomorrow.toDateString())
-                    }
+                    // dateOfEvent: {
+                    //     gte: new Date(input.date.toDateString()),
+                    //     lt: new Date(tomorrow.toDateString())
+                    // }
                 }
             })
             const cohortsData: Cohort[] = [
