@@ -1227,6 +1227,7 @@ export const dummyModel: DataModel[] = [{
     eventB: null,
     eventAFrequency: 1,
     predictionWindow: 30,
+    timeInterval: null
 }]
 
 export const dummyFeatures: FeatureImportance[] = [
