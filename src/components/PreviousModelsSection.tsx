@@ -1,38 +1,19 @@
+import { type DataModel } from "@prisma/client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React from "react";
 
-type PreviousModelsSection = {
-    createdAt: Date,
-    updatedAt: Date,
-    userId: string,
-    input: string,
-    feedback: number,
-    type: string
+interface IProps {
+    models: DataModel[]
 }
 
-
-export const PreviousModelsSection: React.FC = () => {
-
-    const [modelHistory, setModelHistory] = useState<PreviousModelsSection[]>([]);
-
-    // const commandHistoryMutation = api.commandHistory.getAll.useMutation({
-    //     onSuccess: (data) => {
-    //         setCommandHistory(data)
-    //     },
-    //     onError: () => {
-    //         return null;
-    //     }
-    // })
-
-    // useMemo(() => commandHistoryMutation.mutate(), [])
-
+export const PreviousModelsSection: React.FC<IProps> = ({ models }) => {
     return (
-        <div className="bg-slate-100">
+        <div className="bg-slate-100 grid grid-rows-[max-content_1fr] grid-cols-1">
             <div className="h-12 p-3 border-b border-solid border-b-slate-200">
                 <text className="text-sm text-[#838383] font-medium">Previous Models</text>
             </div>
             <div className="overflow-auto">
-                {modelHistory && modelHistory?.length === 0 ? (
+                {models && models?.length === 0 ? (
                     <div className="w-[80%] mx-auto mt-[70px]">
                         <Image
                             src="/command_history_empty.png"
@@ -50,15 +31,18 @@ export const PreviousModelsSection: React.FC = () => {
                         </div>
                     </div>) : (
                     <div className="flex flex-col gap-2">
-                        {modelHistory?.map((model, index) => (
+                        {models?.map((model, index) => (
                             <div
-                                className="pl-3 pr-5 flex gap-4 items-center cursor-pointer hover:bg-slate-100 text-[#616161]"
+                                className="pl-3 pr-5 flex gap-4 items-center hover:bg-slate-100 text-[#616161]"
                                 key={index}
                             >
-                                <p className="min-w-[15px] text-xs">{index + 1}</p>
-                                <div className="px-2 py-1 truncate">
-                                    <p className="text-xs">{model.input}</p>
+                                <div className="px-2 py-1 break-normal">
+                                    <p className="text-xs">{model.name} : {model.description}</p>
                                 </div>
+                                {   
+                                    model.completionStatus ? <div className="rounded bg-[#57E777] px-4 pb-2 pt-2 width-15" />
+                                    : <div className="rounded bg-[#E4E757] px-4 pb-2 pt-2 width-15" />
+                                }   
                             </div>
                         ))}
                     </div>)

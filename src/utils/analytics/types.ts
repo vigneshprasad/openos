@@ -14,4 +14,6 @@ export enum AnalyticsEvents {
     marketing_analysis_tab_clicked = "marketing_analysis_tab_clicked",
     report_preview_button_clicked = "report_preview_button_clicked",
     report_run_button_clicked = "report_run_button_clicked",
+    create_data_model = "create_data_model",
+    create_data_model_form_submitted = "create_data_model_form_submitted",
 }

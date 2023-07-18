@@ -48,6 +48,29 @@ export const dataModelRouter = createTRPCRouter({
             });
         }),
 
+    getModelMutation: protectedProcedure
+        .mutation(async ({ ctx }) => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+
+            if(user?.isDummy) {
+                return dummyModel;
+            }            
+
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+                return ctx.prisma.dataModel.findMany();
+            }
+
+            return ctx.prisma.dataModel.findMany({
+                where: {
+                    userId: ctx.session.user.id,
+                }
+            });
+        }),
+
     getFeatures: protectedProcedure
         .input(z.object({
             modelId: z.string({
@@ -276,6 +299,7 @@ export const dataModelRouter = createTRPCRouter({
             eventB: z.string({ }),
             eventAFrequency: z.string({}),
             predictionWindow: z.string({}),
+            timeInterval: z.string({}),
         }))
         .mutation(async ({ ctx, input }) => {
             const slackMessage = 
@@ -293,8 +317,9 @@ export const dataModelRouter = createTRPCRouter({
                     predictionTimeframe: input.predictionTimeframe,
                     eventA: input.eventA,
                     eventB: input.eventB,
-                    eventAFrequency: input.eventAFrequency as unknown as number,
-                    predictionWindow: input.predictionWindow as unknown as number,
+                    eventAFrequency: Number(input.eventAFrequency),
+                    predictionWindow: Number(input.predictionWindow),
+                    timeInterval: Number(input.timeInterval),
                     userId: ctx.session.user.id,
                     completionStatus: false,
                 },
