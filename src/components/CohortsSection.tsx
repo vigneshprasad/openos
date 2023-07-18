@@ -42,8 +42,8 @@ const CohortsSection = ({
                         <td className="">{row.name}</td>
                         <td className="text-center">{row.userList.length}</td>
                         <td className="text-center">{Math.round(row.predictedChurn * 100)}</td>
-                        <td className="text-center">{Math.round(row.actualChurn  * 100)}</td>
-                        <td className="text-center">{Math.round(row.deviation  * 100)}%</td>
+                        <td className="text-center">{row.actualChurn ? Math.round(row.actualChurn  * 100) : '-'}</td>
+                        <td className="text-center">{row.deviation ? Math.round(row.deviation) : '-'}%</td>
                         {/* <td className="cursor-pointer text-center underline">Download</td> */}
                     </tr>
                 })}

@@ -66,8 +66,8 @@ const Home: NextPage = () => {
                 <div className="flex flex-col justify-start">
                     <div className="h-12 flex-row flex justify-between flex-basis-content p-2 bg-homepage-tab-background">
                         <IntegrationStatus />
-                    <div className="flex gap-2">
-                            <Select title="Pre-made models" options={modelOptions} value={selectedModelId} />
+                        <div className="flex gap-2">
+                            <Select title={modelOptions[0] ? modelOptions[0]?.label : "Premade Model"} options={modelOptions} onChange={(selectedModel) => setSelectedModelId(selectedModel)}/>
                             <Select title="Yesterday" options={availableDates} onChange={(selectedDate) => setSelectedDate(new Date(selectedDate))}/>
                         </div>
                     </div>

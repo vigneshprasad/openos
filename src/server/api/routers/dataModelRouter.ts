@@ -7,8 +7,8 @@ import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 export type Cohort = {
     name: string,
     predictedChurn: number,
-    actualChurn: number,
-    deviation: number,
+    actualChurn?: number,
+    deviation?: number,
     userList: Prisma.JsonObject[],
 }
 
@@ -179,7 +179,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             const churnByDate: Churn[] = [];
-            for (let i = 0; i < 7; i++) {
+            for (let i = 1; i <= 7; i++) {
                 const date = new Date(start_date);
                 date.setDate(date.getDate() + i);
                 const usersPredictionsByDate = usersPredictions.filter((userPrediction) => {
@@ -250,6 +250,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
                 let predictedChurn = 0;
                 let actualChurn = 0;
+                let showActualChurn = true;
                 const userList: Prisma.JsonObject[] = [];
                 for(let j = 0; j < userPredictions.length; j++) {
                     const userPrediction = userPredictions[j];
@@ -260,6 +261,9 @@ export const dataModelRouter = createTRPCRouter({
                     if(userData && userData.hasOwnProperty(cohort.attributeName)) {
                         if(userData[cohort.attributeName] === cohort.attributeValue) {
                             userList.push(userData);
+                            if(userPrediction.actualResult == null) {
+                                showActualChurn = false;
+                            }
                             if(userPrediction.probability < 0.5) {
                                 predictedChurn++;
                             }
@@ -272,8 +276,8 @@ export const dataModelRouter = createTRPCRouter({
                 cohortsData.push({
                     name: cohort.name,
                     predictedChurn: predictedChurn / userList.length,
-                    actualChurn: actualChurn / userList.length,
-                    deviation: predictedChurn - actualChurn / userList.length,
+                    actualChurn: showActualChurn ? actualChurn / userList.length : undefined,
+                    deviation: showActualChurn ? predictedChurn - actualChurn / userList.length : undefined,
                     userList: userList
                 });
             }
