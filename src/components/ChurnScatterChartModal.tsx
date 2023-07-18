@@ -4,7 +4,6 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 import { api } from '~/utils/api';
 import { useEffect, useMemo, useState } from 'react';
 import { type dummyChurnGraph } from '~/constants/dummyData';
-import Typography from '~/Typography';
 import { type ApexOptions } from 'apexcharts';
 
 interface IProps {
@@ -25,72 +24,57 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
     featureName
 }) => {
 
-  const [churnGraphData, setChurnGraphData] = useState<typeof dummyChurnGraph[]>([]);
+    const [churnGraphData, setChurnGraphData] = useState<typeof dummyChurnGraph>([]);
 
-  const runChurnGraphMutation = api.dataModelRouter.getChurnGraph.useMutation({
-    onSuccess: (churnGraphData) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      setChurnGraphData(churnGraphData);
-    }
-  });
-
-  useEffect(() => {
-    if(!isOpen || !modelId || !featureId || !date)return;
-      runChurnGraphMutation.mutate({
-      modelId,
-      featureId,
-      date
-    });
-  }, [isOpen, modelId, featureId, date]);
-
-
-  const series = useMemo(() => [{
-    name: 'Sample A',
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    data: [...churnGraphData.map((item) => [Number(item.x), Number(item.y)])]
-  }], [churnGraphData])
-  console.log({a: series[0]?.data})
-
-  const options: ApexOptions = useMemo(() => ({
-    chart: {
-      height: 200,
-      type: 'area',
-    },
-    dataLabels: {
-      enabled: false
-    },
-    legend: {
-      show: false
-    },
-    stroke: {
-      curve: 'smooth'
-    },
-    xaxis: {
-      // type: 'numeric',
-      // categories: [dummyChurnByDate.map((item) => item.date)]
-      type: 'numeric',
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      categories: [...churnGraphData.map((item) => Number(item.x)).sort()],
-      tickAmount: 10,
-      labels: {
-        formatter: function (val) {
-          return val
+    const runChurnGraphMutation = api.dataModelRouter.getChurnGraph.useMutation({
+        onSuccess: (churnGraphData) => {
+            setChurnGraphData(churnGraphData);
         }
-      }
-    },
-    yaxis: {
-      tickAmount: 7
-    },
-    tooltip: {
-      x: {
-        // format: 'dd/MM/yy HH:mm'
-      },
-    },
-    colors: ['#4745A4', '#F9BA33']
+    });
+
+    useEffect(() => {
+        if(!isOpen || !modelId || !featureId || !date) return;
+        runChurnGraphMutation.mutate({
+            modelId,
+            featureId,
+            date
+        });
+    }, [isOpen]);
+
+
+    const series = useMemo(() => [{
+        name: 'Probability',
+        data: churnGraphData.map((item, index) => [index, item.y])
+    }], [churnGraphData])
+    const options: ApexOptions = useMemo(() => ({
+        chart: {
+            height: 200,
+            type: 'area',
+        },
+        dataLabels: {
+            enabled: false
+        },
+        legend: {
+            show: false
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        xaxis: {
+            type: 'category',
+            overwriteCategories: churnGraphData.map((item) => (item.x)),
+            tickAmount: 10,
+            labels: {
+                formatter: function (val) {
+                    console.log(val);
+                    return val && typeof val == 'string' ? val.slice(0, 10) : ""
+                }
+            }
+        },
+        yaxis: {
+            tickAmount: 7
+        },
+        colors: ['#4745A4', '#F9BA33']
   }), [churnGraphData]);
 
   return (

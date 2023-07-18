@@ -32,13 +32,18 @@ export const dataModelRouter = createTRPCRouter({
                 return dummyModel;
             }            
 
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools") {
-                return ctx.prisma.dataModel.findMany();
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+                return ctx.prisma.dataModel.findMany({
+                    where: {
+                        completionStatus: true
+                    }
+                });
             }
 
             return ctx.prisma.dataModel.findMany({
                 where: {
                     userId: ctx.session.user.id,
+                    completionStatus: true
                 }
             });
         }),
@@ -87,12 +92,14 @@ export const dataModelRouter = createTRPCRouter({
             if(user?.isDummy) {
                 return dummyChurnGraph;
             }  
+            const tomorrow = new Date();
+            tomorrow.setDate(input.date.getDate() + 1);
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    createdAt: {
-                        gte: input.date,
-                        lte: input.date
+                    dateOfEvent: {
+                        gte: new Date(input.date.toDateString()),
+                        lt: new Date(tomorrow.toDateString())
                     }
                 }
             });
@@ -115,7 +122,7 @@ export const dataModelRouter = createTRPCRouter({
                 if(userData && userData.hasOwnProperty(featureName)) {
                     churnGraph.push({
                         userDistinctId: userPrediction.userDistinctId,
-                        y: userPrediction.probability,
+                        y: userPrediction.probability.toFixed(2) as unknown as number,
                         x: userData[featureName] as string
                     })
                 }
@@ -162,11 +169,15 @@ export const dataModelRouter = createTRPCRouter({
                     return userPrediction.actualResult == 0
                 });
 
+                const actualChurnNull = usersPredictionsByDate.filter((userPrediction) => {
+                    return userPrediction.actualResult == null
+                });
+
                 churnByDate.push({
                     date: date.toDateString(),
                     users: usersPredictionsByDate.length,
-                    predictedChurn: usersChurned.length / usersPredictionsByDate.length,
-                    actualChurn: actualChurn.length > 0 ? actualChurn.length : undefined
+                    predictedChurn: (usersChurned.length / usersPredictionsByDate.length).toFixed(2) as unknown as number,
+                    actualChurn: actualChurnNull.length == 0 ? (actualChurn.length / usersPredictionsByDate.length).toFixed(2) as unknown as number : undefined
                 })
             }
             return churnByDate;

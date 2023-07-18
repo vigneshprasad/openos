@@ -1,5 +1,4 @@
 import dynamic from 'next/dynamic'
-import Select from './Select'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 import { type ApexOptions } from "apexcharts";
 import { api } from '~/utils/api';
@@ -20,6 +19,7 @@ const PredictedChurnCard = ({ value }: { value?: string | number }) => {
 }
 
 const ActualChurnCard = ({ value }: { value?: string | number }) => {
+
   return <div className="h-[120px] w-[200px] bg-actual-churn-background
           flex flex-col justify-center items-center rounded-2xl gap-4"
   >
@@ -27,7 +27,7 @@ const ActualChurnCard = ({ value }: { value?: string | number }) => {
       Actual Churn
     </div>
     <div>
-      <b>{value}%</b>
+      <b>{value == undefined ? '-' : value}%</b>
     </div>
   </div>
 }
@@ -57,9 +57,7 @@ const ChurnComparisonChart = ({
 
   const runChurnByDay = api.dataModelRouter.churnByDay.useMutation({
     onSuccess: (churnByDayData) => {
-      console.log({ churnByDayData });
       setChurnsByDay(churnByDayData);
-      console.log('churnByDay', churnByDayData);
     }
   });
 
@@ -78,7 +76,7 @@ const ChurnComparisonChart = ({
       data: [...churnsByDay.map((item) => item.predictedChurn * 100)],
     }, {
       name: 'Actual',
-      data: [...churnsByDay.map((item) => (item.actualChurn || 0) * 100)]
+      data: [...churnsByDay.map((item) => item.actualChurn == undefined ? null : (item.actualChurn || 0) * 100)]
     }]
     , [churnsByDay]);
 
@@ -129,7 +127,7 @@ const ChurnComparisonChart = ({
     <div className="flex flex-col gap-5">
         <TotalUsersCard value={(churnsByDay[churnsByDay.length - 1]?.users || 0)} />
         <PredictedChurnCard value={(churnsByDay[churnsByDay.length - 1]?.predictedChurn  || 0) * 100} />
-        <ActualChurnCard value={(churnsByDay[churnsByDay.length - 1]?.actualChurn || 0 / (churnsByDay[churnsByDay.length - 1]?.users || 0)) * 100} />
+        <ActualChurnCard value={churnsByDay[churnsByDay.length - 1]?.actualChurn == undefined ? undefined : ((churnsByDay[churnsByDay.length - 1]?.actualChurn || 0) * 100)} />
     </div>
     <div className="h-[400px] bg-white w-1/4 grow rounded-lg px-2">
       <div className='flex justify-between items-center text-sm px-4 mt-2'>

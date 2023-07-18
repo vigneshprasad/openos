@@ -22,9 +22,11 @@ const FeaturesTable = ({
             setFeatures(data);
         }
     })
+    
     const handleOpenChange = () => {
         setSelectedFeatureId(null);
     }
+
     useEffect(() => {
         if (!modelId) return;
         runGetFeatures.mutate({
