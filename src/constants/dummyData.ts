@@ -1265,47 +1265,38 @@ export const dummyFeatures: FeatureImportance[] = [
 
 export const dummyChurnGraph = [
     {
-        userDistinctId: "user-1",
         y: 0.83,
         x: "30000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.85,
         x: "50000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.76,
         x: "40000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.42,
         x: "20000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.30,
         x: "15000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.13,
         x: "7000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.91,
         x: "90000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.53,
         x: "25000"
     },
     {
-        userDistinctId: "user-1",
         y: 0.66,
         x: "5000"
     },

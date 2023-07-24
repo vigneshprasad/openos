@@ -121,10 +121,6 @@ export const dataModelRouter = createTRPCRouter({
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: new Date(input.date.toDateString()),
-                        lt: new Date(tomorrow.toDateString())
-                    }
                 }
             });
             const feature = await ctx.prisma.featureImportance.findFirst({
@@ -136,7 +132,10 @@ export const dataModelRouter = createTRPCRouter({
             if(!featureName) {
                 return []
             }
-            const churnGraph = [];
+            const features: {[key: string]: {
+                total: number,
+                probability: number,
+            }} = {};
             for (let i = 0; i < usersPredictions.length; i++) {
                 const userPrediction = usersPredictions[i]
                 if (!userPrediction) {
@@ -144,10 +143,36 @@ export const dataModelRouter = createTRPCRouter({
                 }
                 const userData = userPrediction.userData as Prisma.JsonObject
                 if(userData && userData.hasOwnProperty(featureName)) {
+                    const key = userData[featureName] as string
+                    if(features.hasOwnProperty(key)) {
+                        const oldFeature = features[key];
+                        if(oldFeature) {
+                            features[key] = {
+                                probability: oldFeature.probability + userPrediction.probability,
+                                total: oldFeature.total + 1
+                            };
+                        } else {
+                            features[key] = {
+                                probability: userPrediction.probability,
+                                total: 1
+                            };
+                        }
+                    } else {
+                        features[key] = {
+                            probability: userPrediction.probability,
+                            total: 1
+                        };
+                    }
+                    
+                }
+            }
+            const churnGraph = [];
+            for (const key in features) {
+                const feature = features[key];
+                if(feature) {
                     churnGraph.push({
-                        userDistinctId: userPrediction.userDistinctId,
-                        y: userPrediction.probability.toFixed(2) as unknown as number,
-                        x: userData[featureName] as string
+                        x: key,
+                        y: feature.probability / feature.total
                     })
                 }
             }

@@ -66,13 +66,17 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
             tickAmount: 10,
             labels: {
                 formatter: function (val) {
-                    console.log(val);
                     return val && typeof val == 'string' ? val.slice(0, 10) : ""
                 }
             }
         },
         yaxis: {
-            tickAmount: 7
+            tickAmount: 7,
+            labels: {
+                formatter: function (val) {
+                    return val.toFixed(2)
+                }
+            }
         },
         colors: ['#4745A4', '#F9BA33']
   }), [churnGraphData]);
