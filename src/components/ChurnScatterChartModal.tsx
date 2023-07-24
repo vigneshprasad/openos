@@ -90,7 +90,7 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
             <div
               className='flex flex-col w-full h-20 bg-white p-4 gap-2'
             >
-              Probability vs {featureName}
+              Probability to Convert vs {featureName}
             </div>
             <Chart options={options} series={series} type="scatter" />
           </Dialog.Content>
