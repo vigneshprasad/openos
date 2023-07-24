@@ -59,6 +59,7 @@ model User {
     StripeResource      StripeResource[]
     MixpanelResource    MixpanelResource[]
     DataModel           DataModel[]
+    GoogleAnalytics     GoogleAnalytics[]
 }
 
 model VerificationToken {
@@ -333,4 +334,18 @@ model Cohorts {
     dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
 
     @@index([dataModelId])
+}
+
+model GoogleAnalytics {
+    id             String    @id @default(cuid())
+    name           String
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+    deletedAt      DateTime?
+    userId         String
+    credentialsUrl String
+    user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    viewId         String
+
+    @@index([userId])
 }

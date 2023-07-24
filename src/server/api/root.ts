@@ -11,6 +11,7 @@ import { stripeResourceRouter } from "./routers/stripeResource";
 import { predictiveAnalysisCommandRouter } from "./routers/predictiveAnalysisCommand";
 import { mixpanelResourceRouter } from "./routers/mixpanelResource";
 import { dataModelRouter } from "./routers/dataModelRouter";
+import { googleAnalyticsRouter } from "./routers/googleAnalytics";
 
 /**
  * This is the primary router for your server.
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   commandHistory: commandHistoryRouter,
   predictiveAnalysisCommand: predictiveAnalysisCommandRouter,
   dataModelRouter: dataModelRouter,
+  googleAnalyticsRouter: googleAnalyticsRouter,
 });
 
 // export type definition of API

@@ -8,6 +8,7 @@ export const IntegrationStatus: React.FC = () => {
     const [stripeResource, setStripeResource] = useState(false);
     const [bankStatementResource, setBankStatementResource] = useState(false);
     const [mixpanelresource, setMixpanelresource] = useState(false);
+    const [googleAnalytics, setGoogleAnalytics] = useState(false);
 
     const integrations = api.user.integrationList.useQuery();
     
@@ -18,6 +19,7 @@ export const IntegrationStatus: React.FC = () => {
             setBankStatementResource(integrations.data?.bankStatement ? true : false);
             setStripeResource(integrations.data?.stripe ? true : false);
             setMixpanelresource(integrations.data?.mixpanel ? true : false);
+            setGoogleAnalytics(integrations.data?.googleAnalytics ? true : false);
         }
     }, [integrations])
 
@@ -29,6 +31,7 @@ export const IntegrationStatus: React.FC = () => {
             {stripeResource && <div className="bg-success-badge px-3 py-1 rounded-full">Stripe</div>}
             {bankStatementResource && <div className="bg-success-badge px-3 py-1 rounded-full">Bank Statement</div>}
             {mixpanelresource && <div className="bg-success-badge px-3 py-1 rounded-full">Mixpanel</div>}
+            {googleAnalytics && <div className="bg-success-badge px-3 py-1 rounded-full">Google Analytics</div>}
         </div>
     );
 }

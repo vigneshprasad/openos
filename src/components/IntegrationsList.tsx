@@ -5,6 +5,7 @@ import { RazorpayResourceForm } from "./RazorpayResourceForm"
 import { StripeResourceForm } from "./StripeResourceForm"
 import { MARIADB, POSTGRES, MYSQL } from "~/constants/dbTypes"
 import { MixpanelResourceForm } from "./MixpanelResourceForm"
+import { GoogleAnalyticsForm } from "./GoogleAnalyticsForm"
 
 const INTEGRATIONS = [
     {
@@ -62,6 +63,14 @@ const INTEGRATIONS = [
         imageSrc: "/mixpanel.webp",
         url: "https://mixpanel.com/",
         button: <MixpanelResourceForm />
+    },
+    {
+        key: "googleAnalytics",
+        title: "Google Analytics",
+        description: "Simple and powerful analytics tool",
+        imageSrc: "/google_analytics.png",
+        url: "https://analytics.google.com/",
+        button: <GoogleAnalyticsForm />
     },
 ]
 
