@@ -42,13 +42,13 @@ const FeaturesTable = ({
             <Image src="/svg/arrow-right-up.svg" alt="arrow" width={24} height={24} />
         </div>
         <table className="overflow-y-auto p-3">
-        <tbody className="w-full">
+            <tbody className="w-full">
                 {features.map((row, index) => {
                     return <tr key={row.id} className={twMerge(
                         "w-full h-13 border border-x-0 border-border",
                         index && "border-t-0"
                         )}>
-                        <td className="border-y-0 border-l-0 w-1/3">{row.featureName}</td>
+                        <td className="border-y-0 border-l-0 w-1/3 max-w-100">{row.featureName}</td>
                         <td className="border-y-0 ">
                             <span className={twMerge(
                                 row.type === "feature" ? "bg-[#D4F8D3]" : "bg-[#EDE7FB]",
@@ -60,7 +60,7 @@ const FeaturesTable = ({
                         </td>
                     </tr>
                 })}
-                </tbody>
+            </tbody>
         </table>
         {selectedFeatureId && feature && <ChurnScatterChartModal
             isOpen={!!selectedFeatureId}

@@ -3,13 +3,14 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { type Prisma } from "@prisma/client";
 import { dummyChurnByDate, dummyChurnGraph, dummyCohortsData, dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
+import { type ExcelCell, type ExcelSheet } from "~/types/types";
 
 export type Cohort = {
     name: string,
     predictedChurn: number,
     actualChurn?: number,
     deviation?: number,
-    userList: Prisma.JsonObject[],
+    totalUsers: number,
 }
 
 export type Churn = {
@@ -199,8 +200,8 @@ export const dataModelRouter = createTRPCRouter({
                 churnByDate.push({
                     date: date.toDateString(),
                     users: usersPredictionsByDate.length,
-                    predictedChurn: (usersChurned.length / usersPredictionsByDate.length).toFixed(2) as unknown as number,
-                    actualChurn: actualChurnNull.length == 0 ? (actualChurn.length / usersPredictionsByDate.length).toFixed(2) as unknown as number : undefined
+                    predictedChurn: usersChurned.length / usersPredictionsByDate.length,
+                    actualChurn: actualChurnNull.length == 0 ? actualChurn.length / usersPredictionsByDate.length : undefined
                 })
             }
             return churnByDate;
@@ -211,9 +212,6 @@ export const dataModelRouter = createTRPCRouter({
         .input(z.object({
             modelId: z.string({
                 required_error: "Model ID is required"
-            }),
-            date: z.date({
-                required_error: "Date is required"
             }),
         }))
         .mutation(async ({ctx, input}) => {
@@ -230,15 +228,9 @@ export const dataModelRouter = createTRPCRouter({
                     dataModelId: input.modelId, 
                 }
             })
-            const tomorrow = new Date(input.date.toDateString());
-            tomorrow.setDate(tomorrow.getDate() + 1);
             const userPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    // dateOfEvent: {
-                    //     gte: new Date(input.date.toDateString()),
-                    //     lt: new Date(tomorrow.toDateString())
-                    // }
                 }
             })
             const cohortsData: Cohort[] = [
@@ -250,8 +242,8 @@ export const dataModelRouter = createTRPCRouter({
                 }
                 let predictedChurn = 0;
                 let actualChurn = 0;
+                let totalUsers = 0;
                 let showActualChurn = true;
-                const userList: Prisma.JsonObject[] = [];
                 for(let j = 0; j < userPredictions.length; j++) {
                     const userPrediction = userPredictions[j];
                     if (!userPrediction) {
@@ -259,8 +251,7 @@ export const dataModelRouter = createTRPCRouter({
                     }
                     const userData = userPrediction.userData as Prisma.JsonObject
                     if(userData && userData.hasOwnProperty(cohort.attributeName)) {
-                        if(userData[cohort.attributeName] === cohort.attributeValue) {
-                            userList.push(userData);
+                        if((userData[cohort.attributeName] as unknown as string).includes(cohort.attributeValue)) {
                             if(userPrediction.actualResult == null) {
                                 showActualChurn = false;
                             }
@@ -270,18 +261,73 @@ export const dataModelRouter = createTRPCRouter({
                             if(userPrediction.actualResult === 0) {
                                 actualChurn++;
                             }
+                            totalUsers++;
                         }
                     }
                 }
                 cohortsData.push({
                     name: cohort.name,
-                    predictedChurn: predictedChurn / userList.length,
-                    actualChurn: showActualChurn ? actualChurn / userList.length : undefined,
-                    deviation: showActualChurn ? predictedChurn - actualChurn / userList.length : undefined,
-                    userList: userList
+                    predictedChurn: (predictedChurn / totalUsers).toFixed(2) as unknown as number,
+                    actualChurn: (showActualChurn ? actualChurn / totalUsers : undefined)?.toFixed(2) as unknown as number,
+                    deviation: (showActualChurn ? predictedChurn - actualChurn / totalUsers : undefined)?.toFixed(2) as unknown as number,
+                    totalUsers: totalUsers,
                 });
             }
             return cohortsData;
+        }),
+
+    getUserList: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+        }))
+        .mutation(async ({ctx, input}) => {
+            const userPredictions = await ctx.prisma.userPrediction.findMany({
+                where: {
+                    dataModelId: input.modelId,
+                }
+            });
+            const userListSheet: ExcelCell[][] = [];
+            const headings: string[] = [];
+            for(let j = 0; j < userPredictions.length; j++) {
+                const userPrediction = userPredictions[j];
+                if (!userPrediction) {
+                    continue
+                }
+                const userData = userPrediction.userData as Prisma.JsonObject
+                for (const key in userData) {
+                    if(!headings.includes(key)) {
+                        headings.push(key);
+                    }
+                }
+            }
+            const header: ExcelCell[] = [];
+            for(const key of headings) { 
+                header.push({
+                    value: key
+                })
+            }
+            userListSheet.push(header);
+            for(let j = 0; j < userPredictions.length; j++) {
+                const userPrediction = userPredictions[j];
+                if (!userPrediction) {
+                    continue
+                }
+                const userData = userPrediction.userData as Prisma.JsonObject
+                const row:ExcelCell[] = [];
+                for(const key of headings) {
+                    row.push({
+                        value: userData.hasOwnProperty(key) ? (userData[key] as string).replaceAll(",", "") : ""
+                    })
+                }
+                userListSheet.push(row);
+            }
+            const userList: ExcelSheet = {
+                heading: "List of Users",
+                sheet: userListSheet
+            };
+            return userList;
         }),
 
     create: protectedProcedure

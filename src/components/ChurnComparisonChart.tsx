@@ -9,10 +9,10 @@ const PredictedChurnCard = ({ value }: { value?: string | number }) => {
     return ( 
         <div className="h-[120px] w-[200px] bg-predicted-churn-background flex flex-col justify-center items-center rounded-2xl gap-4">
             <div>
-                Predicted Churn
+                Predicted Churn 
             </div>
             <div>
-                <b>{value}%</b>
+                <b>{value} %</b>
             </div>
         </div>
     )
@@ -25,7 +25,7 @@ const ActualChurnCard = ({ value }: { value?: string | number }) => {
                 Actual Churn
             </div>
             <div>
-                <b>{value == undefined ? '-' : value}%</b>
+                <b>{value == undefined ? '-' : value} %</b>
             </div>
         </div>   
     )
@@ -72,10 +72,10 @@ const ChurnComparisonChart = ({
     const series = useMemo(() =>
         [{
             name: 'Predicted',
-            data: [...churnsByDay.map((item) => item.predictedChurn * 100)],
+            data: [...churnsByDay.map((item) => (item.predictedChurn * 100).toFixed(2) as unknown as number)],
         }, {
             name: 'Actual',
-            data: [...churnsByDay.map((item) => item.actualChurn == undefined ? null : (item.actualChurn || 0) * 100)]
+            data: [...churnsByDay.map((item) => item.actualChurn == undefined ? null : ((item.actualChurn || 0) * 100).toFixed(2) as unknown as number)]
         }]
     , [churnsByDay]);
 
@@ -105,7 +105,7 @@ const ChurnComparisonChart = ({
             yaxis: {
                 labels: {
                     style: {
-                        colors: '#999999'
+                        colors: '#999999',
                     }
                 }
             },
@@ -126,8 +126,8 @@ const ChurnComparisonChart = ({
         <>
             <div className="flex flex-col gap-5">
                 <TotalUsersCard value={(churnsByDay[churnsByDay.length - 1]?.users || 0)} />
-                <PredictedChurnCard value={(churnsByDay[churnsByDay.length - 1]?.predictedChurn  || 0) * 100} />
-                <ActualChurnCard value={churnsByDay[churnsByDay.length - 1]?.actualChurn == undefined ? undefined : ((churnsByDay[churnsByDay.length - 1]?.actualChurn || 0) * 100)} />
+                <PredictedChurnCard value={((churnsByDay[churnsByDay.length - 1]?.predictedChurn  || 0) * 100).toFixed(2)} />
+                <ActualChurnCard value={churnsByDay[churnsByDay.length - 1]?.actualChurn == undefined ? undefined : ((churnsByDay[churnsByDay.length - 1]?.actualChurn || 0) * 100).toFixed(2)} />
             </div>
             <div className="h-[400px] bg-white w-1/4 grow rounded-lg px-2">
                 <div className='flex justify-between items-center text-sm px-4 mt-2'>

@@ -1319,28 +1319,28 @@ export const dummyCohortsData = [
         predictedChurn: 0.75,
         actualChurn: 0.8,
         deviation: 0.05,
-        userList: "Hello world I hope this is a decently sized string" as unknown as Prisma.JsonObject[]
+        totalUsers: 50,
     },
     {
         name: "Campaign - Organic Referral",
         predictedChurn: 0.66,
         actualChurn: 0.65,
         deviation: 0.01,
-        userList: "Whoa bro I need another string of differnet lnetasdf as;dlkfjasd;lfjk asd" as unknown as Prisma.JsonObject[]
+        totalUsers: 73
     },
     {
         name: "Phone - Apple Devices",
         predictedChurn: 0.15,
         actualChurn: 0.14,
         deviation: 0.01,
-        userList: "asdfasdfasdf asdkjfh asdf" as unknown as Prisma.JsonObject[]
+        totalUsers: 45
     },
     {
         name: "Location - Tier 2 Cities",
         predictedChurn: 0.66,
         actualChurn: 0.65,
         deviation: 0.01,
-        userList: "this is amazing" as unknown as Prisma.JsonObject[]
+        totalUsers: 15
     },
 ]
 

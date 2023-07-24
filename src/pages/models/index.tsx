@@ -29,6 +29,7 @@ const Home: NextPage = () => {
     }, [models]);
 
     const selectedModel = models?.find((model: DataModel) => model.id === selectedModelId);
+    
     const availableDates = useMemo(() => {
         if (!selectedModel) return [];
         const dateArray: Date[] = [];
@@ -84,16 +85,12 @@ const Home: NextPage = () => {
                         }
                         <div className="flex flex-col justify-between my-4">
                             <div className="bg-section-header flex flex-col gap-2 py-5 px-3 rounded-t-lg">
-                                <div className="flex items-center justify-between">
-                                    {/* <div className="text-subtext">Last updated / 2022-06-19</div> */}
-                                    {/* <Select options={[]} title="View" /> */}
-                                </div>
                                 <h2 className="text-dark-text font-bold">Cohort Table</h2>
                                 <div className="text-subtext">Showing <span className="text-dark-text">top 6</span> cohorts</div>
                             </div>
                             {
                                 selectedModelId &&
-                                <CohortsSection modelId={selectedModelId} date={selectedDate} />
+                                <CohortsSection modelId={selectedModelId} />
                             }
                         </div>
                     </div>
