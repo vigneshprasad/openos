@@ -1,6 +1,6 @@
 import Lottie from "react-lottie-player"
 
-import lottieJson from "public/lotties/fading_cubes_loader.json"
+import lottieJson from "public/lotties/spinner.json"
 
 export const FadingCubesLoader: React.FC = () => {
   return (

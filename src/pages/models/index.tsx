@@ -1,13 +1,17 @@
-import type { DataModel } from "@prisma/client";
+import type { DataModel, FeatureImportance } from "@prisma/client";
+import moment from "moment";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { BaseLayout } from "~/components/BaseLayout";
 import ChurnComparisonChart from "~/components/ChurnComparisonChart";
 import CohortsSection from "~/components/CohortsSection";
+import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import FeaturesTable from "~/components/FeaturesTable";
 import { IntegrationStatus } from "~/components/IntegrationStatus";
 import Select from "~/components/Select";
+import { type Cohort, type Churn } from "~/server/api/routers/dataModelRouter";
+import { type ExcelSheet, type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 
 const yesterday = new Date();
@@ -15,46 +19,129 @@ yesterday.setDate(yesterday.getDate() - 1);
 
 const Home: NextPage = () => {
 
+    const [models, setModels] = useState<DataModel[]>([]);
+    const [modelOptions, setModelOptions] = useState<SelectOption[]>([]);
+    const [dateOptions, setDateOptions] = useState<SelectOption[]>([]);
     const [selectedModelId, setSelectedModelId] = useState<string>();
-    const [selectedDate, setSelectedDate] = useState<Date>(yesterday);
+    const defaultDate = moment().subtract(1, 'days').format('DD/MM/YYYY');
+    const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
+    const [period, setSelectedPeriod] = useState<string>("daily");
 
-    const { data: models } = api.dataModelRouter.getModels.useQuery();
+    const [features, setFeatures] = useState<FeatureImportance[]>([]);
+    const [featuresLoading, setFeaturesLoading] = useState<boolean>(true);
+    const [churnsByDay, setChurnsByDay] = useState<Churn[]>([]);
+    const [churnsByDayLoading, setChurnsByDayLoading] = useState<boolean>(true);
+    const [cohorts, setCohorts] = useState<Cohort[]>([]);
+    const [cohortLoading, setCohortLoading] = useState<boolean>(true);
+    const [userList, setUserList] = useState<ExcelSheet>();
+    const [userListLoading, setUserListLoading] = useState<boolean>(true);    
 
-    const modelOptions = useMemo(() => {
-        if (!models || !models.length) return [];
-        return models.map((model) => ({
-            label: model.name,
-            value: model.id,
-        }));
-    }, [models]);
+    const modelMutation = api.dataModelRouter.getModels.useMutation({
+        onSuccess: (data: DataModel[]) => {
+            const modelOptions = data.map((model) => ({
+                label: model.name,
+                value: model.id,
+            }));
+            setModels(data);
+            setModelOptions(modelOptions);
+            if(!data[0]) return;
+            setSelectedModelId(data[0].id);
+            const dateArray: Date[] = [];
+            let currentDate = new Date(data[0].createdAt);
+            while (currentDate <= yesterday) {
+                dateArray.push(new Date(currentDate));
+                const tempDate = new Date(currentDate);
+                tempDate.setDate(tempDate.getDate() + 1);
+                currentDate = tempDate;
+            }
+            const dateOptions = dateArray.map((date) => {
+                const dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                return {
+                    label: dateString,
+                    value: dateString,
+                }
+            });
+            setDateOptions(dateOptions);
+            const defaultDate = dateOptions[dateOptions.length -1 ]
+            const defaultDateValue = defaultDate?.value;
+            if (defaultDateValue) setSelectedDate(defaultDateValue);
+        }
+    });
+
+    useMemo(() => {
+        if (models && models.length > 0) return;
+        modelMutation.mutate();
+    }, []);
 
     const selectedModel = models?.find((model: DataModel) => model.id === selectedModelId);
-    
-    const availableDates = useMemo(() => {
-        if (!selectedModel) return [];
-        const dateArray: Date[] = [];
-        let currentDate = new Date(selectedModel.createdAt);
-        while (currentDate <= yesterday) {
-            dateArray.push(new Date(currentDate));
-            const tempDate = new Date(currentDate);
-            tempDate.setDate(tempDate.getDate() + 1);
-            currentDate = tempDate;
-        }
-        return dateArray.map((date) => {
-            const dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-            return {
-                label: dateString,
-                value: date,
-            }
-        });
-    }, [selectedModel]);
+    const availableTimePeriods = useMemo(() => {
+        setSelectedPeriod("daily");
+        return [{
+            label: "Daily",
+            value: "daily"
+        }, {
+            label: "Weekly",
+            value: "weekly"
+        }];
+    }, []);
 
-    useEffect(() => {
-        if (!models || !models.length) return;
-        const model = models[0];
-        if (!model) return;
-        setSelectedModelId(model.id);
-    }, [models]);
+    const runGetFeatures = api.dataModelRouter.getFeatures.useMutation({
+        onSuccess: (data: FeatureImportance[]) => {
+            setFeatures(data);
+            setFeaturesLoading(false);
+        }
+    })
+
+    const runChurnByDay = api.dataModelRouter.churnByDay.useMutation({
+        onSuccess: (churnByDayData) => {
+            setChurnsByDay(churnByDayData);
+            setChurnsByDayLoading(false);
+        }
+    });
+
+    const runGetCohorts = api.dataModelRouter.getCohorts.useMutation({
+        onSuccess: (cohorts) => {
+            setCohorts(cohorts);
+            setCohortLoading(false);
+        }
+    })
+
+    const runGetUserList = api.dataModelRouter.getUserList.useMutation({
+        onSuccess: (userList) => {
+            setUserList(userList);
+            setUserListLoading(false);
+        }
+    })
+
+    useMemo(() => {
+        setFeaturesLoading(true);
+        setChurnsByDayLoading(true);
+        setCohortLoading(true);
+        setUserListLoading(true);
+        if (!selectedModelId) return;
+        runGetFeatures.mutate({
+            modelId: selectedModelId,
+        });
+        runChurnByDay.mutate({
+            date: selectedDate,
+            modelId: selectedModelId,
+        });
+        runGetCohorts.mutate({
+            modelId: selectedModelId,
+        })
+        runGetUserList.mutate({
+            modelId: selectedModelId,
+        })
+    }, [selectedModelId])
+
+    useMemo(() => {
+        setChurnsByDayLoading(true);
+        if (!selectedModelId) return;
+        runChurnByDay.mutate({
+            date: selectedDate,
+            modelId: selectedModelId,
+        });
+    }, [selectedDate])
 
     return (
         <>
@@ -68,19 +155,52 @@ const Home: NextPage = () => {
                     <div className="h-12 flex-row flex justify-between flex-basis-content p-2 bg-homepage-tab-background">
                         <IntegrationStatus />
                         <div className="flex gap-2">
-                            <Select title={modelOptions[0] ? modelOptions[0]?.label : "Premade Model"} options={modelOptions} onChange={(selectedModel) => setSelectedModelId(selectedModel)}/>
-                            <Select title="Yesterday" options={availableDates} onChange={(selectedDate) => setSelectedDate(new Date(selectedDate))}/>
+                            {
+                                modelOptions && dateOptions && selectedDate && selectedModelId ?
+                                <form className="flex flex-row gap-5 items-center">                                
+                                    <Select 
+                                        title="Model Name" 
+                                        options={modelOptions} 
+                                        onChange={(selectedModel) => setSelectedModelId(selectedModel)} 
+                                        value={selectedModelId}/>
+                                    <Select 
+                                        title="Date" 
+                                        options={dateOptions} 
+                                        onChange={(selectedDate) => setSelectedDate(selectedDate)} 
+                                        value={selectedDate} />
+                                    {/* <Select 
+                                        title="Time Period" 
+                                        options={availableTimePeriods} 
+                                        onChange={(period) => setSelectedPeriod(period)} 
+                                        defaultValue={availableTimePeriods[0]?.value}
+                                        value={period} /> */}
+                                </form>
+                                :
+                                <p> Loading</p>
+                            }
                         </div>
                     </div>
-                    <div className="flex flex-col p-1 mx-4 gap-5">
+                    <div className="p-1 mx-4 gap-5">
                         <div className="my-4 p-4 border border-border shadow-md rounded-lg">
                             {selectedModel ? selectedModel.description : 'No model selected'}
                         </div>
                         {
-                            selectedModelId &&
-                            <div className="flex justify-between gap-8 items-center">
-                                <FeaturesTable modelId={selectedModelId} date={selectedDate} />
-                                <ChurnComparisonChart modelId={selectedModelId} date={selectedDate} />
+                            selectedModelId && selectedDate &&
+                            <div className="grid grid-cols-[1fr_1.5fr] justify-between gap-8 items-center">
+                                <div>
+                                    {
+                                    featuresLoading ?
+                                        <div className="flex justify-center"> <FadingCubesLoader /> </div> :
+                                        <FeaturesTable features={features} modelId={selectedModelId} date={selectedDate}/>
+                                    }
+                                </div>
+                                <div>
+                                    {
+                                        churnsByDayLoading ?
+                                        <div className="flex justify-center"> <FadingCubesLoader /> </div> :
+                                        <ChurnComparisonChart churnsByDay={churnsByDay} />
+                                    }
+                                </div>
                             </div>
                         }
                         <div className="flex flex-col justify-between my-4">
@@ -89,8 +209,9 @@ const Home: NextPage = () => {
                                 <div className="text-subtext">Showing <span className="text-dark-text">top 6</span> cohorts</div>
                             </div>
                             {
-                                selectedModelId &&
-                                <CohortsSection modelId={selectedModelId} />
+                                cohortLoading || userListLoading || !userList ?
+                                <div className="flex justify-center"> <FadingCubesLoader /> </div> :
+                                <CohortsSection userList={userList} cohorts={cohorts} />
                             }
                         </div>
                     </div>

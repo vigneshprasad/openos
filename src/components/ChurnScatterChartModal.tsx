@@ -5,13 +5,14 @@ import { api } from '~/utils/api';
 import { useEffect, useMemo, useState } from 'react';
 import { type dummyChurnGraph } from '~/constants/dummyData';
 import { type ApexOptions } from 'apexcharts';
+import { FadingCubesLoader } from './FadingCubesLoader';
 
 interface IProps {
     isOpen: boolean;
     handleOpenChange: () => void;
     modelId?: string;
     featureId?: string;
-    date?: Date;
+    date?: string;
     featureName: string;
 }
 
@@ -25,15 +26,18 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
 }) => {
 
     const [churnGraphData, setChurnGraphData] = useState<typeof dummyChurnGraph>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const runChurnGraphMutation = api.dataModelRouter.getChurnGraph.useMutation({
         onSuccess: (churnGraphData) => {
             setChurnGraphData(churnGraphData);
+            setLoading(false);
         }
     });
 
     useEffect(() => {
         if(!isOpen || !modelId || !featureId || !date) return;
+        setLoading(true);
         runChurnGraphMutation.mutate({
             modelId,
             featureId,
@@ -41,11 +45,11 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
         });
     }, [isOpen]);
 
-
     const series = useMemo(() => [{
         name: 'Probability',
         data: churnGraphData.map((item, index) => [index, item.y])
     }], [churnGraphData])
+
     const options: ApexOptions = useMemo(() => ({
         chart: {
             height: 200,
@@ -79,23 +83,27 @@ export const ChurnScatterChartModal: React.FC<IProps> = ({
             }
         },
         colors: ['#4745A4', '#F9BA33']
-  }), [churnGraphData]);
+    }), [churnGraphData]);
 
-  return (
-    <div>
-      <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="DialogOverlay" />
-          <Dialog.Content className="DialogContent bg-white w-[90vw] min-w-[800px] max-w-max min-h-[600px] p-5">
-            <div
-              className='flex flex-col w-full h-20 bg-white p-4 gap-2'
-            >
-              Probability to Convert vs {featureName}
-            </div>
-            <Chart options={options} series={series} type="scatter" />
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-    </div>
-  )  
+    return (
+        <div>
+            <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
+                <Dialog.Portal>
+                    <Dialog.Overlay className="DialogOverlay" />
+                    <Dialog.Content className="DialogContent bg-white w-[90vw] min-w-[800px] max-w-max min-h-[600px] p-5">
+                        <div className='flex flex-col w-full h-20 bg-white p-4 gap-2'>
+                            Probability to Convert vs {featureName}
+                        </div>
+                        {
+                            loading ? 
+                                <div className="flex justify-center">
+                                    <FadingCubesLoader /> 
+                                </div> : 
+                                <Chart options={options} series={series} type="scatter" />
+                        }
+                    </Dialog.Content>
+                </Dialog.Portal>
+            </Dialog.Root>
+        </div>
+    )  
 }

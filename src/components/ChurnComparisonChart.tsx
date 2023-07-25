@@ -1,9 +1,8 @@
 import dynamic from 'next/dynamic'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 import { type ApexOptions } from "apexcharts";
-import { api } from '~/utils/api';
-import { useEffect, useMemo, useState } from 'react';
 import { type Churn } from '~/server/api/routers/dataModelRouter';
+import { useMemo } from 'react';
 
 const PredictedChurnCard = ({ value }: { value?: string | number }) => {
     return ( 
@@ -45,29 +44,10 @@ const TotalUsersCard = ({ value }: { value?: string | number }) => {
 }
 
 const ChurnComparisonChart = ({
-    modelId,
-    date
+    churnsByDay,
 }: {
-    modelId?: string,
-    date?: Date
+    churnsByDay: Churn[];
 }) => {
-
-    const [churnsByDay, setChurnsByDay] = useState<Churn[]>([]);
-
-    const runChurnByDay = api.dataModelRouter.churnByDay.useMutation({
-        onSuccess: (churnByDayData) => {
-            setChurnsByDay(churnByDayData);
-        }
-    });
-
-    useEffect(() => {
-        if (!modelId || !date) return;
-        runChurnByDay.mutate({
-            date,
-            modelId,
-        })
-    }, [modelId, date]);
-
 
     const series = useMemo(() =>
         [{
@@ -123,7 +103,7 @@ const ChurnComparisonChart = ({
     ), [churnsByDay]);
 
     return (
-        <>
+        <div className="flex flex-row gap-5">
             <div className="flex flex-col gap-5">
                 <TotalUsersCard value={(churnsByDay[churnsByDay.length - 1]?.users || 0)} />
                 <PredictedChurnCard value={((churnsByDay[churnsByDay.length - 1]?.predictedChurn  || 0) * 100).toFixed(2)} />
@@ -146,7 +126,7 @@ const ChurnComparisonChart = ({
                     <Chart options={options} series={series} type="area" height={340} />
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 

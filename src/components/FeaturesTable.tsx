@@ -1,38 +1,26 @@
 import type { FeatureImportance } from "@prisma/client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { ChurnScatterChartModal } from "~/components/ChurnScatterChartModal";
 import { api } from "~/utils/api";
 
 
 const FeaturesTable = ({
+    features,
     modelId,
     date
 }: {
-    modelId?: string,
-    date?: Date
+    features: FeatureImportance[],
+    modelId: string,
+    date: string
 }) => {
 
     const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null);
-    const [features, setFeatures] = useState<FeatureImportance[]>([]);
 
-    const runGetFeatures = api.dataModelRouter.getFeatures.useMutation({
-        onSuccess: (data) => {
-            setFeatures(data);
-        }
-    })
-    
     const handleOpenChange = () => {
         setSelectedFeatureId(null);
     }
-
-    useEffect(() => {
-        if (!modelId) return;
-        runGetFeatures.mutate({
-            modelId,
-        })
-    }, [modelId]);
     
     const feature = features.find((feature) => feature.id === selectedFeatureId);
 

@@ -1,43 +1,16 @@
-import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { type Cohort } from "~/server/api/routers/dataModelRouter";
 import { type ExcelSheet } from "~/types/types";
-import { api } from "~/utils/api";
 import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import { PrimaryButton } from "./PrimaryButton";
 
 const CohortsSection = ({
-    modelId,
+    cohorts,
+    userList,
 }: {
-    modelId?: string
+    cohorts: Cohort[]
+    userList: ExcelSheet
 }) => {
-
-    const [cohorts, setCohorts] = useState<Cohort[]>([]);
-    const [userList, setUserList] = useState<ExcelSheet>();
-
-    const runGetCohorts = api.dataModelRouter.getCohorts.useMutation({
-        onSuccess: (cohorts) => {
-            setCohorts(cohorts);
-        }
-    })
-
-    const runGetUserList = api.dataModelRouter.getUserList.useMutation({
-        onSuccess: (userList) => {
-            setUserList(userList);
-        }
-    })
-    
-    
-    useEffect(() => {
-    if (!modelId) return;
-        runGetCohorts.mutate({
-            modelId,
-        })
-        runGetUserList.mutate({
-            modelId,
-        })
-    }, [modelId]);
-
 
     return <div className="bg-white">
         <table className="w-full">

@@ -4,6 +4,7 @@ import { type Prisma } from "@prisma/client";
 import { dummyChurnByDate, dummyChurnGraph, dummyCohortsData, dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
+import moment from "moment";
 
 export type Cohort = {
     name: string,
@@ -22,7 +23,7 @@ export type Churn = {
 
 export const dataModelRouter = createTRPCRouter({
     getModels: protectedProcedure
-        .query(async ({ ctx }) => {
+        .mutation(async ({ ctx }) => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
@@ -103,7 +104,7 @@ export const dataModelRouter = createTRPCRouter({
             featureId: z.string({
                 required_error: "Feature ID is required"
             }),
-            date: z.date({
+            date: z.string({
                 required_error: "Date is required"
             })
         }))    
@@ -116,8 +117,8 @@ export const dataModelRouter = createTRPCRouter({
             if(user?.isDummy) {
                 return dummyChurnGraph;
             }  
-            const tomorrow = new Date();
-            tomorrow.setDate(input.date.getDate() + 1);
+            // const today = moment(input.date, "DD/MM/YYYY")
+            // const tomorrow = moment(today).add(1, 'days')
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
@@ -168,10 +169,11 @@ export const dataModelRouter = createTRPCRouter({
             }
             const churnGraph = [];
             for (const key in features) {
+                const newKey = key === "" ? "Unknown" : key;
                 const feature = features[key];
                 if(feature) {
                     churnGraph.push({
-                        x: key,
+                        x: newKey,
                         y: feature.probability / feature.total
                     })
                 }
@@ -184,8 +186,8 @@ export const dataModelRouter = createTRPCRouter({
             modelId: z.string({
                 required_error: "Model ID is required"
             }),
-            date: z.date({
-                required_error: "Date is required"
+            date: z.string({
+                required_error: "String is required"
             })
         }))    
         .mutation(async ({ctx, input}) => {
@@ -197,8 +199,9 @@ export const dataModelRouter = createTRPCRouter({
             if(user?.isDummy) {
                 return dummyChurnByDate;
             }  
-            const start_date = new Date(input.date);
-            start_date.setDate(start_date.getDate() - 7);
+            const date = moment(input.date, "DD/MM/YYYY")
+            // const tomorrow = moment(date).add(1, 'days')
+            const start_date = moment(date).subtract(7, 'days').toDate();
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
