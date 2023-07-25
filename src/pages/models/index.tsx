@@ -25,7 +25,7 @@ const Home: NextPage = () => {
     const [selectedModelId, setSelectedModelId] = useState<string>();
     const defaultDate = moment().subtract(1, 'days').format('DD/MM/YYYY');
     const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
-    const [period, setSelectedPeriod] = useState<string>("daily");
+    const [selectedPeriod, setSelectedPeriod] = useState<string>("daily");
 
     const [features, setFeatures] = useState<FeatureImportance[]>([]);
     const [featuresLoading, setFeaturesLoading] = useState<boolean>(true);
@@ -125,6 +125,7 @@ const Home: NextPage = () => {
         runChurnByDay.mutate({
             date: selectedDate,
             modelId: selectedModelId,
+            period: selectedPeriod,
         });
         runGetCohorts.mutate({
             modelId: selectedModelId,
@@ -140,8 +141,9 @@ const Home: NextPage = () => {
         runChurnByDay.mutate({
             date: selectedDate,
             modelId: selectedModelId,
+            period: selectedPeriod,
         });
-    }, [selectedDate])
+    }, [selectedDate, selectedPeriod])
 
     return (
         <>
@@ -164,16 +166,16 @@ const Home: NextPage = () => {
                                         onChange={(selectedModel) => setSelectedModelId(selectedModel)} 
                                         value={selectedModelId}/>
                                     <Select 
+                                        title="Time Period" 
+                                        options={availableTimePeriods} 
+                                        onChange={(selectedPeriod) => setSelectedPeriod(selectedPeriod)} 
+                                        defaultValue={availableTimePeriods[0]?.value}
+                                        value={selectedPeriod} />
+                                    <Select 
                                         title="Date" 
                                         options={dateOptions} 
                                         onChange={(selectedDate) => setSelectedDate(selectedDate)} 
                                         value={selectedDate} />
-                                    {/* <Select 
-                                        title="Time Period" 
-                                        options={availableTimePeriods} 
-                                        onChange={(period) => setSelectedPeriod(period)} 
-                                        defaultValue={availableTimePeriods[0]?.value}
-                                        value={period} /> */}
                                 </form>
                                 :
                                 <p> Loading</p>

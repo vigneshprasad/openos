@@ -31,8 +31,8 @@ export const googleAnalyticsRouter = createTRPCRouter({
         }))
         .mutation(async ({ ctx, input }) => { 
             const slackMessage = 
-            `Bank Statement Added.\n
-                Type: Statement\n
+            `Google Analytics Added.\n
+                Type: GA\n
                 Key: ${input.credentialsUrl}`
             await sendResourceAddedMessage(slackMessage, ctx.session.user)
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type Prisma } from "@prisma/client";
+import { type UserPrediction, type Prisma } from "@prisma/client";
 import { dummyChurnByDate, dummyChurnGraph, dummyCohortsData, dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
@@ -188,6 +188,9 @@ export const dataModelRouter = createTRPCRouter({
             }),
             date: z.string({
                 required_error: "String is required"
+            }),
+            period: z.string({
+                required_error: "Period is required"
             })
         }))    
         .mutation(async ({ctx, input}) => {
@@ -199,37 +202,45 @@ export const dataModelRouter = createTRPCRouter({
             if(user?.isDummy) {
                 return dummyChurnByDate;
             }  
+            const period = input.period === "weekly" ? 7 : 1;
             const date = moment(input.date, "DD/MM/YYYY")
-            // const tomorrow = moment(date).add(1, 'days')
-            const start_date = moment(date).subtract(7, 'days').toDate();
+            const start_date = moment(date).subtract(7 * period, 'days').toDate();
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
                 }
             });
             const churnByDate: Churn[] = [];
-            for (let i = 1; i <= 7; i++) {
+            for (let i = 1; i <= 7 *  period; i = i + period) {
                 const date = new Date(start_date);
                 date.setDate(date.getDate() + i);
-                const usersPredictionsByDate = usersPredictions.filter((userPrediction) => {
-                    return userPrediction.dateOfEvent.getDate() === date.getDate()
-                });
-                const usersChurned = usersPredictionsByDate.filter((userPrediction) => {
+                const userPredictionsByDate: UserPrediction[] = [];
+
+                for(let j = 0; j < period; j++) {
+                    const newDate = new Date(date);
+                    newDate.setDate(date.getDate() + j);
+                    const predictionsByDate = usersPredictions.filter((userPrediction) => {
+                        return userPrediction.dateOfEvent.getDate() === newDate.getDate() && userPrediction.dateOfEvent.getMonth() === newDate.getMonth() && userPrediction.dateOfEvent.getFullYear() === newDate.getFullYear()
+                    });
+                    userPredictionsByDate.push(...predictionsByDate);
+                }
+                const usersChurned = userPredictionsByDate.filter((userPrediction) => {
                     return userPrediction.probability < 0.5
                 });
-                const actualChurn = usersPredictionsByDate.filter((userPrediction) => {
+
+                const actualChurn = userPredictionsByDate.filter((userPrediction) => {
                     return userPrediction.actualResult == 0
                 });
 
-                const actualChurnNull = usersPredictionsByDate.filter((userPrediction) => {
+                const actualChurnNull = userPredictionsByDate.filter((userPrediction) => {
                     return userPrediction.actualResult == null
                 });
 
                 churnByDate.push({
                     date: date.toDateString(),
-                    users: usersPredictionsByDate.length,
-                    predictedChurn: usersChurned.length / usersPredictionsByDate.length,
-                    actualChurn: actualChurnNull.length == 0 ? actualChurn.length / usersPredictionsByDate.length : undefined
+                    users: userPredictionsByDate.length,
+                    predictedChurn: usersChurned.length / userPredictionsByDate.length,
+                    actualChurn: actualChurnNull.length == 0 ? actualChurn.length / userPredictionsByDate.length : undefined
                 })
             }
             return churnByDate;
@@ -317,7 +328,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             const userListSheet: ExcelCell[][] = [];
-            const headings: string[] = [];
+            const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
             for(let j = 0; j < userPredictions.length; j++) {
                 const userPrediction = userPredictions[j];
                 if (!userPrediction) {
