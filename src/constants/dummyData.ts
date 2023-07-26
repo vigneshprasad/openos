@@ -1,4 +1,4 @@
-import { type DataModel, type FeatureImportance, type Prisma } from "@prisma/client"
+import { type Insights, type DataModel, type FeatureImportance, type ActionableInsights } from "@prisma/client"
 import { PREMADE_MODEL } from "./modelTypes"
 
 export const userAcquisitionData = 
@@ -1377,5 +1377,74 @@ export const dummyChurnByDate = [
         users: 80,
         predictedChurn: 0.71,
         actualChurn: 0.66
+    }
+]
+
+export const dummyInsights: Insights[] = [
+    {
+        id: "dummy-insight-1",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        userId: "dummy-user",
+        modelId: "dummy",
+        title: "Target Higher Price Devices",
+        description: "Higher price devices tend to convert at a much higher rate. When the price of the device is above Rs. 50,000 a user is 1.5x more likely to convert than when the price is below Rs. 50,000. This is a significant difference and should be considered when targeting users.",
+        datePosted: new Date("2023-07-01"),
+        feedback: 0,
+        tag: "Marketing"
+    },
+    {
+        id: "dummy-insight-2",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        userId: "dummy-user",
+        modelId: "dummy",
+        title: "Impact of Trial Period",
+        description: "Users who have used the trial period are 1.2x more likely to convert than users who have not used the trial period. Encourage users to take the free trial to get better conversions.",
+        datePosted: new Date("2023-07-01"),
+        feedback: 1,
+        tag: "Product Management"
+    },
+    {
+        id: "dummy-insight-3",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        userId: "dummy-user",
+        modelId: "dummy",
+        title: "Tier 2 Cities",
+        description: "Users from Tier 2 Cities have a very low conversion rate of 5%. You should focus all your marketing efforts on users from Tier 1 Cities to lower your Cost of Acquisition and to get the best Lifetime Value.",
+        datePosted: new Date("2023-07-01"),
+        feedback: 0,
+        tag: "Marketing"
+    }
+]
+
+export const dummyActionableInsights: ActionableInsights[] = [
+    {
+        id: 'dummy-actionable-insight-1',
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        insightId: 'dummy-insight-1',
+        descrtiption: 'From a marketing standpoint it is best to target users with an Apple device or those with device price greater than 50,000'
+    },
+    {
+        id: 'dummy-actionable-insight-2',
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        insightId: 'dummy-insight-1',
+        descrtiption: 'Sales teams are better off focusing on reaching out to users that come with a higher device price since they are more likely to convert'
+    },
+    {
+        id: 'dummy-actionable-insight-3',
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        insightId: 'dummy-insight-1',
+        descrtiption: 'Optimise the product for Apple Devices and ensure that the website is working well on Safari browser.'
     }
 ]

@@ -60,6 +60,7 @@ model User {
     MixpanelResource    MixpanelResource[]
     DataModel           DataModel[]
     GoogleAnalytics     GoogleAnalytics[]
+    Insights            Insights[]
 }
 
 model VerificationToken {
@@ -287,6 +288,7 @@ model DataModel {
     FeatureImportance   FeatureImportance[]
     UserPrediction      UserPrediction[]
     Cohorts             Cohorts[]
+    Insights            Insights[]
 
     @@index([userId])
 }
@@ -348,4 +350,36 @@ model GoogleAnalytics {
     viewId         String
 
     @@index([userId])
+}
+
+model Insights {
+    id                 String               @id @default(cuid())
+    createdAt          DateTime             @default(now())
+    updatedAt          DateTime             @updatedAt
+    deletedAt          DateTime?
+    userId             String
+    user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+    modelId            String
+    model              DataModel            @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    title              String
+    description        String
+    datePosted         DateTime
+    feedback           Int?
+    tag                String
+    ActionableInsights ActionableInsights[]
+
+    @@index([userId])
+    @@index([modelId])
+}
+
+model ActionableInsights {
+    id           String    @id @default(cuid())
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+    deletedAt    DateTime?
+    insightId    String
+    insight      Insights  @relation(fields: [insightId], references: [id], onDelete: Cascade)
+    descrtiption String
+
+    @@index([insightId])
 }

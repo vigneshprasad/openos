@@ -12,6 +12,7 @@ import { predictiveAnalysisCommandRouter } from "./routers/predictiveAnalysisCom
 import { mixpanelResourceRouter } from "./routers/mixpanelResource";
 import { dataModelRouter } from "./routers/dataModelRouter";
 import { googleAnalyticsRouter } from "./routers/googleAnalytics";
+import { insightsRouter } from "./routers/insights";
 
 /**
  * This is the primary router for your server.
@@ -32,6 +33,7 @@ export const appRouter = createTRPCRouter({
   predictiveAnalysisCommand: predictiveAnalysisCommandRouter,
   dataModelRouter: dataModelRouter,
   googleAnalyticsRouter: googleAnalyticsRouter,
+  insightsRouter: insightsRouter,
 });
 
 // export type definition of API
