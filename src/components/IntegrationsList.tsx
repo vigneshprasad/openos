@@ -6,6 +6,7 @@ import { StripeResourceForm } from "./StripeResourceForm"
 import { MARIADB, POSTGRES, MYSQL } from "~/constants/dbTypes"
 import { MixpanelResourceForm } from "./MixpanelResourceForm"
 import { GoogleAnalyticsForm } from "./GoogleAnalyticsForm"
+import { AmplitudeResourceForm } from "./AmplitudeResourceForm"
 
 const INTEGRATIONS = [
     {
@@ -71,6 +72,14 @@ const INTEGRATIONS = [
         imageSrc: "/google_analytics.png",
         url: "https://analytics.google.com/",
         button: <GoogleAnalyticsForm />
+    },
+    {
+        key: "amplitude",
+        title: "Amplitude",
+        description: "Simple and powerful analytics tool",
+        imageSrc: "/amplitude.png",
+        url: "https://amplitude.com/",
+        button: <AmplitudeResourceForm />
     },
 ]
 

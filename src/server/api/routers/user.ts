@@ -14,7 +14,8 @@ export const userRouter = createTRPCRouter({
                     BankStatement: true,
                     StripeResource: true,
                     MixpanelResource: true,
-                    GoogleAnalytics: true
+                    GoogleAnalytics: true,
+                    AmplitudeResource: true
                 }
             })
 
@@ -25,7 +26,8 @@ export const userRouter = createTRPCRouter({
                 user?.RazorpayResource.length === 0 &&
                 user?.StripeResource.length === 0 &&
                 user?.MixpanelResource.length === 0 &&
-                user?.GoogleAnalytics.length === 0 
+                user?.GoogleAnalytics.length === 0 &&
+                user?.AmplitudeResource.length === 0
 
             const stage3 = !user?.isOnboarded
 
@@ -49,7 +51,8 @@ export const userRouter = createTRPCRouter({
                     BankStatement: true,
                     StripeResource: true,
                     MixpanelResource: true,
-                    GoogleAnalytics: true
+                    GoogleAnalytics: true,
+                    AmplitudeResource: true
                 }
             })
 
@@ -60,6 +63,7 @@ export const userRouter = createTRPCRouter({
                 stripe: user?.StripeResource.length !== 0,
                 mixpanel: user?.MixpanelResource.length !== 0,
                 googleAnalytics: user?.GoogleAnalytics.length !== 0,
+                amplitude: user?.AmplitudeResource.length !== 0,
             }
         }),
   

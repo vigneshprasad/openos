@@ -13,6 +13,7 @@ import { mixpanelResourceRouter } from "./routers/mixpanelResource";
 import { dataModelRouter } from "./routers/dataModelRouter";
 import { googleAnalyticsRouter } from "./routers/googleAnalytics";
 import { insightsRouter } from "./routers/insights";
+import { amplitudeResourceRouter } from "./routers/amplitudeRouter";
 
 /**
  * This is the primary router for your server.
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
   databaseResource: databaseResourceRouter,
   razorpayResource: razorpayResourceRouter,
   mixpanelResource: mixpanelResourceRouter,
+  amplitudeResource: amplitudeResourceRouter,
   stripeResource: stripeResourceRouter,
   commandRouter: commandRouter,
   aws: awsRouter,

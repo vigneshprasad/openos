@@ -7,8 +7,9 @@ export const IntegrationStatus: React.FC = () => {
     const [razorpayResource, setRazorpayResource] = useState(false);
     const [stripeResource, setStripeResource] = useState(false);
     const [bankStatementResource, setBankStatementResource] = useState(false);
-    const [mixpanelresource, setMixpanelresource] = useState(false);
+    const [mixpanelResource, setMixpanelResource] = useState(false);
     const [googleAnalytics, setGoogleAnalytics] = useState(false);
+    const [amplitudeResource, setAmplitudeResource] = useState(false);
 
     const integrations = api.user.integrationList.useQuery();
     
@@ -18,8 +19,9 @@ export const IntegrationStatus: React.FC = () => {
             setRazorpayResource(integrations.data?.razorpay ? true : false);
             setBankStatementResource(integrations.data?.bankStatement ? true : false);
             setStripeResource(integrations.data?.stripe ? true : false);
-            setMixpanelresource(integrations.data?.mixpanel ? true : false);
+            setMixpanelResource(integrations.data?.mixpanel ? true : false);
             setGoogleAnalytics(integrations.data?.googleAnalytics ? true : false);
+            setAmplitudeResource(integrations.data?.amplitude ? true : false)
         }
     }, [integrations])
 
@@ -30,8 +32,9 @@ export const IntegrationStatus: React.FC = () => {
             {razorpayResource && <div className="bg-success-badge px-3 py-1 rounded-full">RazorPay</div>}
             {stripeResource && <div className="bg-success-badge px-3 py-1 rounded-full">Stripe</div>}
             {bankStatementResource && <div className="bg-success-badge px-3 py-1 rounded-full">Bank Statement</div>}
-            {mixpanelresource && <div className="bg-success-badge px-3 py-1 rounded-full">Mixpanel</div>}
+            {mixpanelResource && <div className="bg-success-badge px-3 py-1 rounded-full">Mixpanel</div>}
             {googleAnalytics && <div className="bg-success-badge px-3 py-1 rounded-full">Google Analytics</div>}
+            {amplitudeResource && <div className="bg-success-badge px-3 py-1 rounded-full">Amplitude</div>}
         </div>
     );
 }
