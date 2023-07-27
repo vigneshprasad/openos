@@ -50,7 +50,9 @@ export const InsightSection: React.FC<IProps> = ({ insight }) => {
                                 </div>
                                 <div className="flex flex-row gap-4 h-8 text-sm">
                                     <div className="text-[#616161] my-auto min-w-[100px]"> Tag </div>
-                                    <div className={`rounded-full bg-[${convertStringToColour(insight.tag)}] px-2 py-1 my-1 text-xs`}>
+                                    <div 
+                                        className="rounded-full px-2 py-1 my-1 text-xs" 
+                                        style = {{backgroundColor: convertStringToColour(insight.tag)}}>
                                         {insight.tag}
                                     </div>
                                 </div>

@@ -40,9 +40,11 @@ const InsightsPage: NextPage = () => {
                                                         <h3 className="text-sm font-semibold my-auto">
                                                             {insight.title}
                                                         </h3>
-                                                        <div className={`rounded-full bg-[${convertStringToColour(insight.tag)}] px-2 py-1 my-2 text-xs`}>
-                                                            {insight.tag}
-                                                        </div> 
+                                                        <div 
+                                                            className="rounded-full px-2 py-1 my-1 text-xs" 
+                                                            style = {{backgroundColor: convertStringToColour(insight.tag)}}>
+                                                                {insight.tag}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
