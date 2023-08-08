@@ -132,6 +132,8 @@ const Home: NextPage = () => {
         })
         runGetUserList.mutate({
             modelId: selectedModelId,
+            date: selectedDate,
+            period: selectedPeriod,
         })
     }, [selectedModelId])
 
@@ -207,8 +209,8 @@ const Home: NextPage = () => {
                         }
                         <div className="flex flex-col justify-between my-4">
                             <div className="bg-section-header flex flex-col gap-2 py-5 px-3 rounded-t-lg">
-                                <h2 className="text-dark-text font-bold">Cohort Table</h2>
-                                <div className="text-subtext">Showing <span className="text-dark-text">top 6</span> cohorts</div>
+                                <h2 className="text-dark-text-colour font-bold">Cohort Table</h2>
+                                <div className="text-subtext">Showing <span className="text-dark-text-colour">top 6</span> cohorts</div>
                             </div>
                             {
                                 cohortLoading || userListLoading || !userList ?

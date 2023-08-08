@@ -1,3 +1,4 @@
+import { Insights } from "@prisma/client";
 import { z } from "zod";
 import { dummyActionableInsights, dummyInsights } from "~/constants/dummyData";
 import {
@@ -8,8 +9,13 @@ import {
 
 export const insightsRouter = createTRPCRouter({
     
-    getAll: protectedProcedure
-        .query(async ({ ctx }) => {
+    getInsights: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model Id is required"
+            })  
+        }))
+        .mutation(async ({ ctx, input }): Promise<Insights[]> => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
@@ -26,7 +32,7 @@ export const insightsRouter = createTRPCRouter({
 
             return ctx.prisma.insights.findMany({
                 where: {
-                    userId: ctx.session.user.id,
+                    modelId: input.modelId
                 }
             });
         }),
@@ -37,7 +43,7 @@ export const insightsRouter = createTRPCRouter({
                 required_error: "Insight Id is required"
             })  
         }))
-        .query(async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,

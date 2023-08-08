@@ -130,7 +130,7 @@ export const MainTerminal: React.FC = () => {
     };
 
     return (
-        <div className="p-5 grid grid-rows-[1fr_max-content] grid-cols-1 gap-5 overflow-hidden bg-slate-50">
+        <div className="p-5 grid grid-rows-[1fr_max-content] h-[calc(100vh_-_48px)] grid-cols-1 gap-5 overflow-hidden bg-slate-50">
             {data.length === 0 ? <div>
                 {loading ? 
                     <div className="w-full flex justify-center">

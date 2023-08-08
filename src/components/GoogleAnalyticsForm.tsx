@@ -116,7 +116,7 @@ export const GoogleAnalyticsForm: React.FC = () => {
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content className="DialogContent p-4">
                     <div className="pb-8 flex flex-row justify-between items-center">
-                        <text className="text-md text-[#242533]">Add Bank Statement</text>
+                        <text className="text-md text-[#242533]">Add Google Analytics</text>
                         <Dialog.Close asChild>
                             <CrossCircledIcon color="#C4C4C4" className="cursor-pointer" />
                         </Dialog.Close>

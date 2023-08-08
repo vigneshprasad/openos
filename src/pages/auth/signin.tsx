@@ -14,7 +14,7 @@ const Auth: NextPage = () => {
       <main className="min-h-screen grid grid-cols-3 bg-homepage">
         <div className="col-span-2 flex flex-col justify-center relative">
           <div className="w-inherit absolute right-0">
-            <h1 className="text-[32px] leading-[48px] font-medium">
+            <h1 className="text-4xl leading-[48px] font-medium">
               Retrieve, analyse, model & forecast <br /> your{" "}
               <span className="text-[#F4BF4F]">data & finances.</span>
             </h1>

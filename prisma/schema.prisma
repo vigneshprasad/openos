@@ -269,27 +269,28 @@ model SQLQueryModification {
 }
 
 model DataModel {
-    id                  String              @id @default(cuid())
-    createdAt           DateTime            @default(now())
-    updatedAt           DateTime            @updatedAt
-    deletedAt           DateTime?
-    userId              String
-    type                String
-    name                String
-    userFilter          String?
-    predictionTimeframe String?
-    eventA              String
-    eventB              String?
-    eventAFrequency     Int?
-    predictionWindow    Int?
-    description         String
-    timeInterval        Int?
-    completionStatus    Boolean             @default(false)
-    user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-    FeatureImportance   FeatureImportance[]
-    UserPrediction      UserPrediction[]
-    Cohorts             Cohorts[]
-    Insights            Insights[]
+    id                    String                  @id @default(cuid())
+    createdAt             DateTime                @default(now())
+    updatedAt             DateTime                @updatedAt
+    deletedAt             DateTime?
+    userId                String
+    type                  String
+    name                  String
+    userFilter            String?
+    predictionTimeframe   String?
+    eventA                String
+    eventB                String?
+    eventAFrequency       Int?
+    predictionWindow      Int?
+    description           String
+    completionStatus      Boolean                 @default(false)
+    timeInterval          Int?
+    user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    FeatureImportance     FeatureImportance[]
+    UserPrediction        UserPrediction[]
+    Cohorts               Cohorts[]
+    Insights              Insights[]
+    DataModelPrimaryGraph DataModelPrimaryGraph[]
 
     @@index([userId])
 }
@@ -347,8 +348,8 @@ model GoogleAnalytics {
     deletedAt      DateTime?
     userId         String
     credentialsUrl String
-    user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     viewId         String
+    user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
 }
@@ -359,14 +360,14 @@ model Insights {
     updatedAt          DateTime             @updatedAt
     deletedAt          DateTime?
     userId             String
-    user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
     modelId            String
-    model              DataModel            @relation(fields: [modelId], references: [id], onDelete: Cascade)
     title              String
     description        String
     datePosted         DateTime
     feedback           Int?
     tag                String
+    user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+    model              DataModel            @relation(fields: [modelId], references: [id], onDelete: Cascade)
     ActionableInsights ActionableInsights[]
 
     @@index([userId])
@@ -379,8 +380,8 @@ model ActionableInsights {
     updatedAt    DateTime  @updatedAt
     deletedAt    DateTime?
     insightId    String
-    insight      Insights  @relation(fields: [insightId], references: [id], onDelete: Cascade)
     descrtiption String
+    insight      Insights  @relation(fields: [insightId], references: [id], onDelete: Cascade)
 
     @@index([insightId])
 }
@@ -399,4 +400,18 @@ model AmplitudeResource {
     user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
+}
+
+model DataModelPrimaryGraph {
+    id                String    @id @default(cuid())
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+    deletedAt         DateTime?
+    dataModelId       String
+    predictionCohort1 String
+    predictionCohort2 String
+    predictionCohort3 String?
+    dataModel         DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+
+    @@index([dataModelId])
 }
