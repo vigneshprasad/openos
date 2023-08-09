@@ -23,8 +23,8 @@ export const getDummyIncludeAndExclude = (date: string, modelId: string, period:
         })
     }
     users = users.sort((a, b) => b.probability - a.probability)
-    const excludeUsers = users.slice(0, 5)
-    const includeUsers = users.slice(5, 10).reverse()
+    const excludeUsers = users.slice(0, 5).reverse()
+    const includeUsers = users.slice(5, 10)
 
     return {
         include: {
