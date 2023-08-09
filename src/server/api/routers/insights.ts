@@ -27,7 +27,11 @@ export const insightsRouter = createTRPCRouter({
             }            
 
             if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
-                return ctx.prisma.insights.findMany();
+                return ctx.prisma.insights.findMany({
+                    where: {
+                        modelId: input.modelId
+                    }
+                });
             }
 
             return ctx.prisma.insights.findMany({
