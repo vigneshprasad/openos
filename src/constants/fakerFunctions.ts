@@ -10,9 +10,9 @@ function encode(a: string): number {
     return number;
 }
 
-export const getDummyIncludeAndExclude = (date: string, modelId: string, period: string): IncludeAndExcludeUsers => {
+export const getDummyIncludeAndExclude = (date: string, modelId: string, endDate: string): IncludeAndExcludeUsers => {
 
-    const seed = encode(`${date}${modelId}${period}`)
+    const seed = encode(`${date}${modelId}${endDate}`)
     faker.seed(seed)
 
     let users = []

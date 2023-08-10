@@ -810,7 +810,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                return getDummyIncludeAndExclude(input.modelId, input.date, input.period);
+                return getDummyIncludeAndExclude(input.modelId, input.date, input.endDate);
             }
 
             const date = moment(input.date, "DD/MM/YYYY")
