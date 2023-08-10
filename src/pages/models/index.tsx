@@ -2,7 +2,7 @@ import type { FeatureImportance, Insights } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import router from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import AreaGraph from "~/components/AreaGraph";
 import { BaseLayout2 } from "~/components/BaseLayout2";
@@ -13,15 +13,13 @@ import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import { ScatterPlot } from "~/components/ScatterPlot";
 import Select from "~/components/Select";
 import UsersTable from "~/components/UsersTable";
-import { type ModelGraph, type Cohort, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList } from "~/server/api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList } from "~/server/api/routers/dataModelRouter";
 import { type ExcelSheet, type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
-import Image from "next/image"
+import Image from "next/image";
+import moment from "moment";
 
-
-const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
 
 const Home: NextPage = () => {
 
@@ -31,7 +29,6 @@ const Home: NextPage = () => {
     const [selectedModelId, setSelectedModelId] = useState<string>();
     const [selectedDate, setSelectedDate] = useState<string>();
     const [selectedEndDate, setSelectedEndDate] = useState<string>();
-    const [selectedPeriod, setSelectedPeriod] = useState<string>("daily");
     
     //CHURN CARD STATES
     const [churnCardData, setChurnCardData] = useState<ChurnCards>();
@@ -70,10 +67,6 @@ const Home: NextPage = () => {
     const [selectedInsight, setSelectedInsight] = useState<Insights>();
 
 
-    const [cohorts, setCohorts] = useState<Cohort[]>([]);
-    const [cohortLoading, setCohortLoading] = useState<boolean>(true);
-
-
     //SETTING FIRST MODEL AS DEFAULT
     const modelMutation = api.dataModelRouter.getModels.useMutation({
         onSuccess: (data) => {
@@ -104,7 +97,10 @@ const Home: NextPage = () => {
             setDateOptions(dateOptions);
             const defaultDate = dateOptions[dateOptions.length - 1]
             const defaultDateValue = defaultDate?.value;
-            if (defaultDateValue) setSelectedDate(defaultDateValue);
+            if (defaultDateValue)  {
+                setSelectedDate(defaultDateValue);
+                setSelectedEndDate(defaultDateValue);
+            }
         }
     });
 
@@ -114,16 +110,6 @@ const Home: NextPage = () => {
     }, []);
 
     const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
-    const availableTimePeriods = useMemo(() => {
-        setSelectedPeriod("daily");
-        return [{
-            label: "Daily",
-            value: "daily"
-        }, {
-            label: "Weekly",
-            value: "weekly"
-        }];
-    }, []);
 
     const runGetChurnCards = api.dataModelRouter.getChurnCards.useMutation({
         onSuccess: (data: ChurnCards) => {
@@ -211,6 +197,7 @@ const Home: NextPage = () => {
 
 
     useEffect(() => {
+
         setChurnCardLoading(true);
         setPrimaryGraphLoading(true);
         setAggregateChurnByPrimaryCohortsLoading(true);
@@ -218,27 +205,30 @@ const Home: NextPage = () => {
         setFeaturesLoading(true);
         setIncludeAndExcludeUsersLoading(true);
 
-        setCohortLoading(true);
-        if (!selectedModelId || !selectedDate) return;
+        if (!selectedModelId || !selectedDate || !selectedEndDate) return;
+        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
+            setSelectedEndDate(selectedDate);
+        }
+
         runGetChurnCards.mutate({
             date: selectedDate,
             modelId: selectedModelId,
-            period: selectedPeriod,
+            endDate: selectedEndDate,
         });
         modelPrimaryGraph.mutate({
             date: selectedDate,
             modelId: selectedModelId,
-            period: selectedPeriod,
+            endDate: selectedEndDate,
         });
         runGetAggregateChurnByPrimaryCohorts.mutate({
             date: selectedDate,
             modelId: selectedModelId,
-            period: selectedPeriod,
+            endDate: selectedEndDate,
         });
         runGetUserList.mutate({
             date: selectedDate,
             modelId: selectedModelId,
-            period: selectedPeriod,
+            endDate: selectedEndDate,
         });
         runGetFeatures.mutate({
             modelId: selectedModelId,
@@ -246,22 +236,26 @@ const Home: NextPage = () => {
         runGetUsersToIncludeAndExclude.mutate({
             date: selectedDate,
             modelId: selectedModelId,
-            period: selectedPeriod,
+            endDate: selectedEndDate,
         });
         runGetInsights.mutate({
             modelId: selectedModelId,
         });
-    }, [selectedModelId, selectedDate, selectedPeriod])
+    }, [selectedModelId, selectedDate, selectedEndDate])
+
 
     useEffect(() => {
-        if(!selectedFeature || !selectedModelId || !selectedDate) return;
+        if(!selectedFeature || !selectedModelId || !selectedDate || !selectedEndDate) return;
+        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
+            setSelectedEndDate(selectedDate);
+        }
         runGetScatterPlot.mutate({
             modelId: selectedModelId,
             featureId: selectedFeature?.id,
             date: selectedDate,
-            period: selectedPeriod,
+            endDate: selectedEndDate,
         })
-    }, [selectedFeature, selectedModelId, selectedDate, selectedPeriod])
+    }, [selectedFeature, selectedModelId, selectedDate, selectedEndDate])
 
     return (
         <>
@@ -282,22 +276,23 @@ const Home: NextPage = () => {
                                         options={modelOptions}
                                         onChange={(selectedModel) => setSelectedModelId(selectedModel)}
                                         value={selectedModelId} />
-                                    <Select
-                                        title="Time Period"
-                                        options={availableTimePeriods}
-                                        onChange={(selectedPeriod) => setSelectedPeriod(selectedPeriod)}
-                                        defaultValue={availableTimePeriods[0]?.value}
-                                        value={selectedPeriod} />
-                                    <Select
+                                    <Select 
                                         title="Date"
                                         options={dateOptions}
                                         onChange={(selectedDate) => setSelectedDate(selectedDate)}
                                         value={selectedDate} />
+                                    to
+                                    <Select
+                                        title="End Date"
+                                        options={dateOptions.filter((date) => moment(date.value, 'DD/MM/YYYY') >= moment(selectedDate, 'DD/MM/YYYY'))}
+                                        onChange={(selectedDate) => setSelectedEndDate(selectedDate)}
+                                        value={selectedEndDate} />
                                 </form>
                                 :
                                 <p> Loading</p>
                         }
                     </div>
+
                     <div className="bg-page-background-colour flex justify-center">
                         <div className="w-[100ch]">
                             {/* Model Title Card */}
@@ -345,7 +340,7 @@ const Home: NextPage = () => {
                                                             }
                                                             <div className="text-dark-grey-text-colour font-light text-xs">
                                                                 {
-                                                                    selectedPeriod === 'daily' ? 'vs. Yesterday' : 'vs. Last Week'
+                                                                    selectedDate == selectedEndDate ? 'vs. Yesterday' : 'vs. Last Period'
                                                                 }
                                                             </div>
                                                         </div>
@@ -376,7 +371,7 @@ const Home: NextPage = () => {
                                                             }
                                                             <div className="text-dark-grey-text-colour font-light text-xs">
                                                                 {
-                                                                    selectedPeriod === 'daily' ? 'vs. Yesterday' : 'vs. Last Week'
+                                                                    selectedDate == selectedEndDate ? 'vs. Yesterday' : 'vs. Last Period'
                                                                 }
                                                             </div>
                                                         </div>
@@ -392,7 +387,7 @@ const Home: NextPage = () => {
                                                             Actual Churn
                                                         </div>
                                                         <div className="text-2xl text-dark-text-colour">
-                                                            {churnCardData?.actualChurn ? churnCardData?.actualChurn.toFixed(2) : '-'}
+                                                            {churnCardData?.actualChurn ? churnCardData?.actualChurn.toFixed(2) : '-'} %
                                                         </div>
                                                         {   
                                                             churnCardData?.actualChurnDeviation &&
@@ -409,7 +404,7 @@ const Home: NextPage = () => {
                                                                 }
                                                                 <div className="text-dark-grey-text-colour font-light text-xs">
                                                                     {
-                                                                        selectedPeriod === 'daily' ? 'vs. Yesterday' : 'vs. Last Week'
+                                                                        selectedDate == selectedEndDate ? 'vs. Yesterday' : 'vs. Last Period'
                                                                     }
                                                                 </div>
                                                             </div>
@@ -447,7 +442,7 @@ const Home: NextPage = () => {
                                                         <div className="p-4">
                                                             <AreaGraph 
                                                                 graphData={selectedPrimaryGraph === 'cohort 1' ? primaryGraphData.cohort1 : primaryGraphData.cohort2} 
-                                                                categoriesFormat={selectedPeriod === "daily" ? "h:mm a" : "MMM Do YYYY"} />
+                                                                categoriesFormat={selectedDate === selectedEndDate ? "h:mm a" : "MMM Do YYYY"} />
                                                         </div>
                                                     </div>
                                             }

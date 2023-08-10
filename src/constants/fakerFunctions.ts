@@ -44,9 +44,9 @@ export const getDummyIncludeAndExclude = (date: string, modelId: string, period:
     }
 }
 
-export const getDummyScatterPlot = (date: string, modelId: string, period: string, featureId: string): ScatterPlotData => {
+export const getDummyScatterPlot = (date: string, modelId: string, endDate: string, featureId: string): ScatterPlotData => {
 
-    const seed = encode(`${date}${modelId}${period}${featureId}`)
+    const seed = encode(`${date}${modelId}${endDate}${featureId}`)
     faker.seed(seed)
 
     if(featureId === "dummy1") {
@@ -243,8 +243,8 @@ export const getDummyScatterPlot = (date: string, modelId: string, period: strin
 
 }
 
-export const getDummyChurnCards = (date: string, modelId: string, period: string):ChurnCards => {
-    const seed = encode(`${date}${modelId}${period}`)
+export const getDummyChurnCards = (date: string, modelId: string, endDate: string):ChurnCards => {
+    const seed = encode(`${date}${modelId}${endDate}`)
     faker.seed(seed)
 
     const totalUsers = faker.number.int({ min: 5000, max: 10000, });
@@ -269,14 +269,17 @@ export const getDummyChurnCards = (date: string, modelId: string, period: string
     }
 }
 
-export const getDummyModelGraph = (dateInput: string, modelId: string, period: string):ModelGraph => {
+export const getDummyModelGraph = (dateInput: string, modelId: string, endDateInput: string):ModelGraph => {
     const timeSeries: Date[] = []
-    if(period === "weekly") {
+    if(dateInput !== endDateInput) {
         const date = moment(dateInput, "DD/MM/YYYY")
-        for(let i = 0; i < 8; i++) {
-            const new_date = moment(date).add((i), 'days').toDate();
-            timeSeries.push(new_date);
+        const end_date = moment(endDateInput, "DD/MM/YYYY")
+        console.log(date, end_date)
+        while(date.isSameOrBefore(end_date, 'days')) {
+            timeSeries.push(date.toDate());
+            date.add(1, 'days');
         }
+
     } else {
         const date = moment(dateInput, "DD/MM/YYYY")
         
@@ -285,7 +288,7 @@ export const getDummyModelGraph = (dateInput: string, modelId: string, period: s
             timeSeries.push(new_date);
         }
     }
-    const seed = encode(`${dateInput}${modelId}${period}`)
+    const seed = encode(`${dateInput}${modelId}${endDateInput}`)
     faker.seed(seed)
 
     const resultData: ModelGraph = {
@@ -356,9 +359,9 @@ export const getDummyModelGraph = (dateInput: string, modelId: string, period: s
     return resultData;
 }
 
-export const getDummyAggregateChurnByPrimaryCohorts = (date: string, modelId: string, period: string):AggregateChurnByPrimaryCohorts => {
+export const getDummyAggregateChurnByPrimaryCohorts = (date: string, modelId: string, endDate: string):AggregateChurnByPrimaryCohorts => {
 
-    const seed = encode(`${date}${modelId}${period}`)
+    const seed = encode(`${date}${modelId}${endDate}`)
     faker.seed(seed)
 
     const resultData: AggregateChurnByPrimaryCohorts = {

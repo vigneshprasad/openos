@@ -194,15 +194,14 @@ export const dataModelRouter = createTRPCRouter({
             date: z.string({
                 required_error: "String is required"
             }),
-            period: z.string({
-                required_error: "Period is required"
-            })
+            endDate: z.string({
+                required_error: "End date is required"
+            }),
         }))
         .mutation(async ({ctx, input}) => {
             
-            const period = input.period === "weekly" ? 7 : 1;
             const date = moment(input.date, "DD/MM/YYYY")
-            const end = moment(date).add(period, 'days').toDate();
+            const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
             const userPredictions = await ctx.prisma.userPrediction.findMany({
@@ -311,9 +310,9 @@ export const dataModelRouter = createTRPCRouter({
             date: z.string({
                 required_error: "String is required"
             }),
-            period: z.string({
-                required_error: "Period is required"
-            })
+            endDate: z.string({
+                required_error: "End date is required"
+            }),
         }))    
         .mutation(async ({ctx, input}) : Promise<ModelGraph> => {
             const user = await ctx.prisma.user.findUnique({
@@ -322,20 +321,22 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                return getDummyModelGraph(input.date, input.modelId, input.period);
+                return getDummyModelGraph(input.date, input.modelId, input.endDate);
             }  
 
             // Get time series based on whether the data is weekly or hourly
             const timeSeries: Date[] = []
-            if(input.period === "weekly") {
+            const startDate = moment(input.date, "DD/MM/YYYY")
+            const endDate = moment(input.endDate, "DD/MM/YYYY")
+            if(input.date !== input.endDate) {
                 const date = moment(input.date, "DD/MM/YYYY")
-                for(let i = 0; i < 8; i++) {
-                    const new_date = moment(date).add((i), 'days').toDate();
-                    timeSeries.push(new_date);
+                const end_date = moment(input.endDate, "DD/MM/YYYY")
+                while(date.isSameOrBefore(end_date, 'days')) {
+                    timeSeries.push(date.toDate());
+                    date.add(1, 'days');
                 }
             } else {
                 const date = moment(input.date, "DD/MM/YYYY")
-                
                 for(let i = 1; i <= 6; i++) {
                     const new_date = moment(date).add((i*4), 'hours').toDate();
                     timeSeries.push(new_date);
@@ -343,17 +344,16 @@ export const dataModelRouter = createTRPCRouter({
             }
 
             // Get all the user predictions for the model in the relevant time period
-            const usersPredictions = await ctx.prisma.userPrediction.findMany({
+            let usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: timeSeries[0]?.toISOString(),
-                        lt: timeSeries[timeSeries.length - 1]?.toISOString(),
-                    }
                 }
             });
 
-
+            usersPredictions = usersPredictions.filter((userPrediction) => {
+                return moment(userPrediction.dateOfEvent).isSameOrAfter(startDate, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(endDate, 'days');
+            });
+            
             // Get the primary graph parameters for the model
             const dataModelPrimaryGraph = await ctx.prisma.dataModelPrimaryGraph.findFirst({
                 where: {
@@ -364,12 +364,12 @@ export const dataModelRouter = createTRPCRouter({
             if(!dataModelPrimaryGraph) {
                 return {
                     cohort1: {
-                        xAxis: timeSeries.slice(0, timeSeries.length - 1),
+                        xAxis: timeSeries.slice(0, timeSeries.length),
                         title: '',
                         data: []
                     },
                     cohort2: {
-                        xAxis: timeSeries.slice(0, timeSeries.length - 1),
+                        xAxis: timeSeries.slice(0, timeSeries.length),
                         title: '',
                         data: []
                     }
@@ -434,12 +434,12 @@ export const dataModelRouter = createTRPCRouter({
 
             const resultData: ModelGraph = {
                 cohort1: {
-                    xAxis: timeSeries.slice(0, timeSeries.length - 1),
+                    xAxis: timeSeries.slice(0, timeSeries.length),
                     title: predictionCohort1,
                     data: []
                 },
                 cohort2: {
-                    xAxis: timeSeries.slice(0, timeSeries.length - 1),
+                    xAxis: timeSeries.slice(0, timeSeries.length),
                     title: predictionCohort2,
                     data: []
                 }
@@ -453,14 +453,11 @@ export const dataModelRouter = createTRPCRouter({
                     name: cohortValue ? cohortValue : "Unknown",
                     data: []
                 }
-                for(let i = 0; i < timeSeries.length - 1; i++) {
+                for(let i = 0; i < timeSeries.length; i++) {
                     const start = timeSeries[i];
-                    const end = timeSeries[i + 1];
-                    if(!start || !end) {
-                        continue;
-                    }
+                    const startMoment = moment(start, 'DD/MM/YYYY');
                     const relevantUsers = usersPredictions.filter((userPrediction) => {
-                        return userPrediction.dateOfEvent >= start && userPrediction.dateOfEvent < end
+                        return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
                     });
                     let count = 0;
                     let total = 0;
@@ -492,14 +489,11 @@ export const dataModelRouter = createTRPCRouter({
                     name: cohortValue ? cohortValue : "Unknown",
                     data: []
                 }
-                for(let i = 0; i < timeSeries.length - 1; i++) {
+                for(let i = 0; i < timeSeries.length; i++) {
                     const start = timeSeries[i];
-                    const end = timeSeries[i + 1];
-                    if(!start || !end) {
-                        continue;
-                    }
+                    const startMoment = moment(start, 'DD/MM/YYYY');
                     const relevantUsers = usersPredictions.filter((userPrediction) => {
-                        return userPrediction.dateOfEvent >= start && userPrediction.dateOfEvent < end
+                        return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
                     });
                     let count = 0;
                     let total = 0;
@@ -533,8 +527,8 @@ export const dataModelRouter = createTRPCRouter({
             date: z.string({
                 required_error: "String is required"
             }),
-            period: z.string({
-                required_error: "Period is required"
+            endDate: z.string({
+                required_error: "EndDate is required"
             })
         }))    
         .mutation(async ({ctx, input}) : Promise<ChurnCards> => {
@@ -544,18 +538,27 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                return getDummyChurnCards(input.date, input.modelId, input.period);
+                return getDummyChurnCards(input.date, input.modelId, input.endDate);
             }  
-            const period = input.period === "weekly" ? 7 : 1;
+    
             const date = moment(input.date, "DD/MM/YYYY")
-            const previous_start_date = moment(date).subtract(period, 'days').toDate();
-            const end_date = moment(date).add(period, 'days').toDate();
+            const end_date = moment(input.endDate, "DD/MM/YYYY")
+            const period = end_date.diff(date, 'days');
+            let previous_start_date = moment(date).subtract(period, 'days');
+            let previous_end_date = moment(date).subtract(1, 'days');
+                
+            if (date.isSame(end_date)) {
+                previous_start_date = moment(date).subtract(1, 'days');
+                previous_end_date = moment(date).subtract(1, 'days');
+            }
+
 
             const usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
                 }
             });
+
 
             const churnResults:ChurnCards = {
                 totalUsers: 0,
@@ -567,11 +570,11 @@ export const dataModelRouter = createTRPCRouter({
             }
 
             const previousPeriodUsers = usersPredictions.filter((userPrediction) => {
-                return userPrediction.dateOfEvent >= previous_start_date && userPrediction.dateOfEvent < date.toDate()
+                return moment(userPrediction.dateOfEvent).isSameOrAfter(previous_start_date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore( previous_end_date, 'days');
             });
 
             const currentPeriodUsers = usersPredictions.filter((userPrediction) => {
-                return userPrediction.dateOfEvent >= date.toDate() && userPrediction.dateOfEvent < end_date
+                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end_date, 'days');
             });
 
             churnResults.totalUsers = currentPeriodUsers.length;
@@ -592,22 +595,20 @@ export const dataModelRouter = createTRPCRouter({
             const previousPeriodActualChurn = previousPeriodUsers.filter((userPrediction) => {
                 return userPrediction.actualResult === 1
             });
+            const previousPeriodNotNullValue = previousPeriodUsers.filter((userPrediction) => {
+                return userPrediction.actualResult !== null
+            });
             const currentPeriodActualChurn = currentPeriodUsers.filter((userPrediction) => {
                 return userPrediction.actualResult === 1
             });
-            const currentPeriodNullValue = currentPeriodUsers.filter((userPrediction) => {
-                return userPrediction.actualResult === null
+            const currentPeriodNotNullValue = currentPeriodUsers.filter((userPrediction) => {
+                return userPrediction.actualResult !== null
             });
 
-            if(currentPeriodNullValue.length > 0) {
-                churnResults.actualChurn = null;
-                churnResults.actualChurnDeviation = null;
-            } else {
-                const actualChurnValue = currentPeriodActualChurn.length / currentPeriodUsers.length * 100;
-                const previousPeriodActualChurnValue = previousPeriodActualChurn.length / previousPeriodUsers.length * 100;
-                churnResults.actualChurn = actualChurnValue;
-                churnResults.actualChurnDeviation = (actualChurnValue - previousPeriodActualChurnValue) / previousPeriodActualChurnValue * 100;
-            }
+            const actualChurnValue = currentPeriodNotNullValue.length ? currentPeriodActualChurn.length / currentPeriodNotNullValue.length * 100 : null;
+            const previousPeriodActualChurnValue = previousPeriodNotNullValue ? previousPeriodActualChurn.length / previousPeriodNotNullValue.length * 100 : null;
+            churnResults.actualChurn = actualChurnValue;
+            churnResults.actualChurnDeviation = actualChurnValue && previousPeriodActualChurnValue ? (actualChurnValue - previousPeriodActualChurnValue) / previousPeriodActualChurnValue * 100 : null;
 
             return churnResults;
 
@@ -621,8 +622,8 @@ export const dataModelRouter = createTRPCRouter({
             date: z.string({
                 required_error: "String is required"
             }),
-            period: z.string({
-                required_error: "Period is required"
+            endDate: z.string({
+                required_error: "End Date is required"
             })
         }))    
         .mutation(async ({ctx, input}) : Promise<AggregateChurnByPrimaryCohorts> => {
@@ -632,22 +633,21 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                return getDummyAggregateChurnByPrimaryCohorts(input.date, input.modelId, input.period);
+                return getDummyAggregateChurnByPrimaryCohorts(input.date, input.modelId, input.endDate);
             }  
 
-            const period = input.period === "weekly" ? 7 : 1;
-            const date = moment(input.date, "DD/MM/YYYY")
-            const end = moment(date).add(period, 'days').toDate();
+            const date = moment(input.date, "DD/MM/YYYY");
+            const end = moment(input.endDate, "DD/MM/YYYY");
 
             // Get all the user predictions for the model in the relevant time period
-            const usersPredictions = await ctx.prisma.userPrediction.findMany({
+            let usersPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: date.toISOString(),
-                        lt: end.toISOString(),
-                    }
                 }
+            });
+
+            usersPredictions = usersPredictions.filter((userPrediction) => {
+                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end, 'days');
             });
 
             // Get the primary graph parameters for the model
@@ -799,8 +799,8 @@ export const dataModelRouter = createTRPCRouter({
             date: z.string({
                 required_error: "String is required"
             }),
-            period: z.string({
-                required_error: "Period is required"
+            endDate: z.string({
+                required_error: "End Date is required"
             })
         }))
         .mutation(async ({ctx, input}) : Promise<IncludeAndExcludeUsers> => {
@@ -813,24 +813,23 @@ export const dataModelRouter = createTRPCRouter({
                 return getDummyIncludeAndExclude(input.modelId, input.date, input.period);
             }
 
-            const period = input.period === "weekly" ? 7 : 1;
             const date = moment(input.date, "DD/MM/YYYY")
-            const end = moment(date).add(period, 'days').toDate();
+            const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
-            const userPredictions = await ctx.prisma.userPrediction.findMany({
+            let userPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: date.toISOString(),
-                        lt: end.toISOString(),
-                    }
-                },
+                }, 
                 orderBy: [
                     {
                       probability: 'asc',
                     },
                 ],
+            });
+
+            userPredictions = userPredictions.filter((userPrediction) => {
+                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end, 'days');
             });
 
             const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
@@ -931,8 +930,8 @@ export const dataModelRouter = createTRPCRouter({
             date: z.string({
                 required_error: "Date is required"
             }),
-            period: z.string({
-                required_error: "Period is required"
+            endDate: z.string({
+                required_error: "End Date is required"
             })
         }))    
         .mutation(async ({ctx, input}): Promise<ScatterPlotData> => {
@@ -942,21 +941,20 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-               return getDummyScatterPlot(input.modelId, input.date, input.period, input.featureId);
+               return getDummyScatterPlot(input.modelId, input.date, input.endDate, input.featureId);
             }  
-            const period = input.period === "weekly" ? 7 : 1;
             const date = moment(input.date, "DD/MM/YYYY")
-            const end = moment(date).add(period, 'days').toDate();
+            const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
-            const userPredictions = await ctx.prisma.userPrediction.findMany({
+            let userPredictions = await ctx.prisma.userPrediction.findMany({
                 where: {
                     dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: date.toISOString(),
-                        lt: end.toISOString(),
-                    }
                 },
+            });
+
+            userPredictions = userPredictions.filter((userPrediction) => {
+                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end, 'days');
             });
 
             const feature = await ctx.prisma.featureImportance.findUnique({
