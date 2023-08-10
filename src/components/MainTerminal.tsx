@@ -7,7 +7,6 @@ import { api } from "~/utils/api";
 import type { CommandResultType, ExcelSheet, QueryAndResult, SimpleReportType } from "../types/types";
 import Report from "~/components/Report";
 import Image from "next/image";
-import { Spinner } from "~/components/Spinner";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { convertComplexReportToExcel, convertDatabaseQueryResultToExcel, convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import { ErrorBox } from "~/components/ErrorBox";
