@@ -47,13 +47,7 @@ export const insightsRouter = createTRPCRouter({
                 required_error: "Insight Id is required"
             })  
         }))
-        .mutation(async ({ ctx, input }) => {
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.session.user.id,
-                }
-            });
-            
+        .mutation(async ({ ctx, input }) => {            
             return ctx.prisma.actionableInsights.findMany({
                 where: {
                     insightId: input.insightId
