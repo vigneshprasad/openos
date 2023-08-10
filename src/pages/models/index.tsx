@@ -191,7 +191,10 @@ const Home: NextPage = () => {
         setDateOptions(dateOptions);
         const defaultDate = dateOptions[dateOptions.length - 1]
         const defaultDateValue = defaultDate?.value;
-        if (defaultDateValue) setSelectedDate(defaultDateValue);
+        if (defaultDateValue) {
+            setSelectedDate(defaultDateValue);
+            setSelectedEndDate(defaultDateValue);
+        }
 
     }, [selectedModelId]);
 
