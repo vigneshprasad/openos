@@ -274,7 +274,6 @@ export const getDummyModelGraph = (dateInput: string, modelId: string, endDateIn
     if(dateInput !== endDateInput) {
         const date = moment(dateInput, "DD/MM/YYYY")
         const end_date = moment(endDateInput, "DD/MM/YYYY")
-        console.log(date, end_date)
         while(date.isSameOrBefore(end_date, 'days')) {
             timeSeries.push(date.toDate());
             date.add(1, 'days');

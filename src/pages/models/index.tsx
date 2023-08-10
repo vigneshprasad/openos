@@ -66,6 +66,7 @@ const Home: NextPage = () => {
     const [insightsLoading, setInsightsLoading] = useState<boolean>(true);
     const [selectedInsight, setSelectedInsight] = useState<Insights>();
 
+    const loading = churnCardLoading || primaryGraphLoading || aggregateChurnByPrimaryCohortsLoading || userListLoading || featuresLoading || scatterPlotLoading || includeAndExcludeUsersLoading || insightsLoading;
 
     //SETTING FIRST MODEL AS DEFAULT
     const modelMutation = api.dataModelRouter.getModels.useMutation({
@@ -78,38 +79,15 @@ const Home: NextPage = () => {
             setModels(data);
             setModelOptions(modelOptions);
             if (!data[0]) return;
-            setSelectedModelId(data[0].model.id);
-            const dateArray: Date[] = [];
-            let currentDate = new Date(data[0].start_date);
-            while (currentDate <= data[0].end_date) {
-                dateArray.push(new Date(currentDate));
-                const tempDate = new Date(currentDate);
-                tempDate.setDate(tempDate.getDate() + 1);
-                currentDate = tempDate;
-            }
-            const dateOptions = dateArray.map((date) => {
-                const dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                return {
-                    label: dateString,
-                    value: dateString,
-                }
-            });
-            setDateOptions(dateOptions);
-            const defaultDate = dateOptions[dateOptions.length - 1]
-            const defaultDateValue = defaultDate?.value;
-            if (defaultDateValue)  {
-                setSelectedDate(defaultDateValue);
-                setSelectedEndDate(defaultDateValue);
-            }
+            handleModelChange(data[0].model.id, data);
         }
     });
 
     useEffect(() => {
         if (models && models.length > 0) return;
-        modelMutation.mutate();
-    }, []);
 
-    const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
+        modelMutation.mutate()
+    }, []);
 
     const runGetChurnCards = api.dataModelRouter.getChurnCards.useMutation({
         onSuccess: (data: ChurnCards) => {
@@ -143,7 +121,9 @@ const Home: NextPage = () => {
         onSuccess: (data: FeatureImportance[]) => {
             setFeatures(data);
             setFeaturesLoading(false);
-            setSelectedFeature(data[0]);
+            if(data[0]) {
+                handleFeatureChange(data[0].id, data[0]);
+            }
         }
     })
 
@@ -169,9 +149,12 @@ const Home: NextPage = () => {
         }
     })
 
-    useEffect(() => {
-        if (!selectedModelId) return;
-        const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
+    const handleModelChange = (value: string, dataModels?: DataModelList[]) => {
+        setSelectedModelId(value);
+        let selectedModel = models?.find((model: DataModelList) => model.model.id === value);
+        if(dataModels) {
+            selectedModel = dataModels?.find((model: DataModelList) => model.model.id === value);
+        }
         if(!selectedModel) return;
         const dateArray: Date[] = [];
         let currentDate = new Date(selectedModel.start_date);
@@ -194,71 +177,95 @@ const Home: NextPage = () => {
         if (defaultDateValue) {
             setSelectedDate(defaultDateValue);
             setSelectedEndDate(defaultDateValue);
+            reRunAllQueries(value, defaultDateValue, defaultDateValue);
         }
+    }
 
-    }, [selectedModelId]);
+    const handleFeatureChange = (value: string, selectedFeature?: FeatureImportance) => {
+        const feature = features?.find((feature) => feature.id === value);
+        if(!feature && !selectedFeature) return;
+        setSelectedFeature(feature ? feature : selectedFeature);
+        if(!selectedModelId || !selectedDate || !selectedEndDate) return;
+        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
+            setSelectedEndDate(selectedDate);
+        }
+        setScatterPlotLoading(true);
+        runGetScatterPlot.mutate({
+            modelId: selectedModelId,
+            featureId: value,
+            date: selectedDate,
+            endDate: selectedEndDate,
+        })
+    }
+
+    const handleDateChange = (value: string) => {
+        if(!value) return;
+        setSelectedDate(value);
+        if (moment(value, 'DD/MM/YYYY').isAfter(moment(selectedEndDate, 'DD/MM/YYYY'))) {
+            setSelectedEndDate(value);
+        }
+        if(loading || !selectedModelId || !selectedEndDate) return;
+        reRunAllQueries(selectedModelId, value, selectedEndDate);
+    }
+
+    const handleEndDateChange = (value: string) => {
+        if(!value) return;
+        setSelectedEndDate(value);
+        if (moment(value, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
+            setSelectedDate(value);
+        }
+        if(loading || !selectedModelId || !selectedDate) return;
+        reRunAllQueries(selectedModelId, selectedDate, value);
+    }
 
 
-    useEffect(() => {
-
+    const reRunAllQueries = (modelId: string, date: string, endDate: string) => {
         setChurnCardLoading(true);
         setPrimaryGraphLoading(true);
         setAggregateChurnByPrimaryCohortsLoading(true);
         setUserListLoading(true);
         setFeaturesLoading(true);
         setIncludeAndExcludeUsersLoading(true);
-
-        if (!selectedModelId || !selectedDate || !selectedEndDate) return;
-        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
-            setSelectedEndDate(selectedDate);
+        setInsightsLoading(true);
+        
+        if(moment(date, 'DD/MM/YYYY').isBefore(moment(endDate, 'DD/MM/YYYY'))) {
+            endDate = date;
         }
 
         runGetChurnCards.mutate({
-            date: selectedDate,
-            modelId: selectedModelId,
-            endDate: selectedEndDate,
+            date: date,
+            modelId: modelId,
+            endDate: endDate,
         });
         modelPrimaryGraph.mutate({
-            date: selectedDate,
-            modelId: selectedModelId,
-            endDate: selectedEndDate,
+            date: date,
+            modelId: modelId,
+            endDate: endDate,
         });
         runGetAggregateChurnByPrimaryCohorts.mutate({
-            date: selectedDate,
-            modelId: selectedModelId,
-            endDate: selectedEndDate,
+            date: date,
+            modelId: modelId,
+            endDate: endDate,
         });
         runGetUserList.mutate({
-            date: selectedDate,
-            modelId: selectedModelId,
-            endDate: selectedEndDate,
+            date: date,
+            modelId: modelId,
+            endDate: endDate,
         });
         runGetFeatures.mutate({
-            modelId: selectedModelId,
+            modelId: modelId,
         });
         runGetUsersToIncludeAndExclude.mutate({
-            date: selectedDate,
-            modelId: selectedModelId,
-            endDate: selectedEndDate,
+            date: date,
+            modelId: modelId,
+            endDate: endDate,
         });
         runGetInsights.mutate({
-            modelId: selectedModelId,
+            modelId: modelId,
         });
-    }, [selectedModelId, selectedDate, selectedEndDate])
+    }
 
-
-    useEffect(() => {
-        if(!selectedFeature || !selectedModelId || !selectedDate || !selectedEndDate) return;
-        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
-            setSelectedEndDate(selectedDate);
-        }
-        runGetScatterPlot.mutate({
-            modelId: selectedModelId,
-            featureId: selectedFeature?.id,
-            date: selectedDate,
-            endDate: selectedEndDate,
-        })
-    }, [selectedFeature, selectedModelId, selectedDate, selectedEndDate])
+    const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
 
     return (
         <>
@@ -277,18 +284,18 @@ const Home: NextPage = () => {
                                     <Select
                                         title="Model Name"
                                         options={modelOptions}
-                                        onChange={(selectedModel) => setSelectedModelId(selectedModel)}
+                                        onChange={handleModelChange}
                                         value={selectedModelId} />
                                     <Select 
                                         title="Date"
                                         options={dateOptions}
-                                        onChange={(selectedDate) => setSelectedDate(selectedDate)}
+                                        onChange={handleDateChange}
                                         value={selectedDate} />
                                     to
                                     <Select
                                         title="End Date"
+                                        onChange={handleEndDateChange}
                                         options={dateOptions.filter((date) => moment(date.value, 'DD/MM/YYYY') >= moment(selectedDate, 'DD/MM/YYYY'))}
-                                        onChange={(selectedDate) => setSelectedEndDate(selectedDate)}
                                         value={selectedEndDate} />
                                 </form>
                                 :
@@ -522,7 +529,6 @@ const Home: NextPage = () => {
 
                                      {/* Scatter Plot */}
                                      {
-                                        (scatterPlotData === undefined || scatterPlotData.series.length > 0) && 
                                         <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                             {
                                                 featuresLoading || !features ?
@@ -538,10 +544,7 @@ const Home: NextPage = () => {
                                                                         value: feature.id
                                                                     }
                                                                 })}
-                                                                onChange={
-                                                                    (selectedFeature) => 
-                                                                        setSelectedFeature(features.find(feature => feature.id === selectedFeature))
-                                                                }
+                                                                onChange={handleFeatureChange}
                                                                 value={selectedFeature?.id} />                                                        
                                                         </div>
                                                         {

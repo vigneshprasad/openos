@@ -37,6 +37,7 @@ interface IProps {
     value?: string | Date;
     defaultValue?: string | Date;
     onChange?: (value: string) => void;
+    disabled?: boolean;
 }
 
 const Select: React.FC<IProps> = ({
@@ -44,9 +45,10 @@ const Select: React.FC<IProps> = ({
     options,
     value,
     defaultValue,
-    onChange
+    onChange,
+    disabled
 }) => (
-    <RadixSelect.Root defaultValue={defaultValue?.toString()} value={value?.toString()} onValueChange={onChange}>
+    <RadixSelect.Root defaultValue={defaultValue?.toString()} value={value?.toString()} onValueChange={onChange} disabled={disabled}>
         <RadixSelect.Trigger
             className=" text-xs text-dark-text-colour rounded-lg inline-flex justify-center px-4 py-2 bg-white border border-border-colour drop-shadow-md"
         >

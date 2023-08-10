@@ -6,6 +6,7 @@ import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts } from "~/constants/fakerFunctions";
+import { getUserPredictions } from "~/utils/getUserPredictions";
 
 export type Cohort = {
     name: string,
@@ -108,11 +109,16 @@ export const dataModelRouter = createTRPCRouter({
 
             let models = []
             if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
-                models = await ctx.prisma.dataModel.findMany({});
+                models = await ctx.prisma.dataModel.findMany({
+                    where: {
+                        completionStatus: true,
+                    }
+                });
             } else {
                 models = await ctx.prisma.dataModel.findMany({
                     where: {
                         userId: ctx.session.user.id,
+                        completionStatus: true,
                     }
                 });
             }
@@ -121,7 +127,7 @@ export const dataModelRouter = createTRPCRouter({
 
             for(let i = 0; i < models.length; i++) {
                 const model = models[i]
-                const modelId = models[0]?.id;
+                const modelId = models[i]?.id;
                 const start_date = models[i]?.createdAt;
                 if(!model || !start_date || !modelId) continue;
                 const userPredictions = await ctx.prisma.userPrediction.findFirst({
@@ -132,6 +138,7 @@ export const dataModelRouter = createTRPCRouter({
                        dateOfEvent: "desc"
                     }
                 });
+
                 if(!userPredictions) continue;
                 results.push({
                     model: model,
@@ -198,21 +205,13 @@ export const dataModelRouter = createTRPCRouter({
                 required_error: "End date is required"
             }),
         }))
-        .mutation(async ({ctx, input}) => {
+        .mutation(async ({input}) => {
             
             const date = moment(input.date, "DD/MM/YYYY")
             const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
-            const userPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                    dateOfEvent: {
-                        gte: date.toISOString(),
-                        lt: end.toISOString(),
-                    }
-                }
-            });
+            const userPredictions = await getUserPredictions(input.modelId, date, end);
 
             const userListSheet: ExcelCell[][] = [];
             const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
@@ -344,15 +343,7 @@ export const dataModelRouter = createTRPCRouter({
             }
 
             // Get all the user predictions for the model in the relevant time period
-            let usersPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }
-            });
-
-            usersPredictions = usersPredictions.filter((userPrediction) => {
-                return moment(userPrediction.dateOfEvent).isSameOrAfter(startDate, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(endDate, 'days');
-            });
+            const usersPredictions = await getUserPredictions(input.modelId, startDate, endDate);
             
             // Get the primary graph parameters for the model
             const dataModelPrimaryGraph = await ctx.prisma.dataModelPrimaryGraph.findFirst({
@@ -553,12 +544,7 @@ export const dataModelRouter = createTRPCRouter({
             }
 
 
-            const usersPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }
-            });
-
+            const usersPredictions = await getUserPredictions(input.modelId);
 
             const churnResults:ChurnCards = {
                 totalUsers: 0,
@@ -640,15 +626,7 @@ export const dataModelRouter = createTRPCRouter({
             const end = moment(input.endDate, "DD/MM/YYYY");
 
             // Get all the user predictions for the model in the relevant time period
-            let usersPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }
-            });
-
-            usersPredictions = usersPredictions.filter((userPrediction) => {
-                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end, 'days');
-            });
+            const usersPredictions = await getUserPredictions(input.modelId, date, end);
 
             // Get the primary graph parameters for the model
             const dataModelPrimaryGraph = await ctx.prisma.dataModelPrimaryGraph.findFirst({
@@ -817,20 +795,7 @@ export const dataModelRouter = createTRPCRouter({
             const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
-            let userPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }, 
-                orderBy: [
-                    {
-                      probability: 'asc',
-                    },
-                ],
-            });
-
-            userPredictions = userPredictions.filter((userPrediction) => {
-                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end, 'days');
-            });
+            const userPredictions = await getUserPredictions(input.modelId, date, end);
 
             const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
             for(let j = 0; j < userPredictions.length; j++) {
@@ -947,15 +912,7 @@ export const dataModelRouter = createTRPCRouter({
             const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
-            let userPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                },
-            });
-
-            userPredictions = userPredictions.filter((userPrediction) => {
-                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end, 'days');
-            });
+            const userPredictions = await getUserPredictions(input.modelId, date, end);
 
             const feature = await ctx.prisma.featureImportance.findUnique({
                 where: {
