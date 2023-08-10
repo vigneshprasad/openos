@@ -1,5 +1,6 @@
-import { type Insights, type DataModel, type FeatureImportance, type ActionableInsights } from "@prisma/client"
+import { type Insights, type FeatureImportance } from "@prisma/client"
 import { PREMADE_MODEL } from "./modelTypes"
+import { type DataModelList } from "~/server/api/routers/dataModelRouter"
 
 export const userAcquisitionData = 
 [
@@ -1211,23 +1212,27 @@ export const marketingSpentData =
     null
 ]
 
-export const dummyModel: DataModel[] = [{
-    id: "dummy",
-    createdAt: new Date("2023-07-01"),
-    updatedAt: new Date("2023-07-01"),
-    completionStatus: false,
-    deletedAt: null,
-    userId: "dummy-user",
-    type: PREMADE_MODEL,
-    name: "Churn Prediction: Signed Up to Workshop Attended",
-    description: "We've developed a predictive model to predict a new user's likelihood to churn within 30 days, churn defined as non-attendance of weekly workshops for a month.",
-    userFilter: "from Facebook",
-    predictionTimeframe: '7',
-    eventA: "workshop attended",
-    eventB: null,
-    eventAFrequency: 1,
-    predictionWindow: 30,
-    timeInterval: null
+export const dummyModel: DataModelList[] = [{
+    model: {
+        id: "dummy",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        completionStatus: false,
+        deletedAt: null,
+        userId: "dummy-user",
+        type: PREMADE_MODEL,
+        name: "Churn Prediction: Signed Up to Workshop Attended",
+        description: "We've developed a predictive model to predict a new user's likelihood to churn within 30 days, churn defined as non-attendance of weekly workshops for a month.",
+        userFilter: "from Facebook",
+        predictionTimeframe: '7',
+        eventA: "workshop attended",
+        eventB: null,
+        eventAFrequency: 1,
+        predictionWindow: 30,
+        timeInterval: null
+    },
+    start_date: new Date("2023-07-01"),
+    end_date: new Date(),
 }]
 
 export const dummyFeatures: FeatureImportance[] = [
@@ -1290,123 +1295,6 @@ export const dummyFeatures: FeatureImportance[] = [
         featureName: "Target Role",
         type: "characteristic",
         importance: 0.032,
-    }
-]
-
-export const dummyChurnGraph = [
-    {
-        y: 0.83,
-        x: "30000"
-    },
-    {
-        y: 0.85,
-        x: "50000"
-    },
-    {
-        y: 0.76,
-        x: "40000"
-    },
-    {
-        y: 0.42,
-        x: "20000"
-    },
-    {
-        y: 0.30,
-        x: "15000"
-    },
-    {
-        y: 0.13,
-        x: "7000"
-    },
-    {
-        y: 0.91,
-        x: "90000"
-    },
-    {
-        y: 0.53,
-        x: "25000"
-    },
-    {
-        y: 0.66,
-        x: "5000"
-    },
-]
-
-export const dummyUserList = JSON.stringify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23])
-
-export const dummyCohortsData = [
-    {
-        name: "Campaign - Insta Influencer July 2023",
-        predictedChurn: 0.75,
-        actualChurn: 0.8,
-        deviation: 0.05,
-        totalUsers: 50,
-    },
-    {
-        name: "Campaign - Organic Referral",
-        predictedChurn: 0.66,
-        actualChurn: 0.65,
-        deviation: 0.01,
-        totalUsers: 73
-    },
-    {
-        name: "Phone - Apple Devices",
-        predictedChurn: 0.15,
-        actualChurn: 0.14,
-        deviation: 0.01,
-        totalUsers: 45
-    },
-    {
-        name: "Location - Tier 2 Cities",
-        predictedChurn: 0.66,
-        actualChurn: 0.65,
-        deviation: 0.01,
-        totalUsers: 15
-    },
-]
-
-export const dummyChurnByDate = [
-    {
-        date: "2023-07-01",
-        users: 80,
-        predictedChurn: 0.75,
-        actualChurn: 0.8
-    },
-    {
-        date: "2023-07-02",
-        users: 100,
-        predictedChurn: 0.7,
-        actualChurn: 0.83
-    },
-    {
-        date: "2023-07-03",
-        users: 80,
-        predictedChurn: 0.8,
-        actualChurn: 0.6
-    },
-    {
-        date: "2023-07-04",
-        users: 80,
-        predictedChurn: 0.77,
-        actualChurn: 0.65
-    },
-    {
-        date: "2023-07-05",
-        users: 80,
-        predictedChurn: 0.84,
-        actualChurn: 0.79
-    },
-    {
-        date: "2023-07-06",
-        users: 80,
-        predictedChurn: 0.63,
-        actualChurn: 0.71
-    },
-    {
-        date: "2023-07-07",
-        users: 80,
-        predictedChurn: 0.71,
-        actualChurn: 0.66
     }
 ]
 
@@ -1475,32 +1363,5 @@ export const dummyInsights: Insights[] = [
         datePosted: new Date("2023-07-01"),
         feedback: 0,
         tag: "Marketing"
-    }
-]
-
-export const dummyActionableInsights: ActionableInsights[] = [
-    {
-        id: 'dummy-actionable-insight-1',
-        createdAt: new Date("2023-07-01"),
-        updatedAt: new Date("2023-07-01"),
-        deletedAt: null,
-        insightId: 'dummy-insight-1',
-        descrtiption: 'From a marketing standpoint it is best to target users with an Apple device or those with device price greater than 50,000'
-    },
-    {
-        id: 'dummy-actionable-insight-2',
-        createdAt: new Date("2023-07-01"),
-        updatedAt: new Date("2023-07-01"),
-        deletedAt: null,
-        insightId: 'dummy-insight-1',
-        descrtiption: 'Sales teams are better off focusing on reaching out to users that come with a higher device price since they are more likely to convert'
-    },
-    {
-        id: 'dummy-actionable-insight-3',
-        createdAt: new Date("2023-07-01"),
-        updatedAt: new Date("2023-07-01"),
-        deletedAt: null,
-        insightId: 'dummy-insight-1',
-        descrtiption: 'Optimise the product for Apple Devices and ensure that the website is working well on Safari browser.'
     }
 ]

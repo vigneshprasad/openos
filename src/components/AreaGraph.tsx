@@ -12,7 +12,7 @@ const AreaGraph = ({
     categoriesFormat: string;
 }) => {
 
-    const { xAxis, title, data } = graphData;
+    const { xAxis, data } = graphData;
 
     const options: ApexOptions = 
         {

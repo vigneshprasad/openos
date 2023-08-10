@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type UserPrediction, type Prisma } from "@prisma/client";
-import { dummyChurnByDate, dummyChurnGraph, dummyCohortsData, dummyFeatures, dummyModel } from "~/constants/dummyData";
+import { type Prisma, type DataModel } from "@prisma/client";
+import { dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
@@ -87,9 +87,15 @@ export type ScatterPlotData = {
     }[]
 }
 
+export type DataModelList = {
+    model: DataModel,
+    start_date: Date,
+    end_date: Date,
+}
+
 export const dataModelRouter = createTRPCRouter({
     getModels: protectedProcedure
-        .mutation(async ({ ctx }) => {
+        .mutation(async ({ ctx }):Promise<DataModelList[]> => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
@@ -100,33 +106,50 @@ export const dataModelRouter = createTRPCRouter({
                 return dummyModel;
             }            
 
+            let models = []
             if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
-                return ctx.prisma.dataModel.findMany({
+                models = await ctx.prisma.dataModel.findMany({});
+            } else {
+                models = await ctx.prisma.dataModel.findMany({
                     where: {
-                        completionStatus: true
+                        userId: ctx.session.user.id,
                     }
                 });
             }
 
-            return ctx.prisma.dataModel.findMany({
-                where: {
-                    userId: ctx.session.user.id,
-                    completionStatus: true
-                }
-            });
+            const results:DataModelList[] = [];
+
+            for(let i = 0; i < models.length; i++) {
+                const model = models[i]
+                const modelId = models[0]?.id;
+                const start_date = models[i]?.createdAt;
+                if(!model || !start_date || !modelId) continue;
+                const userPredictions = await ctx.prisma.userPrediction.findFirst({
+                    where: {
+                        dataModelId: modelId
+                    },
+                    orderBy: {
+                       dateOfEvent: "desc"
+                    }
+                });
+                if(!userPredictions) continue;
+                results.push({
+                    model: model,
+                    start_date: start_date,
+                    end_date: userPredictions.dateOfEvent
+                })   
+            }
+
+            return results;
         }),
 
     getModelMutation: protectedProcedure
-        .mutation(async ({ ctx }) => {
+        .mutation(async ({ ctx }):Promise<DataModel[]> => {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
                 }
-            });
-
-            if(user?.isDummy) {
-                return dummyModel;
-            }            
+            });        
 
             if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
                 return ctx.prisma.dataModel.findMany();
@@ -162,224 +185,7 @@ export const dataModelRouter = createTRPCRouter({
             })
         }),
 
-    getChurnGraph: protectedProcedure
-        .input(z.object({
-            modelId: z.string({
-                required_error: "Model ID is required"
-            }),
-            featureId: z.string({
-                required_error: "Feature ID is required"
-            }),
-            date: z.string({
-                required_error: "Date is required"
-            })
-        }))    
-        .mutation(async ({ctx, input}) => {
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.session.user.id,
-                }
-            });
-            if(user?.isDummy) {
-                return dummyChurnGraph;
-            }  
-            // const today = moment(input.date, "DD/MM/YYYY")
-            // const tomorrow = moment(today).add(1, 'days')
-            const usersPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }
-            });
-            const feature = await ctx.prisma.featureImportance.findFirst({
-                where: {
-                    id: input.featureId
-                }
-            });
-            const featureName = feature?.featureName;
-            if(!featureName) {
-                return []
-            }
-            const features: {[key: string]: {
-                total: number,
-                probability: number,
-            }} = {};
-            for (let i = 0; i < usersPredictions.length; i++) {
-                const userPrediction = usersPredictions[i]
-                if (!userPrediction) {
-                    continue
-                }
-                const userData = userPrediction.userData as Prisma.JsonObject
-                if(userData && userData.hasOwnProperty(featureName)) {
-                    const key = userData[featureName] as string
-                    if(features.hasOwnProperty(key)) {
-                        const oldFeature = features[key];
-                        if(oldFeature) {
-                            features[key] = {
-                                probability: oldFeature.probability + userPrediction.probability,
-                                total: oldFeature.total + 1
-                            };
-                        } else {
-                            features[key] = {
-                                probability: userPrediction.probability,
-                                total: 1
-                            };
-                        }
-                    } else {
-                        features[key] = {
-                            probability: userPrediction.probability,
-                            total: 1
-                        };
-                    }
-                    
-                }
-            }
-            const churnGraph = [];
-            for (const key in features) {
-                const newKey = key === "" ? "Unknown" : key;
-                const feature = features[key];
-                if(feature) {
-                    churnGraph.push({
-                        x: newKey,
-                        y: feature.probability / feature.total
-                    })
-                }
-            }
-            return churnGraph;
-        }),
-
-    churnByDay: protectedProcedure
-        .input(z.object({
-            modelId: z.string({
-                required_error: "Model ID is required"
-            }),
-            date: z.string({
-                required_error: "String is required"
-            }),
-            period: z.string({
-                required_error: "Period is required"
-            })
-        }))    
-        .mutation(async ({ctx, input}) => {
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.session.user.id,
-                }
-            });
-            if(user?.isDummy) {
-                return dummyChurnByDate;
-            }  
-            const period = input.period === "weekly" ? 7 : 1;
-            const date = moment(input.date, "DD/MM/YYYY")
-            const start_date = moment(date).subtract(7 * period, 'days').toDate();
-            const usersPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }
-            });
-            const churnByDate: Churn[] = [];
-            for (let i = 1; i <= 7 *  period; i = i + period) {
-                const date = new Date(start_date);
-                date.setDate(date.getDate() + i);
-                const userPredictionsByDate: UserPrediction[] = [];
-
-                for(let j = 0; j < period; j++) {
-                    const newDate = new Date(date);
-                    newDate.setDate(date.getDate() + j);
-                    const predictionsByDate = usersPredictions.filter((userPrediction) => {
-                        return userPrediction.dateOfEvent.getDate() === newDate.getDate() && userPrediction.dateOfEvent.getMonth() === newDate.getMonth() && userPrediction.dateOfEvent.getFullYear() === newDate.getFullYear()
-                    });
-                    userPredictionsByDate.push(...predictionsByDate);
-                }
-                const usersChurned = userPredictionsByDate.filter((userPrediction) => {
-                    return userPrediction.probability < 0.5
-                });
-
-                const actualChurn = userPredictionsByDate.filter((userPrediction) => {
-                    return userPrediction.actualResult == 0
-                });
-
-                const actualChurnNull = userPredictionsByDate.filter((userPrediction) => {
-                    return userPrediction.actualResult == null
-                });
-
-                churnByDate.push({
-                    date: date.toDateString(),
-                    users: userPredictionsByDate.length,
-                    predictedChurn: usersChurned.length / userPredictionsByDate.length,
-                    actualChurn: actualChurnNull.length == 0 ? actualChurn.length / userPredictionsByDate.length : undefined
-                })
-            }
-            return churnByDate;
-        }),
-
-    getCohorts: protectedProcedure
-        .input(z.object({
-            modelId: z.string({
-                required_error: "Model ID is required"
-            }),
-        }))
-        .mutation(async ({ctx, input}) => {
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.session.user.id,
-                }
-            });
-            if(user?.isDummy) {
-                return dummyCohortsData;
-            }  
-            const cohorts = await ctx.prisma.cohorts.findMany({
-                where: {
-                    dataModelId: input.modelId, 
-                }
-            })
-            const userPredictions = await ctx.prisma.userPrediction.findMany({
-                where: {
-                    dataModelId: input.modelId,
-                }
-            })
-            const cohortsData: Cohort[] = [
-            ];
-            for(let i = 0; i < cohorts.length; i++) {
-                const cohort = cohorts[i];
-                if(!cohort) {
-                    continue;
-                }
-                let predictedChurn = 0;
-                let actualChurn = 0;
-                let totalUsers = 0;
-                let showActualChurn = true;
-                for(let j = 0; j < userPredictions.length; j++) {
-                    const userPrediction = userPredictions[j];
-                    if (!userPrediction) {
-                        continue
-                    }
-                    const userData = userPrediction.userData as Prisma.JsonObject
-                    if(userData && userData.hasOwnProperty(cohort.attributeName)) {
-                        if((userData[cohort.attributeName] as unknown as string).includes(cohort.attributeValue)) {
-                            if(userPrediction.actualResult == null) {
-                                showActualChurn = false;
-                            }
-                            if(userPrediction.probability < 0.5) {
-                                predictedChurn++;
-                            }
-                            if(userPrediction.actualResult === 0) {
-                                actualChurn++;
-                            }
-                            totalUsers++;
-                        }
-                    }
-                }
-                cohortsData.push({
-                    name: cohort.name,
-                    predictedChurn: (predictedChurn / totalUsers).toFixed(2) as unknown as number,
-                    actualChurn: (showActualChurn ? actualChurn / totalUsers : undefined)?.toFixed(2) as unknown as number,
-                    deviation: (showActualChurn ? predictedChurn - actualChurn / totalUsers : undefined)?.toFixed(2) as unknown as number,
-                    totalUsers: totalUsers,
-                });
-            }
-            return cohortsData;
-        }),
-
+        
     getUserList: protectedProcedure
         .input(z.object({
             modelId: z.string({

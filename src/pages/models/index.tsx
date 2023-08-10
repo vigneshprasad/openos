@@ -1,5 +1,4 @@
-import type { DataModel, FeatureImportance, Insights } from "@prisma/client";
-import moment from "moment";
+import type { FeatureImportance, Insights } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import router from "next/router";
@@ -14,7 +13,7 @@ import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import { ScatterPlot } from "~/components/ScatterPlot";
 import Select from "~/components/Select";
 import UsersTable from "~/components/UsersTable";
-import { type ModelGraph, type Cohort, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData } from "~/server/api/routers/dataModelRouter";
+import { type ModelGraph, type Cohort, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList } from "~/server/api/routers/dataModelRouter";
 import { type ExcelSheet, type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
@@ -26,12 +25,12 @@ yesterday.setDate(yesterday.getDate() - 1);
 
 const Home: NextPage = () => {
 
-    const [models, setModels] = useState<DataModel[]>([]);
+    const [models, setModels] = useState<DataModelList[]>([]);
     const [modelOptions, setModelOptions] = useState<SelectOption[]>([]);
     const [dateOptions, setDateOptions] = useState<SelectOption[]>([]);
     const [selectedModelId, setSelectedModelId] = useState<string>();
-    const defaultDate = moment().subtract(1, 'days').format('DD/MM/YYYY');
-    const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
+    const [selectedDate, setSelectedDate] = useState<string>();
+    const [selectedEndDate, setSelectedEndDate] = useState<string>();
     const [selectedPeriod, setSelectedPeriod] = useState<string>("daily");
     
     //CHURN CARD STATES
@@ -77,18 +76,19 @@ const Home: NextPage = () => {
 
     //SETTING FIRST MODEL AS DEFAULT
     const modelMutation = api.dataModelRouter.getModels.useMutation({
-        onSuccess: (data: DataModel[]) => {
+        onSuccess: (data) => {
+            if(!data) return;
             const modelOptions = data.map((model) => ({
-                label: model.name,
-                value: model.id,
+                label: model.model.name,
+                value: model.model.id,
             }));
             setModels(data);
             setModelOptions(modelOptions);
             if (!data[0]) return;
-            setSelectedModelId(data[0].id);
+            setSelectedModelId(data[0].model.id);
             const dateArray: Date[] = [];
-            let currentDate = new Date(data[0].createdAt);
-            while (currentDate <= yesterday) {
+            let currentDate = new Date(data[0].start_date);
+            while (currentDate <= data[0].end_date) {
                 dateArray.push(new Date(currentDate));
                 const tempDate = new Date(currentDate);
                 tempDate.setDate(tempDate.getDate() + 1);
@@ -113,7 +113,7 @@ const Home: NextPage = () => {
         modelMutation.mutate();
     }, []);
 
-    const selectedModel = models?.find((model: DataModel) => model.id === selectedModelId);
+    const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
     const availableTimePeriods = useMemo(() => {
         setSelectedPeriod("daily");
         return [{
@@ -183,6 +183,32 @@ const Home: NextPage = () => {
         }
     })
 
+    useEffect(() => {
+        if (!selectedModelId) return;
+        const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
+        if(!selectedModel) return;
+        const dateArray: Date[] = [];
+        let currentDate = new Date(selectedModel.start_date);
+        while (currentDate <= selectedModel.end_date) {
+            dateArray.push(new Date(currentDate));
+            const tempDate = new Date(currentDate);
+            tempDate.setDate(tempDate.getDate() + 1);
+            currentDate = tempDate;
+        }
+        const dateOptions = dateArray.map((date) => {
+            const dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+            return {
+                label: dateString,
+                value: dateString,
+            }
+        });
+        setDateOptions(dateOptions);
+        const defaultDate = dateOptions[dateOptions.length - 1]
+        const defaultDateValue = defaultDate?.value;
+        if (defaultDateValue) setSelectedDate(defaultDateValue);
+
+    }, [selectedModelId]);
+
 
     useEffect(() => {
         setChurnCardLoading(true);
@@ -193,7 +219,7 @@ const Home: NextPage = () => {
         setIncludeAndExcludeUsersLoading(true);
 
         setCohortLoading(true);
-        if (!selectedModelId) return;
+        if (!selectedModelId || !selectedDate) return;
         runGetChurnCards.mutate({
             date: selectedDate,
             modelId: selectedModelId,
@@ -228,7 +254,7 @@ const Home: NextPage = () => {
     }, [selectedModelId, selectedDate, selectedPeriod])
 
     useEffect(() => {
-        if(!selectedFeature || !selectedModelId) return;
+        if(!selectedFeature || !selectedModelId || !selectedDate) return;
         runGetScatterPlot.mutate({
             modelId: selectedModelId,
             featureId: selectedFeature?.id,
@@ -279,8 +305,8 @@ const Home: NextPage = () => {
                                 {selectedModel ?
                                     <div className="grid grid-cols-[3fr_1fr]">
                                         <div>
-                                            <p className="mb-1"> {selectedModel.name}</p>
-                                            <p className="text-light-text-colour text-sm">{selectedModel.description} </p>
+                                            <p className="mb-1"> {selectedModel.model.name}</p>
+                                            <p className="text-light-text-colour text-sm">{selectedModel.model.description} </p>
                                         </div>
                                         <div className="flex justify-end my-auto">
                                             <PrimaryButton2 onClick={() => router.push('/create-model')}>
@@ -590,7 +616,7 @@ const Home: NextPage = () => {
                                     {/* Insights */}
 
                                     {
-                                        (insights == undefined || insights.length) && 
+                                        (insights == undefined || insights.length > 0) && 
                                         <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                         {
                                             insightsLoading || !insights || !selectedInsight ?

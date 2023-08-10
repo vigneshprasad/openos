@@ -1,6 +1,6 @@
-import { Insights } from "@prisma/client";
+import { type Insights } from "@prisma/client";
 import { z } from "zod";
-import { dummyActionableInsights, dummyInsights } from "~/constants/dummyData";
+import { dummyInsights } from "~/constants/dummyData";
 import {
     createTRPCRouter,
     protectedProcedure,
@@ -53,10 +53,6 @@ export const insightsRouter = createTRPCRouter({
                     id: ctx.session.user.id,
                 }
             });
-
-            if(user?.isDummy) {
-                return dummyActionableInsights;
-            }     
             
             return ctx.prisma.actionableInsights.findMany({
                 where: {

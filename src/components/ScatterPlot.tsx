@@ -1,6 +1,5 @@
-import { ApexOptions } from 'apexcharts';
+import { type ApexOptions } from 'apexcharts';
 import dynamic from 'next/dynamic';
-import { servicesVersion } from 'typescript';
 import { type ScatterPlotData } from '~/server/api/routers/dataModelRouter';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })

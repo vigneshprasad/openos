@@ -1,9 +1,4 @@
 import type { FeatureImportance } from "@prisma/client";
-import Image from "next/image";
-import { useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { ChurnScatterChartModal } from "~/components/ChurnScatterChartModal";
-import { api } from "~/utils/api";
 
 
 const FeaturesImportanceTable = ({

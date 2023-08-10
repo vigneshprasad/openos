@@ -1,5 +1,4 @@
 import { type PropsWithChildren } from "react"
-import { Navbar } from "./Navbar"
 import { type SideNavKeys, SideNavbar } from "./SideNavbar"
 
 type IProps = PropsWithChildren & {
