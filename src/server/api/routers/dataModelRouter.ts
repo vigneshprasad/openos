@@ -342,7 +342,9 @@ export const dataModelRouter = createTRPCRouter({
             const timeSeries: Date[] = []
             const startDate = moment(input.date, "DD/MM/YYYY")
             const endDate = moment(input.endDate, "DD/MM/YYYY")
+            let period = ''
             if(input.date !== input.endDate) {
+                period = 'weekly'
                 const date = moment(input.date, "DD/MM/YYYY")
                 const end_date = moment(input.endDate, "DD/MM/YYYY")
                 while(date.isSameOrBefore(end_date, 'days')) {
@@ -350,8 +352,9 @@ export const dataModelRouter = createTRPCRouter({
                     date.add(1, 'days');
                 }
             } else {
+                period = 'hourly'
                 const date = moment(input.date, "DD/MM/YYYY")
-                for(let i = 1; i <= 6; i++) {
+                for(let i = 0; i <= 6; i++) {
                     const new_date = moment(date).add((i*4), 'hours').toDate();
                     timeSeries.push(new_date);
                 }
@@ -461,10 +464,17 @@ export const dataModelRouter = createTRPCRouter({
                 }
                 for(let i = 0; i < timeSeries.length; i++) {
                     const start = timeSeries[i];
-                    const startMoment = moment(start, 'DD/MM/YYYY');
-                    const relevantUsers = usersPredictions.filter((userPrediction) => {
+                    const startMoment = moment(start);
+                    let relevantUsers = usersPredictions.filter((userPrediction) => {
                         return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
                     });
+                    if (period === 'hourly') {
+                        const timeSeriesStart = moment(timeSeries[i])
+                        const timeSeriesEnd = moment(timeSeries[i]).add(4, 'hours')
+                        relevantUsers = usersPredictions.filter((userPrediction) => {
+                            return moment(userPrediction.dateOfEvent).utc().isAfter(timeSeriesStart.utc()) && moment(userPrediction.dateOfEvent).utc().isBefore(timeSeriesEnd.utc())
+                        });
+                    }
                     let count = 0;
                     let total = 0;
                     for (let k = 0; k < relevantUsers.length; k++) {
@@ -487,7 +497,6 @@ export const dataModelRouter = createTRPCRouter({
                 resultData.cohort1.data.push(cohortDataSeries);
             }
 
-
             for (let j = 0; j < predictionCohort2FrequencyArray.length; j++) {
                 const cohortValue = predictionCohort2FrequencyArray[j];
                 if (j > 4) break;
@@ -497,10 +506,17 @@ export const dataModelRouter = createTRPCRouter({
                 }
                 for(let i = 0; i < timeSeries.length; i++) {
                     const start = timeSeries[i];
-                    const startMoment = moment(start, 'DD/MM/YYYY');
-                    const relevantUsers = usersPredictions.filter((userPrediction) => {
+                    const startMoment = moment(start);
+                    let relevantUsers = usersPredictions.filter((userPrediction) => {
                         return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
                     });
+                    const timeSeriesStart = moment(timeSeries[i])
+                    const timeSeriesEnd = moment(timeSeries[i]).add(4, 'hours')
+                    if (period === 'hourly') {
+                        relevantUsers = usersPredictions.filter((userPrediction) => {
+                            return moment(userPrediction.dateOfEvent).isAfter(timeSeriesStart) && moment(userPrediction.dateOfEvent).isBefore(timeSeriesEnd)
+                        });
+                    }
                     let count = 0;
                     let total = 0;
                     for (let k = 0; k < relevantUsers.length; k++) {
@@ -509,7 +525,7 @@ export const dataModelRouter = createTRPCRouter({
                             continue
                         }
                         const userData = userPrediction.userData as Prisma.JsonObject
-                        if (userData[predictionCohort1] === cohortValue) {
+                        if (userData[predictionCohort2] === cohortValue) {
                             total++;
                             if (userPrediction.probability > 0.5) {
                                 count++;
