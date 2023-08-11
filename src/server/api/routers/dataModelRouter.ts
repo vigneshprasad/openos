@@ -687,7 +687,7 @@ export const dataModelRouter = createTRPCRouter({
                     const value = userData[predictionCohort1] as string;
                     const count = predictionCohort1Frequency[value]?.count;
                     const predicted = predictionCohort1Frequency[value]?.predicted;
-                    let newPrediction = predicted ? predicted : 0;
+                    let newPrediction = predicted !== undefined ? predicted : 0;
                     if(userPrediction.probability > 0.5) {
                         newPrediction = newPrediction + 1;
                     }

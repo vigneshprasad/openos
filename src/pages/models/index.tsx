@@ -228,11 +228,9 @@ const Home: NextPage = () => {
         setPrimaryGraphLoading(true);
         setAggregateChurnByPrimaryCohortsLoading(true);
         setUserListLoading(true);
-        setFeaturesLoading(true);
         setIncludeAndExcludeUsersLoading(true);
-        setInsightsLoading(true);
         
-        if(moment(date, 'DD/MM/YYYY').isBefore(moment(endDate, 'DD/MM/YYYY'))) {
+        if(moment(date, 'DD/MM/YYYY').isAfter(moment(endDate, 'DD/MM/YYYY'))) {
             endDate = date;
         }
 
@@ -262,6 +260,8 @@ const Home: NextPage = () => {
             endDate: endDate,
         });
         if(modelChange) {
+            setFeaturesLoading(true);
+            setInsightsLoading(true);
             runGetFeatures.mutate({
                 modelId: modelId,
             });
