@@ -1229,7 +1229,8 @@ export const dummyModel: DataModelList[] = [{
         eventB: null,
         eventAFrequency: 1,
         predictionWindow: 30,
-        timeInterval: null
+        timeInterval: null,
+        phoneNumberField: null,
     },
     start_date: new Date("2023-07-01"),
     end_date: new Date(),
