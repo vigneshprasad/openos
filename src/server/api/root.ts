@@ -14,6 +14,7 @@ import { dataModelRouter } from "./routers/dataModelRouter";
 import { googleAnalyticsRouter } from "./routers/googleAnalytics";
 import { insightsRouter } from "./routers/insights";
 import { amplitudeResourceRouter } from "./routers/amplitudeRouter";
+import { userPredictionRouter } from "./routers/userPredictions";
 
 /**
  * This is the primary router for your server.
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   dataModelRouter: dataModelRouter,
   googleAnalyticsRouter: googleAnalyticsRouter,
   insightsRouter: insightsRouter,
+  userPredictionRouter: userPredictionRouter,
 });
 
 // export type definition of API

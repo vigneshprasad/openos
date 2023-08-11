@@ -285,6 +285,7 @@ model DataModel {
     description           String
     completionStatus      Boolean                 @default(false)
     timeInterval          Int?
+    phoneNumberField      String?
     user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
     FeatureImportance     FeatureImportance[]
     UserPrediction        UserPrediction[]
@@ -320,6 +321,7 @@ model UserPrediction {
     probability    Float
     userData       Json
     actualResult   Int?
+    feedback       Int?
     dataModel      DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
 
     @@index([dataModelId])

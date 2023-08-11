@@ -6,7 +6,7 @@ import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts } from "~/constants/fakerFunctions";
-import { getUserPredictions } from "~/utils/getUserPredictions";
+import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
 
 export type Cohort = {
     name: string,
@@ -92,6 +92,22 @@ export type DataModelList = {
     model: DataModel,
     start_date: Date,
     end_date: Date,
+}
+
+export type ChurnByThreshold = {
+    name: string,
+    numberOfUsers: number,
+    userList: ExcelSheet,
+    lowerBound: number,
+    upperBound: number
+}
+
+export type UserToContact = {
+    id: string
+    distinctId: string,
+    probability: number,
+    phoneNumber?: string,
+    feedback?: number | null,
 }
 
 export const dataModelRouter = createTRPCRouter({
@@ -191,8 +207,7 @@ export const dataModelRouter = createTRPCRouter({
                 take: 6,
             })
         }),
-
-        
+ 
     getUserList: protectedProcedure
         .input(z.object({
             modelId: z.string({
@@ -768,7 +783,6 @@ export const dataModelRouter = createTRPCRouter({
             return resultData;
         }),
 
-
     getUsersToIncludeAndExclude: protectedProcedure
         .input(z.object({
             modelId: z.string({
@@ -883,7 +897,6 @@ export const dataModelRouter = createTRPCRouter({
             }
         }),
 
-
     getScatterPlot: protectedProcedure
         .input(z.object({
             modelId: z.string({
@@ -975,5 +988,191 @@ export const dataModelRouter = createTRPCRouter({
                 series: churnGraph
             };
         }),
+
+    getChurnByThreshold: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+            date: z.string({
+                required_error: "String is required"
+            }),
+            endDate: z.string({
+                required_error: "End Date is required"
+            })
+        }))
+        .mutation(async ({ctx, input}) : Promise<ChurnByThreshold[]> => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+            if(user?.isDummy) {
+                // TODO 
+            }
+
+            const date = moment(input.date, "DD/MM/YYYY")
+            const end = moment(input.endDate, "DD/MM/YYYY")
+
+            // Get all the user predictions for the model in the relevant time period
+            const userPredictions = await getUserPredictions(input.modelId, date, end);
+            console.log("TOTAL PREDICTIONS: ", userPredictions.length)
+
+            const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
+            for(let j = 0; j < userPredictions.length; j++) {
+                const userPrediction = userPredictions[j];
+                if (!userPrediction) {
+                    continue
+                }
+                const userData = userPrediction.userData as Prisma.JsonObject
+                for (const key in userData) {
+                    if(!headings.includes(key)) {
+                        headings.push(key);
+                    }
+                }
+            }
+            const header: ExcelCell[] = [];
+            for(const key of headings) { 
+                header.push({
+                    value: key
+                })
+            }
+
+            const resultData:ChurnByThreshold[] = [
+                {
+                    name: "0-20% Probability to Convert",
+                    numberOfUsers: 0,
+                    lowerBound: 0,
+                    upperBound: 0.2,
+                    userList: {
+                        heading: '0-20% Probability to Convert',
+                        sheet: []
+                    }
+                },
+                {
+                    name: "20-40% Probability to Convert",
+                    numberOfUsers: 0,
+                    lowerBound: 0.2,
+                    upperBound: 0.4,
+                    userList: {
+                        heading: '20-40% Probability to Convert',
+                        sheet: []
+                    }
+                },
+                {
+                    name: "40-60% Probability to Convert",
+                    numberOfUsers: 0,
+                    lowerBound: 0.4,
+                    upperBound: 0.6,
+                    userList: {
+                        heading: '40-60% Probability to Convert',
+                        sheet: []
+                    }
+                },
+                {
+                    name: "60-80% Probability to Convert",
+                    numberOfUsers: 0,
+                    lowerBound: 0.6,
+                    upperBound: 0.8,
+                    userList: {
+                        heading: '60-80% Probability to Convert',
+                        sheet: []
+                    }
+                },
+                {
+                    name: "80-100% Probability to Convert",
+                    numberOfUsers: 0,
+                    lowerBound: 0.8,
+                    upperBound: 1,
+                    userList: {
+                        heading: '80-100% Probability to Convert',
+                        sheet: []
+                    }
+                }
+            ];
+
+
+            for(let j = 0; j < userPredictions.length; j++) {
+                const userPrediction = userPredictions[j];
+                if (!userPrediction) {
+                    continue
+                }
+                const userData = userPrediction.userData as Prisma.JsonObject
+                const row:ExcelCell[] = [];
+                for(const key of headings) {
+                    row.push({
+                        value: userData.hasOwnProperty(key) ? (userData[key] as string).replaceAll(",", "") : ""
+                    })
+                }
+                for (let i = 0; i < 5; i++) {
+                    const bucket = resultData[i];
+                    if(!bucket) continue;
+                    if(userPrediction.probability > bucket.lowerBound && userPrediction.probability <= bucket.upperBound) {
+                        bucket.numberOfUsers++;
+                        resultData[i]?.userList.sheet.push(row)
+                    }
+                }
+            }
+            
+            return resultData;
+        }),
+
+    getUsersToContact: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+            date: z.string({
+                required_error: "String is required"
+            }),
+            endDate: z.string({
+                required_error: "End date is required"
+            }),
+        }))
+        .mutation(async ({ctx, input}): Promise<UserToContact[]>=> {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+            if(user?.isDummy) {
+                // TODO 
+            }
+            
+            const date = moment(input.date, "DD/MM/YYYY")
+            const end = moment(input.endDate, "DD/MM/YYYY")
+
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                },
+            });
+
+            // Get all the user predictions for the model in the relevant time period
+            const userPredictions = await getUserPredictionsSortedByProbability(input.modelId, date, end);
+            const results: UserToContact[] = [];
+            
+            for(let j = 0; j < userPredictions.length; j++) {
+                const userPrediction = userPredictions[j];
+                if (!userPrediction) {
+                    continue
+                }
+                const userData = userPrediction.userData as Prisma.JsonObject
+                let phone = "Unknown";
+                if(model?.phoneNumberField && userData.hasOwnProperty(model?.phoneNumberField)) {
+                    phone = userData[model?.phoneNumberField] as string;
+                }
+                results.push({
+                    id: userPrediction.id,
+                    distinctId: userPrediction.userDistinctId,
+                    probability: userPrediction.probability,
+                    phoneNumber: phone,
+                    feedback: userPrediction.feedback,
+                })
+
+            }
+            return results;
+        }),
+        
         
 })

@@ -1,27 +1,22 @@
-import type { FeatureImportance, Insights } from "@prisma/client";
+import type { Insights } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import router from "next/router";
 import { useEffect, useState } from "react";
-import { CSVLink } from "react-csv";
-import AreaGraph from "~/components/AreaGraph";
 import { BaseLayout2 } from "~/components/BaseLayout2";
-import CohortTable from "~/components/CohortTable";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
-import FeaturesImportanceTable from "~/components/FeatureImportanceTable";
 import { PrimaryButton2 } from "~/components/PrimaryButton2";
-import { ScatterPlot } from "~/components/ScatterPlot";
 import Select from "~/components/Select";
-import UsersTable from "~/components/UsersTable";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList } from "~/server/api/routers/dataModelRouter";
-import { type ExcelSheet, type SelectOption } from "~/types/types";
+import { type ChurnCards, type DataModelList, type ChurnByThreshold, type UserToContact } from "~/server/api/routers/dataModelRouter";
+import { type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
-import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import Image from "next/image";
 import moment from "moment";
+import ChurnByThresholdTable from "~/components/ChurnByThresholdTable";
+import UsersToContactTable from "~/components/UsersToContact";
 
 
-const Home: NextPage = () => {
+const CustomerSuccess: NextPage = () => {
 
     const [models, setModels] = useState<DataModelList[]>([]);
     const [modelOptions, setModelOptions] = useState<SelectOption[]>([]);
@@ -34,39 +29,21 @@ const Home: NextPage = () => {
     const [churnCardData, setChurnCardData] = useState<ChurnCards>();
     const [churnCardLoading, setChurnCardLoading] = useState<boolean>(true);
 
-
-    // PRIMARY GRAPH STATES
-    const [primaryGraphData, setPrimaryGraphData] = useState<ModelGraph>();
-    const [primaryGraphLoading, setPrimaryGraphLoading] = useState<boolean>(true);
-    const [selectedPrimaryGraph, setSelectedPrimaryGraph] = useState<'cohort 1' | 'cohort 2'>('cohort 1');
-
-    // AGGREGATE CHURN FOR PRIMARY METRICS STATES
-    const [aggregateChurnByPrimaryCohorts, setAggregateChurnByPrimaryCohorts] = useState<AggregateChurnByPrimaryCohorts>();
-    const [aggregateChurnByPrimaryCohortsLoading, setAggregateChurnByPrimaryCohortsLoading] = useState<boolean>(true);
-
-    // USER LIST STATES
-    const [userList, setUserList] = useState<ExcelSheet>();
-    const [userListLoading, setUserListLoading] = useState<boolean>(true);
-    
-    // FEATURE IMPORTANCE STATES
-    const [features, setFeatures] = useState<FeatureImportance[]>();
-    const [featuresLoading, setFeaturesLoading] = useState<boolean>(true);
-
-    // SCATTER PLOT STATES
-    const [scatterPlotData, setScatterPlotDataLoading] = useState<ScatterPlotData>();
-    const [scatterPlotLoading, setScatterPlotLoading] = useState<boolean>(true);
-    const [selectedFeature, setSelectedFeature] = useState<FeatureImportance>();
-
-    // INCLUDE AND EXCLUDE USERS
-    const [includeAndExcludeUsers, setIncludeAndExcludeUsers] = useState<IncludeAndExcludeUsers>();
-    const [includeAndExcludeUsersLoading, setIncludeAndExcludeUsersLoading] = useState<boolean>(true);
-
     // INSIGHT AND ACTIONABLE INSIGHTS
     const [insights, setInsights] = useState<Insights[]>();
     const [insightsLoading, setInsightsLoading] = useState<boolean>(true);
     const [selectedInsight, setSelectedInsight] = useState<Insights>();
 
-    const loading = churnCardLoading || primaryGraphLoading || aggregateChurnByPrimaryCohortsLoading || userListLoading || featuresLoading || scatterPlotLoading || includeAndExcludeUsersLoading || insightsLoading;
+    // CHURN BY THRESHOLD STATES
+    const [churnByThreshold, setChurnByThreshold] = useState<ChurnByThreshold[]>();
+    const [churnByThresholdLoading, setChurnByThresholdLoading] = useState<boolean>(true);
+
+    // USER LIST STATES
+    const [userList, setUserList] = useState<UserToContact[]>();
+    const [userListLoading, setUserListLoading] = useState<boolean>(true);
+    const [userListShowCount, setUserListShowCount] = useState<number>(10);
+
+    const loading = churnCardLoading || insightsLoading;
 
     // SETTING FIRST MODEL AS DEFAULT
     const modelMutation = api.dataModelRouter.getModels.useMutation({
@@ -83,12 +60,13 @@ const Home: NextPage = () => {
         }
     });
 
-    // GET MODELS ON FIRST LOAD
+    // LOADING MODELS ON FIRST LOAD
     useEffect(() => {
         if (models && models.length > 0) return;
 
         modelMutation.mutate()
     }, []);
+
 
     // DATA MUTATIONS
     const runGetChurnCards = api.dataModelRouter.getChurnCards.useMutation({
@@ -98,51 +76,6 @@ const Home: NextPage = () => {
         }
     });
 
-    const modelPrimaryGraph = api.dataModelRouter.modelPrimaryGraph.useMutation({
-        onSuccess: (primaryGraphData) => {
-            setPrimaryGraphData(primaryGraphData);
-            setPrimaryGraphLoading(false);
-        }
-    });
-
-    const runGetAggregateChurnByPrimaryCohorts = api.dataModelRouter.getAggregateChurnByPrimaryCohorts.useMutation({
-        onSuccess: (aggregateChurnData) => {
-            setAggregateChurnByPrimaryCohorts(aggregateChurnData);
-            setAggregateChurnByPrimaryCohortsLoading(false);
-        }
-    });
-
-    const runGetUserList = api.dataModelRouter.getUserList.useMutation({
-        onSuccess: (userList) => {
-            setUserList(userList);
-            setUserListLoading(false);
-        }
-    })
-
-    const runGetFeatures = api.dataModelRouter.getFeatures.useMutation({
-        onSuccess: (data: FeatureImportance[]) => {
-            setFeatures(data);
-            setFeaturesLoading(false);
-            if(data[0]) {
-                handleFeatureChange(data[0].id, data[0]);
-            }
-        }
-    })
-
-    const runGetUsersToIncludeAndExclude = api.dataModelRouter.getUsersToIncludeAndExclude.useMutation({
-        onSuccess: (data: IncludeAndExcludeUsers) => {
-            setIncludeAndExcludeUsers(data);
-            setIncludeAndExcludeUsersLoading(false);
-        }
-    })
-
-    const runGetScatterPlot = api.dataModelRouter.getScatterPlot.useMutation({
-        onSuccess: (data: ScatterPlotData) => {
-            setScatterPlotDataLoading(data);
-            setScatterPlotLoading(false);
-        }
-    })
-
     const runGetInsights = api.insightsRouter.getInsights.useMutation({
         onSuccess: (data: Insights[]) => {
             setInsights(data);
@@ -151,7 +84,21 @@ const Home: NextPage = () => {
         }
     })
 
-    // CHANGE HANDLERS
+    const runChurnByThreshold = api.dataModelRouter.getChurnByThreshold.useMutation({
+        onSuccess: (data: ChurnByThreshold[]) => {
+            setChurnByThreshold(data);
+            setChurnByThresholdLoading(false);
+        }
+    })
+
+    const runGetUserList = api.dataModelRouter.getUsersToContact.useMutation({
+        onSuccess: (data: UserToContact[]) => {
+            setUserList(data);
+            setUserListLoading(false);
+        }
+    })
+
+    // SELECTION HANDLERS
     const handleModelChange = (value: string, dataModels?: DataModelList[]) => {
         setSelectedModelId(value);
         let selectedModel = models?.find((model: DataModelList) => model.model.id === value);
@@ -184,23 +131,6 @@ const Home: NextPage = () => {
         }
     }
 
-    const handleFeatureChange = (value: string, selectedFeature?: FeatureImportance) => {
-        const feature = features?.find((feature) => feature.id === value);
-        if(!feature && !selectedFeature) return;
-        setSelectedFeature(feature ? feature : selectedFeature);
-        if(!selectedModelId || !selectedDate || !selectedEndDate) return;
-        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
-            setSelectedEndDate(selectedDate);
-        }
-        setScatterPlotLoading(true);
-        runGetScatterPlot.mutate({
-            modelId: selectedModelId,
-            featureId: value,
-            date: selectedDate,
-            endDate: selectedEndDate,
-        })
-    }
-
     const handleDateChange = (value: string) => {
         if(!value) return;
         setSelectedDate(value);
@@ -221,16 +151,12 @@ const Home: NextPage = () => {
         reRunAllQueries(selectedModelId, selectedDate, value);
     }
 
-
-    // RE RUN ALL QUERIES
+    // RE-RUN ALL QUERIES
     const reRunAllQueries = (modelId: string, date: string, endDate: string, modelChange?: boolean) => {
         setChurnCardLoading(true);
-        setPrimaryGraphLoading(true);
-        setAggregateChurnByPrimaryCohortsLoading(true);
-        setUserListLoading(true);
-        setFeaturesLoading(true);
-        setIncludeAndExcludeUsersLoading(true);
         setInsightsLoading(true);
+        setChurnByThresholdLoading(true);
+        setUserListLoading(true);
         
         if(moment(date, 'DD/MM/YYYY').isBefore(moment(endDate, 'DD/MM/YYYY'))) {
             endDate = date;
@@ -241,12 +167,7 @@ const Home: NextPage = () => {
             modelId: modelId,
             endDate: endDate,
         });
-        modelPrimaryGraph.mutate({
-            date: date,
-            modelId: modelId,
-            endDate: endDate,
-        });
-        runGetAggregateChurnByPrimaryCohorts.mutate({
+        runChurnByThreshold.mutate({
             date: date,
             modelId: modelId,
             endDate: endDate,
@@ -256,15 +177,8 @@ const Home: NextPage = () => {
             modelId: modelId,
             endDate: endDate,
         });
-        runGetUsersToIncludeAndExclude.mutate({
-            date: date,
-            modelId: modelId,
-            endDate: endDate,
-        });
+
         if(modelChange) {
-            runGetFeatures.mutate({
-                modelId: modelId,
-            });
             runGetInsights.mutate({
                 modelId: modelId,
             });
@@ -369,7 +283,7 @@ const Home: NextPage = () => {
                                                     <div className="flex justify-center"> <FadingCubesLoader height={50} width={50} /> </div> :
                                                     <div className="flex flex-col gap-1">
                                                         <div className="text-dark-grey-text-colour text-sm font-semibold">
-                                                            Predicted Churn
+                                                            Predicted Conversion
                                                         </div>
                                                         <div className="text-2xl text-dark-text-colour">
                                                             {churnCardData?.predictedChurn.toFixed(2)} %
@@ -400,7 +314,7 @@ const Home: NextPage = () => {
                                                     <div className="flex justify-center"> <FadingCubesLoader height={50} width={50} /> </div> :
                                                     <div className="flex flex-col gap-1">
                                                         <div className="text-dark-grey-text-colour text-sm font-semibold">
-                                                            Actual Churn
+                                                            Actual Conversion
                                                         </div>
                                                         <div className="text-2xl text-dark-text-colour">
                                                             {churnCardData?.actualChurn ? churnCardData?.actualChurn.toFixed(2) : '-'} %
@@ -430,198 +344,61 @@ const Home: NextPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* Primary Graph */}
+                                    {/* Churn By Threshold*/}
                                     {
-                                        (primaryGraphData === undefined || primaryGraphData.cohort1.data.length > 0 || primaryGraphData.cohort2.data.length > 0) && 
-                                        <div className="bg-white drop-shadow-md mb-8 rounded-lg">
-                                            {
-                                                primaryGraphLoading || !primaryGraphData || !selectedPrimaryGraph ?
-                                                    <div className="flex justify-center"> <FadingCubesLoader /> </div> :
-                                                    <div>
-                                                        <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
-                                                            <div className="text-dark-text-colour font-medium my-auto">Predicted Churn by Source</div>
-                                                            <Select
-                                                                title="Cohort"
-                                                                options={[{
-                                                                    label: primaryGraphData.cohort1.title,
-                                                                    value: 'cohort 1',
-                                                                }, {
-                                                                    label: primaryGraphData.cohort2.title,
-                                                                    value: 'cohort 2'
-                                                                }]}
-                                                                onChange={
-                                                                    (selectedPrimaryGraph) => 
-                                                                        setSelectedPrimaryGraph(selectedPrimaryGraph === 'cohort 1' ? 'cohort 1' : 'cohort 2')
-                                                                }
-                                                                value={selectedPrimaryGraph} />                                                        
-                                                        </div>
-                                                        <div className="p-4">
-                                                            <AreaGraph 
-                                                                graphData={selectedPrimaryGraph === 'cohort 1' ? primaryGraphData.cohort1 : primaryGraphData.cohort2} 
-                                                                categoriesFormat={selectedDate === selectedEndDate ? "h:mm a" : "MMM Do YYYY"} />
-                                                        </div>
-                                                    </div>
-                                            }
-                                        </div>
-                                    }
-                                    
-                                    {/* Aggregate Churn by Primary Cohorts */}
-                                    {
-                                        (aggregateChurnByPrimaryCohorts === undefined || aggregateChurnByPrimaryCohorts.cohort1.data.length > 0 || aggregateChurnByPrimaryCohorts.cohort2.data.length > 0) &&
-                                        <div className="grid grid-cols-2 gap-4 mb-8">
-                                            <div className="bg-white drop-shadow-md rounded-lg">
-                                                {
-                                                    aggregateChurnByPrimaryCohortsLoading || userListLoading || !aggregateChurnByPrimaryCohorts || !userList ?
-                                                        <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
-                                                        <div className="grid grid-rows-[auto_1fr_auto] h-full">
-                                                            <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted Churn by {aggregateChurnByPrimaryCohorts.cohort1.title}</div>
-                                                            </div>
-                                                            <div>
-                                                                <CohortTable data={aggregateChurnByPrimaryCohorts.cohort1.data} />
-                                                            </div>
-                                                            <div className="border-t border-border-colour p-4">
-                                                                <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
-                                                                    <PrimaryButton2 paddingY={1}>
-                                                                        <p>Download All Users</p>
-                                                                    </PrimaryButton2>
-                                                                </CSVLink>
-                                                            </div>
-                                                        </div>
-                                                }
-                                            </div>
-                                            <div className="bg-white drop-shadow-md rounded-lg">
-                                                {
-                                                    aggregateChurnByPrimaryCohortsLoading || userListLoading || !aggregateChurnByPrimaryCohorts || !userList ?
-                                                        <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
-                                                        <div className="grid grid-rows-[auto_1fr_auto] h-full">
-                                                            <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted Churn by {aggregateChurnByPrimaryCohorts.cohort2.title}</div>
-                                                            </div>
-                                                            <div className="mb-">
-                                                                <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} />
-                                                            </div>
-                                                            <div className="border-t border-border-colour p-4">
-                                                                <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
-                                                                    <PrimaryButton2 paddingY={1}>
-                                                                        <p>Download All Users</p>
-                                                                    </PrimaryButton2>
-                                                                </CSVLink>
-                                                            </div>
-                                                        </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-
-                                    {/* Feature Importance */}
-                                    {
-                                        (features === undefined || features.length > 0) &&
+                                        (churnByThreshold === undefined || churnByThreshold.length > 0) &&
                                             <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                             {
-                                                featuresLoading || !features ?
+                                                churnByThresholdLoading || !churnByThreshold ?
                                                     <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                     <div>
                                                         <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
                                                             <div className="text-dark-text-colour font-medium my-auto">
-                                                                Features impacting the target variable 🎯
+                                                                Conversion Rate by Threshold
                                                             </div>                                                  
                                                         </div>
-                                                        <FeaturesImportanceTable features={features} />
+                                                        <ChurnByThresholdTable buckets={churnByThreshold} />
                                                     </div>
                                             }
                                         </div>
                                     }
 
-                                     {/* Scatter Plot */}
-                                     {
+
+                                    {/* User List*/}
+                                    {
+                                        (userList === undefined || userList.length > 0) &&
                                         <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                             {
-                                                featuresLoading || !features ?
-                                                    <div className="flex justify-center"> <FadingCubesLoader /> </div> :
+                                                userListLoading || !userList ?
+                                                <div className="flex justify-center"> 
+                                                    <FadingCubesLoader height={100} width={100} /> 
+                                                </div> :
+                                                <div className="grid grid-rows-[auto_1fr_auto] h-full">
+                                                    <div className="border-b border-border-colour">
+                                                        <div className="text-dark-text-colour font-medium my-auto p-6">List of Users Likely to Convert</div>
+                                                    </div>
                                                     <div>
-                                                        <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
-                                                            <div className="text-dark-text-colour font-medium my-auto">Feature Importance Exploration</div>
-                                                            <Select
-                                                                title="Cohort"
-                                                                options={features.map((feature) => {
-                                                                    return {
-                                                                        label: feature.featureName,
-                                                                        value: feature.id
-                                                                    }
-                                                                })}
-                                                                onChange={handleFeatureChange}
-                                                                value={selectedFeature?.id} />                                                        
-                                                        </div>
+                                                        <UsersToContactTable users={userList.slice(0, userListShowCount)} />
+                                                    </div>
+                                                    <div className="border-t border-border-colour p-4">
                                                         {
-                                                            scatterPlotLoading || !scatterPlotData || !selectedFeature ?
-                                                            <div className="flex justify-center"> <FadingCubesLoader /> </div> :
-                                                            <div className="p-4">
-                                                                <ScatterPlot scatterPlotData={scatterPlotData} title={selectedFeature?.featureName}  />
+                                                            userListShowCount < userList.length &&
+                                                            <div className="align-center mx-auto">
+                                                                <PrimaryButton2 
+                                                                    onClick={() => setUserListShowCount(userListShowCount + 10)}
+                                                                    paddingY={1}>
+                                                                    <p>Load More</p>
+                                                                </PrimaryButton2>
                                                             </div>
                                                         }
                                                     </div>
+                                                </div>
                                             }
                                         </div>
                                     }
 
-                                    {/* Include and Exclude List */}
-                                    {
-                                        (includeAndExcludeUsers === undefined || includeAndExcludeUsers.include.users.length > 0) &&
-                                        <div className="grid grid-cols-2 gap-4 mb-8">
-                                            <div className="bg-white drop-shadow-md rounded-lg">
-                                                {
-                                                    includeAndExcludeUsersLoading || !includeAndExcludeUsers ?
-                                                        <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
-                                                        <div className="grid grid-rows-[auto_1fr_auto] h-full">
-                                                            <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Type of Users to Avoid When Marketing 🤦🏼‍♂️</div>
-                                                            </div>
-                                                            <div>
-                                                                <UsersTable data={includeAndExcludeUsers.exclude.users} />
-                                                            </div>
-                                                            <div className="border-t border-border-colour p-4">
-                                                                <CSVLink 
-                                                                    className="w-fit-content mx-auto" 
-                                                                    data={convertSimpleReportToExcel(includeAndExcludeUsers?.include.userList.sheet)}
-                                                                    target="_blank">
-                                                                    <PrimaryButton2 paddingY={1}>
-                                                                        <p>Download List</p>
-                                                                    </PrimaryButton2>
-                                                                </CSVLink>
-                                                            </div>
-                                                        </div>
-                                                }
-                                            </div>
-                                            <div className="bg-white drop-shadow-md rounded-lg">
-                                                {
-                                                    includeAndExcludeUsersLoading || !includeAndExcludeUsers ?
-                                                        <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
-                                                        <div className="grid grid-rows-[auto_1fr_auto] h-full">
-                                                            <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Type of Users to Target When Marketing 🕵🏻</div>
-                                                            </div>
-                                                            <div className="mb-">
-                                                                <UsersTable data={includeAndExcludeUsers.include.users} />
-                                                            </div>
-                                                            <div className="border-t border-border-colour p-4">
-                                                                <CSVLink 
-                                                                    className="w-fit-content mx-auto" 
-                                                                    data={convertSimpleReportToExcel(includeAndExcludeUsers?.exclude.userList.sheet)}
-                                                                    target="_blank">
-                                                                    <PrimaryButton2 paddingY={1}>
-                                                                        <p>Download List</p>
-                                                                    </PrimaryButton2>
-                                                                </CSVLink>
-                                                            </div>
-                                                        </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
 
                                     {/* Insights */}
-
                                     {
                                         (insights == undefined || insights.length > 0) && 
                                         <div className="bg-white drop-shadow-md mb-8 rounded-lg">
@@ -687,4 +464,4 @@ const Home: NextPage = () => {
     );
 };
 
-export default Home;
+export default CustomerSuccess;
