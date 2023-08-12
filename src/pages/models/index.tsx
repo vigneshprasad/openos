@@ -45,8 +45,8 @@ const Home: NextPage = () => {
     const [aggregateChurnByPrimaryCohortsLoading, setAggregateChurnByPrimaryCohortsLoading] = useState<boolean>(true);
 
     // USER LIST STATES
-    const [userList, setUserList] = useState<ExcelSheet>();
-    const [userListLoading, setUserListLoading] = useState<boolean>(true);
+    // const [userList, setUserList] = useState<ExcelSheet>();
+    // const [userListLoading, setUserListLoading] = useState<boolean>(true);
     
     // FEATURE IMPORTANCE STATES
     const [features, setFeatures] = useState<FeatureImportance[]>();
@@ -66,7 +66,7 @@ const Home: NextPage = () => {
     const [insightsLoading, setInsightsLoading] = useState<boolean>(true);
     const [selectedInsight, setSelectedInsight] = useState<Insights>();
 
-    const loading = churnCardLoading || primaryGraphLoading || aggregateChurnByPrimaryCohortsLoading || userListLoading || featuresLoading || scatterPlotLoading || includeAndExcludeUsersLoading || insightsLoading;
+    const loading = churnCardLoading || primaryGraphLoading || aggregateChurnByPrimaryCohortsLoading || featuresLoading || scatterPlotLoading || includeAndExcludeUsersLoading || insightsLoading;
 
     // SETTING FIRST MODEL AS DEFAULT
     const modelMutation = api.dataModelRouter.getModels.useMutation({
@@ -112,12 +112,12 @@ const Home: NextPage = () => {
         }
     });
 
-    const runGetUserList = api.dataModelRouter.getUserList.useMutation({
-        onSuccess: (userList) => {
-            setUserList(userList);
-            setUserListLoading(false);
-        }
-    })
+    // const runGetUserList = api.dataModelRouter.getUserList.useMutation({
+    //     onSuccess: (userList) => {
+    //         setUserList(userList);
+    //         setUserListLoading(false);
+    //     }
+    // })
 
     const runGetFeatures = api.dataModelRouter.getFeatures.useMutation({
         onSuccess: (data: FeatureImportance[]) => {
@@ -227,7 +227,7 @@ const Home: NextPage = () => {
         setChurnCardLoading(true);
         setPrimaryGraphLoading(true);
         setAggregateChurnByPrimaryCohortsLoading(true);
-        setUserListLoading(true);
+        // setUserListLoading(true);
         setIncludeAndExcludeUsersLoading(true);
         
         if(moment(date, 'DD/MM/YYYY').isAfter(moment(endDate, 'DD/MM/YYYY'))) {
@@ -249,11 +249,11 @@ const Home: NextPage = () => {
             modelId: modelId,
             endDate: endDate,
         });
-        runGetUserList.mutate({
-            date: date,
-            modelId: modelId,
-            endDate: endDate,
-        });
+        // runGetUserList.mutate({
+        //     date: date,
+        //     modelId: modelId,
+        //     endDate: endDate,
+        // });
         runGetUsersToIncludeAndExclude.mutate({
             date: date,
             modelId: modelId,
@@ -471,7 +471,7 @@ const Home: NextPage = () => {
                                         <div className="grid grid-cols-2 gap-4 mb-8">
                                             <div className="bg-white drop-shadow-md rounded-lg">
                                                 {
-                                                    aggregateChurnByPrimaryCohortsLoading || userListLoading || !aggregateChurnByPrimaryCohorts || !userList ?
+                                                    aggregateChurnByPrimaryCohortsLoading || !aggregateChurnByPrimaryCohorts ?
                                                         <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
@@ -480,19 +480,19 @@ const Home: NextPage = () => {
                                                             <div>
                                                                 <CohortTable data={aggregateChurnByPrimaryCohorts.cohort1.data} />
                                                             </div>
-                                                            <div className="border-t border-border-colour p-4">
+                                                            {/* <div className="border-t border-border-colour p-4">
                                                                 <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
                                                                     <PrimaryButton2 paddingY={1}>
                                                                         <p>Download All Users</p>
                                                                     </PrimaryButton2>
                                                                 </CSVLink>
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                 }
                                             </div>
                                             <div className="bg-white drop-shadow-md rounded-lg">
                                                 {
-                                                    aggregateChurnByPrimaryCohortsLoading || userListLoading || !aggregateChurnByPrimaryCohorts || !userList ?
+                                                    aggregateChurnByPrimaryCohortsLoading || !aggregateChurnByPrimaryCohorts ?
                                                         <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
@@ -501,13 +501,13 @@ const Home: NextPage = () => {
                                                             <div className="mb-">
                                                                 <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} />
                                                             </div>
-                                                            <div className="border-t border-border-colour p-4">
+                                                            {/* <div className="border-t border-border-colour p-4">
                                                                 <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
                                                                     <PrimaryButton2 paddingY={1}>
                                                                         <p>Download All Users</p>
                                                                     </PrimaryButton2>
                                                                 </CSVLink>
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                 }
                                             </div>
