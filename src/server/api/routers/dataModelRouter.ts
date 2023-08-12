@@ -5,7 +5,7 @@ import { dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
-import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts } from "~/constants/fakerFunctions";
+import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
 
 export type Cohort = {
@@ -97,7 +97,6 @@ export type DataModelList = {
 export type ChurnByThreshold = {
     name: string,
     numberOfUsers: number,
-    userList: ExcelSheet,
     lowerBound: number,
     upperBound: number
 }
@@ -1024,7 +1023,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                // TODO 
+                return getDummyChurnByThreshold(input.modelId, input.date, input.endDate);
             }
 
             const date = moment(input.date, "DD/MM/YYYY")
@@ -1032,7 +1031,6 @@ export const dataModelRouter = createTRPCRouter({
 
             // Get all the user predictions for the model in the relevant time period
             const userPredictions = await getUserPredictions(input.modelId, date, end);
-            console.log("TOTAL PREDICTIONS: ", userPredictions.length)
 
             const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
             for(let j = 0; j < userPredictions.length; j++) {
@@ -1060,50 +1058,30 @@ export const dataModelRouter = createTRPCRouter({
                     numberOfUsers: 0,
                     lowerBound: 0,
                     upperBound: 0.2,
-                    userList: {
-                        heading: '0-20% Probability to Convert',
-                        sheet: []
-                    }
                 },
                 {
                     name: "20-40% Probability to Convert",
                     numberOfUsers: 0,
                     lowerBound: 0.2,
                     upperBound: 0.4,
-                    userList: {
-                        heading: '20-40% Probability to Convert',
-                        sheet: []
-                    }
                 },
                 {
                     name: "40-60% Probability to Convert",
                     numberOfUsers: 0,
                     lowerBound: 0.4,
                     upperBound: 0.6,
-                    userList: {
-                        heading: '40-60% Probability to Convert',
-                        sheet: []
-                    }
                 },
                 {
                     name: "60-80% Probability to Convert",
                     numberOfUsers: 0,
                     lowerBound: 0.6,
                     upperBound: 0.8,
-                    userList: {
-                        heading: '60-80% Probability to Convert',
-                        sheet: []
-                    }
                 },
                 {
                     name: "80-100% Probability to Convert",
                     numberOfUsers: 0,
                     lowerBound: 0.8,
                     upperBound: 1,
-                    userList: {
-                        heading: '80-100% Probability to Convert',
-                        sheet: []
-                    }
                 }
             ];
 
@@ -1125,7 +1103,6 @@ export const dataModelRouter = createTRPCRouter({
                     if(!bucket) continue;
                     if(userPrediction.probability > bucket.lowerBound && userPrediction.probability <= bucket.upperBound) {
                         bucket.numberOfUsers++;
-                        resultData[i]?.userList.sheet.push(row)
                     }
                 }
             }
@@ -1152,7 +1129,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                // TODO 
+                return getDummyUserToContact(input.modelId, input.date, input.endDate);
             }
             
             const date = moment(input.date, "DD/MM/YYYY")

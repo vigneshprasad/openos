@@ -1,6 +1,4 @@
-import { CSVLink } from "react-csv";
 import { type ChurnByThreshold } from "~/server/api/routers/dataModelRouter";
-import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 
 const ChurnByThresholdTable = ({
     buckets,
@@ -19,7 +17,7 @@ const ChurnByThresholdTable = ({
         <div className="py-4">
             {buckets.map((row, index) => {
                 return (
-                    <div key={index} className="grid grid-cols-[0.1fr_1fr_2fr_0.2fr_0.5fr] p-4 mr-4 ml-4 gap-6">
+                    <div key={index} className="grid grid-cols-[0.1fr_1fr_2fr_0.5fr] p-4 mr-4 ml-4 gap-6">
                         <div className="w-6 h-6 bg-light-grey-background-colour text-sm flex justify-center"> 
                             <div className="my-auto">{index + 1}</div>
                         </div>
@@ -35,9 +33,6 @@ const ChurnByThresholdTable = ({
                             ></div>
                         </div>
                         <div> {row.numberOfUsers} </div>
-                        <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(row.userList.sheet)} target="_blank">
-                            <p className="text-xs text-accent-colour">Download Users</p>
-                        </CSVLink>
                     </div>
                 );
             })}

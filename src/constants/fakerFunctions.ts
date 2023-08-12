@@ -1,4 +1,4 @@
-import { type ChurnCards, type ModelGraph, type IncludeAndExcludeUsers, type ScatterPlotData, type AggregateChurnByPrimaryCohorts} from "~/server/api/routers/dataModelRouter"
+import { type ChurnCards, type ModelGraph, type IncludeAndExcludeUsers, type ScatterPlotData, type AggregateChurnByPrimaryCohorts, ChurnByThreshold, UserToContact} from "~/server/api/routers/dataModelRouter"
 import { faker } from '@faker-js/faker';
 import moment from "moment";
 
@@ -429,4 +429,70 @@ export const getDummyAggregateChurnByPrimaryCohorts = (date: string, modelId: st
     return resultData;
 
 
+}
+
+export const getDummyChurnByThreshold = (date: string, modelId: string, endDate: string):ChurnByThreshold[] => {
+    const seed = encode(`${date}${modelId}${endDate}`)
+    faker.seed(seed)
+
+    const resultData:ChurnByThreshold[] = [
+        {
+            name: "0-20% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0,
+            upperBound: 0.2,
+        },
+        {
+            name: "20-40% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.2,
+            upperBound: 0.4,
+        },
+        {
+            name: "40-60% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.4,
+            upperBound: 0.6,
+        },
+        {
+            name: "60-80% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.6,
+            upperBound: 0.8,
+        },
+        {
+            name: "80-100% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.8,
+            upperBound: 1,
+        }
+    ];
+
+
+    for (let i = 0; i < 5; i++) {
+        const bucket = resultData[i];
+        if(!bucket) continue;
+        bucket.numberOfUsers = faker.number.int({min: 1000, max: 5000})
+    }
+
+    return resultData;
+}
+
+export const getDummyUserToContact = (date: string, modelId: string, endDate: string): UserToContact[] => {
+
+    const seed = encode(`${date}${modelId}${endDate}`)
+    faker.seed(seed)
+
+    const users:UserToContact[] = []
+    for(let i = 0; i < 200; i++) {
+        users.push({
+            id: faker.string.uuid(),
+            distinctId: faker.internet.email(),
+            probability: faker.number.float({ min: 0, max: 1, }),
+            phoneNumber: faker.phone.number('+91 ##### #####'),
+            feedback: faker.number.int({min: -1, max: 1})
+        })
+    }
+
+    return users.sort((a, b) => b.probability - a.probability);
 }
