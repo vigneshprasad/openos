@@ -203,6 +203,9 @@ export const dataModelRouter = createTRPCRouter({
                 where: {
                     dataModelId: input.modelId, 
                 },
+                orderBy: {
+                    importance: "desc"
+                },
                 take: 6,
             })
         }),

@@ -665,7 +665,7 @@ const Home: NextPage = () => {
                                                             </div>
                                                             <Image 
                                                                 className="w-2/5 m-1 rounded-md"
-                                                                src={`/insight${insights.indexOf(selectedInsight) + 1}.png`} 
+                                                                src={`/insight${(insights.indexOf(selectedInsight) % 5) + 1}.png`} 
                                                                 alt={selectedInsight.title}
                                                                 width={0}
                                                                 height={0}
