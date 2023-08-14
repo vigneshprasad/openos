@@ -10,7 +10,7 @@ const CohortTable = ({
 
     return (
         <div className="overflow-x-auto w-full">
-            <div className="grid grid-cols-3 text-xs bg-table-heading-background-colour text-light-grey-text-colour p-4 uppercase font-medium">
+            <div className="grid grid-cols-[1fr_0.5fr_0.5fr] text-xs bg-table-heading-background-colour text-light-grey-text-colour p-4 uppercase font-medium">
                 <div>Cohort</div>
                 <div>Total</div>
                 <div>{isConversion ? 'Conversion' : 'Churn'} Rate</div>
@@ -18,7 +18,7 @@ const CohortTable = ({
             <div className="text-xs text-light-text-colour font-light">
                 {
                     data.map((item, index) => (
-                        <div key={index} className={`grid grid-cols-3 mx-4 py-4 ${index !== data.length - 1  ? "border-b border-border-colour" : ""}`}>
+                        <div key={index} className={`grid grid-cols-[1fr_0.5fr_0.5fr] mx-4 py-4 ${index !== data.length - 1  ? "border-b border-border-colour" : ""}`}>
                             <div>{item.title}</div>
                             <div>{item.totalUsers}</div>
                             <div>{item.predictedChurnUsers.toFixed(2)}%</div>
