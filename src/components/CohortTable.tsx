@@ -2,8 +2,10 @@ import { type AggregateChurn } from "~/server/api/routers/dataModelRouter";
 
 const CohortTable = ({
     data,
+    isConversion,
 }: {
     data: AggregateChurn[];
+    isConversion?: boolean
 }) => {
 
     return (
@@ -11,7 +13,7 @@ const CohortTable = ({
             <div className="grid grid-cols-3 text-xs bg-table-heading-background-colour text-light-grey-text-colour p-4 uppercase font-medium">
                 <div>Cohort</div>
                 <div>Total</div>
-                <div>Churn Rate</div>
+                <div>{isConversion ? 'Conversion' : 'Churn'} Rate</div>
             </div>
             <div className="text-xs text-light-text-colour font-light">
                 {

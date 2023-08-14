@@ -14,7 +14,7 @@ import { ScatterPlot } from "~/components/ScatterPlot";
 import Select from "~/components/Select";
 import UsersTable from "~/components/UsersTable";
 import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList } from "~/server/api/routers/dataModelRouter";
-import { type ExcelSheet, type SelectOption } from "~/types/types";
+import { type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import Image from "next/image";
@@ -273,6 +273,7 @@ const Home: NextPage = () => {
 
     const selectedModel = models?.find((model: DataModelList) => model.model.id === selectedModelId);
 
+
     return (
         <>
             <Head>
@@ -291,16 +292,19 @@ const Home: NextPage = () => {
                                         title="Model Name"
                                         options={modelOptions}
                                         onChange={handleModelChange}
+                                        disabled={loading}
                                         value={selectedModelId} />
                                     <Select 
                                         title="Date"
                                         options={dateOptions}
                                         onChange={handleDateChange}
+                                        disabled={loading}
                                         value={selectedDate} />
                                     to
                                     <Select
                                         title="End Date"
                                         onChange={handleEndDateChange}
+                                        disabled={loading}
                                         options={dateOptions.filter((date) => moment(date.value, 'DD/MM/YYYY') >= moment(selectedDate, 'DD/MM/YYYY'))}
                                         value={selectedEndDate} />
                                 </form>
@@ -369,7 +373,7 @@ const Home: NextPage = () => {
                                                     <div className="flex justify-center"> <FadingCubesLoader height={50} width={50} /> </div> :
                                                     <div className="flex flex-col gap-1">
                                                         <div className="text-dark-grey-text-colour text-sm font-semibold">
-                                                            Predicted Churn
+                                                            Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} Rate
                                                         </div>
                                                         <div className="text-2xl text-dark-text-colour">
                                                             {churnCardData?.predictedChurn.toFixed(2)} %
@@ -400,7 +404,7 @@ const Home: NextPage = () => {
                                                     <div className="flex justify-center"> <FadingCubesLoader height={50} width={50} /> </div> :
                                                     <div className="flex flex-col gap-1">
                                                         <div className="text-dark-grey-text-colour text-sm font-semibold">
-                                                            Actual Churn
+                                                            Actual {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'}
                                                         </div>
                                                         <div className="text-2xl text-dark-text-colour">
                                                             {churnCardData?.actualChurn ? churnCardData?.actualChurn.toFixed(2) : '-'} %
@@ -439,7 +443,7 @@ const Home: NextPage = () => {
                                                     <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                     <div>
                                                         <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
-                                                            <div className="text-dark-text-colour font-medium my-auto">Predicted Churn by Source</div>
+                                                            <div className="text-dark-text-colour font-medium my-auto">Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} by Source</div>
                                                             <Select
                                                                 title="Cohort"
                                                                 options={[{
@@ -475,10 +479,10 @@ const Home: NextPage = () => {
                                                         <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted Churn by {aggregateChurnByPrimaryCohorts.cohort1.title}</div>
+                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} by {aggregateChurnByPrimaryCohorts.cohort1.title}</div>
                                                             </div>
                                                             <div>
-                                                                <CohortTable data={aggregateChurnByPrimaryCohorts.cohort1.data} />
+                                                                <CohortTable data={aggregateChurnByPrimaryCohorts.cohort1.data} isConversion={selectedModel.model.type == 'Conversion'}/>
                                                             </div>
                                                             {/* <div className="border-t border-border-colour p-4">
                                                                 <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
@@ -496,10 +500,10 @@ const Home: NextPage = () => {
                                                         <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted Churn by {aggregateChurnByPrimaryCohorts.cohort2.title}</div>
+                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} by {aggregateChurnByPrimaryCohorts.cohort2.title}</div>
                                                             </div>
                                                             <div className="mb-">
-                                                                <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} />
+                                                                <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} isConversion={selectedModel.model.type == 'Conversion'}/>
                                                             </div>
                                                             {/* <div className="border-t border-border-colour p-4">
                                                                 <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
@@ -578,7 +582,7 @@ const Home: NextPage = () => {
                                                                 <div className="text-dark-text-colour font-medium my-auto p-6">Type of Users to Avoid When Marketing 🤦🏼‍♂️</div>
                                                             </div>
                                                             <div>
-                                                                <UsersTable data={includeAndExcludeUsers.exclude.users} />
+                                                                <UsersTable data={includeAndExcludeUsers.exclude.users} isConversion={selectedModel.model.type == 'Conversion'}/>
                                                             </div>
                                                             <div className="border-t border-border-colour p-4">
                                                                 <CSVLink 
@@ -602,7 +606,7 @@ const Home: NextPage = () => {
                                                                 <div className="text-dark-text-colour font-medium my-auto p-6">Type of Users to Target When Marketing 🕵🏻</div>
                                                             </div>
                                                             <div className="mb-">
-                                                                <UsersTable data={includeAndExcludeUsers.include.users} />
+                                                                <UsersTable data={includeAndExcludeUsers.include.users} isConversion={selectedModel.model.type == 'Conversion'}/>
                                                             </div>
                                                             <div className="border-t border-border-colour p-4">
                                                                 <CSVLink 

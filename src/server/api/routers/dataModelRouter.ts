@@ -826,6 +826,13 @@ export const dataModelRouter = createTRPCRouter({
             const date = moment(input.date, "DD/MM/YYYY")
             const end = moment(input.endDate, "DD/MM/YYYY")
 
+            // Get the model to know how to order the users
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
             // Get all the user predictions for the model in the relevant time period
             const userPredictions = await getUserPredictions(input.modelId, date, end);
 
@@ -846,6 +853,16 @@ export const dataModelRouter = createTRPCRouter({
             for(const key of headings) { 
                 header.push({
                     value: key
+                })
+            }
+
+            if(model && model.type === "Conversion") {
+                userPredictions.sort((a, b) => {
+                    return b.probability - a.probability;
+                })
+            } else {
+                userPredictions.sort((a, b) => {
+                    return a.probability - b.probability;
                 })
             }
 

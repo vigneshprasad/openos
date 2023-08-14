@@ -3,8 +3,10 @@ import Avatar from "boring-avatars";
 
 const UsersTable = ({
     data,
+    isConversion
 }: {
     data: LookAlikeUsers[];
+    isConversion?: boolean
 }) => {
     
     return (
@@ -25,7 +27,7 @@ const UsersTable = ({
                                     {item.distinctId}
                                 </div>
                                 <div className="text-xs text-dark-grey-text-colour">
-                                    {(item.probability * 100).toFixed(2)} % likely to churn
+                                    {(item.probability * 100).toFixed(2)} % likely to {isConversion ? 'convert' : 'churn'}
                                 </div>
                             </div>
                         </div>
