@@ -210,7 +210,6 @@ const SalesForecast: NextPage = () => {
     // RE-RUN ALL QUERIES
     const reRunAllQueries = (metricName: string, dimensionName: string, timePeriodName: string, startDate: string, modelChange?: boolean, modelId?: string) => {
         setGraphDataLoading(true);
-        setInsightsLoading(true);
         
         runGetGraphData.mutate({
             metric: metricName,
@@ -220,6 +219,8 @@ const SalesForecast: NextPage = () => {
         });
 
         if(modelChange && modelId) {
+            setFeaturesLoading(true);
+            setInsightsLoading(true);
             runGetFeatures.mutate({
                 modelId: modelId,
             });
