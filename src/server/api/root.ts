@@ -15,6 +15,7 @@ import { googleAnalyticsRouter } from "./routers/googleAnalytics";
 import { insightsRouter } from "./routers/insights";
 import { amplitudeResourceRouter } from "./routers/amplitudeRouter";
 import { userPredictionRouter } from "./routers/userPredictions";
+import { gaForecastRouter } from "./routers/gaForecastRouter";
 
 /**
  * This is the primary router for your server.
@@ -22,22 +23,23 @@ import { userPredictionRouter } from "./routers/userPredictions";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  databaseResource: databaseResourceRouter,
-  razorpayResource: razorpayResourceRouter,
-  mixpanelResource: mixpanelResourceRouter,
-  amplitudeResource: amplitudeResourceRouter,
-  stripeResource: stripeResourceRouter,
-  commandRouter: commandRouter,
-  aws: awsRouter,
-  bankStatement: bankStatementRouter,
-  savedQuery: savedQueryRouter,
-  user: userRouter,
-  commandHistory: commandHistoryRouter,
-  predictiveAnalysisCommand: predictiveAnalysisCommandRouter,
-  dataModelRouter: dataModelRouter,
-  googleAnalyticsRouter: googleAnalyticsRouter,
-  insightsRouter: insightsRouter,
-  userPredictionRouter: userPredictionRouter,
+    databaseResource: databaseResourceRouter,
+    razorpayResource: razorpayResourceRouter,
+    mixpanelResource: mixpanelResourceRouter,
+    amplitudeResource: amplitudeResourceRouter,
+    stripeResource: stripeResourceRouter,
+    commandRouter: commandRouter,
+    aws: awsRouter,
+    bankStatement: bankStatementRouter,
+    savedQuery: savedQueryRouter,
+    user: userRouter,
+    commandHistory: commandHistoryRouter,
+    predictiveAnalysisCommand: predictiveAnalysisCommandRouter,
+    dataModelRouter: dataModelRouter,
+    googleAnalyticsRouter: googleAnalyticsRouter,
+    insightsRouter: insightsRouter,
+    userPredictionRouter: userPredictionRouter,
+    gaForecastRouter: gaForecastRouter,
 });
 
 // export type definition of API

@@ -62,6 +62,8 @@ model User {
     GoogleAnalytics     GoogleAnalytics[]
     Insights            Insights[]
     AmplitudeResource   AmplitudeResource[]
+    GAForecastModel     GAForecastModel[]
+    GAInsights          GAInsights[]
 }
 
 model VerificationToken {
@@ -343,15 +345,16 @@ model Cohorts {
 }
 
 model GoogleAnalytics {
-    id             String    @id @default(cuid())
-    name           String
-    createdAt      DateTime  @default(now())
-    updatedAt      DateTime  @updatedAt
-    deletedAt      DateTime?
-    userId         String
-    credentialsUrl String
-    viewId         String
-    user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id               String            @id @default(cuid())
+    name             String
+    createdAt        DateTime          @default(now())
+    updatedAt        DateTime          @updatedAt
+    deletedAt        DateTime?
+    userId           String
+    credentialsUrl   String
+    viewId           String
+    user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+    GAECommerceModel GAForecastModel[]
 
     @@index([userId])
 }
@@ -364,7 +367,7 @@ model Insights {
     userId             String
     modelId            String
     title              String
-    description        String
+    description        String               @db.Text
     datePosted         DateTime
     feedback           Int?
     tag                String
@@ -416,4 +419,118 @@ model DataModelPrimaryGraph {
     dataModel         DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
 
     @@index([dataModelId])
+}
+
+model GADimension {
+    id                String          @id @default(cuid())
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+    gaForecastModelId String
+    name              String
+    gaForecastModel   GAForecastModel @relation(fields: [gaForecastModelId], references: [id], onDelete: Cascade)
+
+    @@index([gaForecastModelId])
+}
+
+model GAMetric {
+    id                String          @id @default(cuid())
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+    gaForecastModelId String
+    name              String
+    gaForecastModel   GAForecastModel @relation(fields: [gaForecastModelId], references: [id], onDelete: Cascade)
+
+    @@index([gaForecastModelId])
+}
+
+model GATimePeriodOption {
+    id                String          @id @default(cuid())
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+    gaForecastModelId String
+    name              String
+    gaForecastModel   GAForecastModel @relation(fields: [gaForecastModelId], references: [id], onDelete: Cascade)
+
+    @@index([gaForecastModelId])
+}
+
+model GAForecastModel {
+    id                String          @id @default(cuid())
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+    googleAnalyticsId String
+    googleAnalytics   GoogleAnalytics @relation(fields: [googleAnalyticsId], references: [id])
+    startDate         DateTime
+    userId            String
+    description       String?         @db.Text
+    name              String?
+
+    user                  User                    @relation(fields: [userId], references: [id])
+    gaDimension           GADimension[]
+    gaMetric              GAMetric[]
+    gaTimePeriodOption    GATimePeriodOption[]
+    GAFeatureImportance   GAFeatureImportance[]
+    GAInsights            GAInsights[]
+    GAModelPrimaryCohorts GAModelPrimaryCohorts[]
+
+    type GAForecastModelType @default(SALES_FORECAST)
+
+    @@index([googleAnalyticsId])
+    @@index([userId])
+}
+
+model GAFeatureImportance {
+    id          String          @id @default(cuid())
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+    deletedAt   DateTime?
+    dataModelId String
+    featureName String
+    importance  Float
+    type        String
+    dataModel   GAForecastModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+
+    @@index([dataModelId])
+}
+
+model GAInsights {
+    id          String          @id @default(cuid())
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+    deletedAt   DateTime?
+    userId      String
+    modelId     String
+    title       String
+    description String          @db.Text
+    datePosted  DateTime
+    feedback    Int?
+    tag         String?
+    user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    model       GAForecastModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([modelId])
+}
+
+model GAModelPrimaryCohorts {
+    id                String          @id @default(cuid())
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+    dataModelId       String
+    predictionCohort1 String
+    predictionCohort2 String?
+    dataModel         GAForecastModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+
+    @@index([dataModelId])
+}
+
+enum GAForecastModelType {
+    SALES_FORECAST
+    USER_RETENTION
+    REVENUE_FORECAST
 }

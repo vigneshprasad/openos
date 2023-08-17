@@ -1,0 +1,7 @@
+export default function ContractIcon(
+    props: React.SVGProps<SVGSVGElement>
+): JSX.Element {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48"><g transform="rotate(-90 24 24)" {...props}><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="36" height="36" x="6" y="6" rx="3"/><path stroke-linecap="round" d="M6 16h36M20 32l4-4l4 4M6 10v12m36-12v12"/></g></g></svg>
+    )
+}

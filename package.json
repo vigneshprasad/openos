@@ -50,6 +50,7 @@
     "react-csv": "^2.2.2",
     "react-datasheet": "^1.4.12",
     "react-dom": "18.2.0",
+    "react-icons": "^4.10.1",
     "react-loader-spinner": "^5.3.4",
     "react-lottie-player": "^1.5.4",
     "stripe": "^12.5.0",

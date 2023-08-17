@@ -7,9 +7,11 @@ import moment from 'moment';
 const AreaGraph = ({
     graphData,
     categoriesFormat,
+    yAxisNotPercentage
 }: {
     graphData: GraphData;
     categoriesFormat: string;
+    yAxisNotPercentage?: boolean
 }) => {
 
     const { xAxis, data } = graphData;
@@ -41,7 +43,11 @@ const AreaGraph = ({
             yaxis: {
                 labels: {
                     formatter: function (val) {
-                        return val ? (val * 100).toFixed(0) + "%" : "";
+                        if(val) {
+                            return yAxisNotPercentage ? val.toFixed(0) : (val * 100).toFixed(0) + "%";
+                        } else {
+                            return "";
+                        }
                     },
                 },
                 decimalsInFloat: 2,
@@ -49,7 +55,11 @@ const AreaGraph = ({
             tooltip: {
                 y: {
                     formatter: function (val) {
-                        return val ? (val * 100).toFixed(2) + "%" : "";
+                        if(val) {
+                            return yAxisNotPercentage ? val.toFixed(2) : (val * 100).toFixed(2) + "%";
+                        } else {
+                            return "";
+                        }
                     }
                 },
             },

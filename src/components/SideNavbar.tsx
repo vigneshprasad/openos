@@ -1,97 +1,209 @@
 import Link from "next/link";
 import DBIcon from "./icons/DBIcon";
-import SearchIcon from "./icons/Search";
-import GraphIcon from "./icons/Graph";
-import TargetIcon from "./icons/Target";
-import InsightsIcon from "./icons/InsightsIcon";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Image from "next/image";
+import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
+import ExpandIcon from "./icons/Expand";
+import ContractIcon from "./icons/Contract";
 
-export type SideNavKeys = "terminal" | "models" | "create-model" | "integrations" | "customization" | "insights"
+import { FaCode, FaBolt, FaBullhorn, FaRegHeart, FaTag } from "react-icons/fa6";
+
+export type SideNavKeys = "terminal" | "create_model" | "growth_marketing" | "customer_success" | "sales_forecast" | "integrations";
 
 type IProps = {
     activeKey: SideNavKeys;
 }
 
-const SIDENAV_ITEMS = [
-    {
-        key: "terminal",
-        icon: {
-            active: <SearchIcon className="text-accent-colour" />,
-            inactive: <SearchIcon className="text-light-text-colour" />
-        },
-        route: "/"
-    },
-    {
-        key: "models",
-        icon: {
-            active: <GraphIcon className="text-accent-colour" />,
-            inactive: <GraphIcon className="text-light-text-colour" />
-        },
-        route: "/models"
-    },
-    {
-        key: "create-model",
-        icon: {
-            active: <TargetIcon className="text-accent-colour" />,
-            inactive: <TargetIcon className="text-light-text-colour" />
-        },
-        route: "/create-model"
-    },
-    {
-        key: "integrations",
-        icon: {
-            active: <DBIcon className="text-accent-colour" />,
-            inactive: <DBIcon className="text-light-text-colour" />
-        },
-        route: "/integrations"
-    },
-    // {
-    //     key: "insights",
-    //     icon: {
-    //         active: <InsightsIcon className="text-primary" />,
-    //         inactive: <InsightsIcon color="#747474" />
-    //     },
-    //     route: "/insights"
-    // },
-    // //   {
-    // //     key: "customization",
-    // //     icon: {
-    // //       active: <EyeIcon className="text-primary"/>,
-    // //       inactive: <EyeIcon color="#747474" />
-    // //     },
-    // //     route: "/customization"
-    // //   }
-]
-
 export const SideNavbar: React.FC<IProps> = ({ activeKey }) => {
     const { data: sessionData } = useSession();
 
+    const [isOpen, setIsOpen] = useState(false)
+
     return (
-        <div className="w-16 p-1 border-r border-border-colour flex flex-col gap-4 items-center absolute bg-white h-full">
-            <div className="pt-4">
-                <label
-                    tabIndex={0}
-                    className="btn-ghost btn-circle avatar btn"
-                    onClick={() => void signOut({ callbackUrl: '/auth/signin' })}
-                >
-                    <div className="flex flex-col gap-1 items-center bg-blue-card-background-colour rounded-full w-12 h-12 justify-center">
-                        {sessionData?.user?.name ? sessionData.user.name[0] : "A"}
-                        {/* {active && <div className="w-1 h-1 bg-[#4191F6]" />} */}
+        <div className={`${isOpen ? 'w-72' : 'w-16'} p-1 border-r border-border-colour flex flex-col absolute bg-white h-full z-50`}>
+            {
+                isOpen ?
+                <div className="flex flex-row gap-3 mx-4 my-4 align-middle justify-between">
+                    <div className="flex flex-row gap-3">
+                        <label
+                            tabIndex={0}
+                            className="btn-ghost btn-circle avatar btn"
+                            onClick={() => void signOut({ callbackUrl: '/auth/signin' })}
+                        >
+                            <div className="flex items-center bg-blue-card-background-colour rounded-sm w-8 h-8 justify-center font-medium">
+                                {sessionData?.user?.name ? sessionData.user.name[0] : "A"}
+                            </div>
+                        </label>
+                        <div className="my-auto font-medium">
+                            {sessionData?.user?.name ? sessionData.user.name : "Anonymous"}
+                        </div>
                     </div>
-                </label>
-            </div>
-            {SIDENAV_ITEMS.map(({ key, icon, route }) => {
-                const active = activeKey === key
-                return (
-                    <Link href={route} key={key}>
-                        <div className={`flex flex-col gap-1 items-center w-12 h-12 justify-center ${active ? "bg-button-active-state" : ""} rounded-full`}>
-                            {active ? icon.active : icon.inactive}
-                            {/* {active && <div className="w-1 h-1 bg-[#4191F6]" />} */}
+                    <div 
+                        className="my-auto"
+                        onClick={() => setIsOpen(!isOpen)}>
+                        <ContractIcon className="text-light-grey-text-colour"/>
+                    </div>
+                </div>
+            :
+                <div>            
+                    <div
+                        className="flex w-12 h-12 items-center justify-center rounded-full mx-auto" 
+                        onClick={() => setIsOpen(!isOpen)}>
+                        <ExpandIcon className="text-light-grey-text-colour"/>
+                    </div>
+                    <label
+                        tabIndex={0}
+                        className="flex btn-ghost btn-circle avatar btn w-10 h-10 items-center justify-center mx-auto"
+                        onClick={() => void signOut({ callbackUrl: '/auth/signin' })}
+                    >
+                        <div className="flex items-center bg-blue-card-background-colour rounded-full w-10 h-10 justify-center mt-2">
+                            {sessionData?.user?.name ? sessionData.user.name[0] : "A"}
+                        </div>
+                    </label>
+                </div>
+            }
+            {/* DATA EXPLORATION */}
+            {isOpen ?
+                <div className="py-4 mx-4 border-b border-border-colour">
+                    <div className="mb-4 text-sm font-medium">Data Exploration</div>
+                    <Link href={"/"}>
+                        <div className="flex flex-row gap-3">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'terminal' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'terminal' ? <FaCode className="text-accent-colour" /> : <FaCode className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Natural Language to SQL</span>
                         </div>
                     </Link>
-                )
-            })}
+                </div>
+            :   
+                <div className="py-4 border-b border-border-colour">
+                    <Link href={"/"}>
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'terminal' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'terminal' ? <FaCode className="text-accent-colour" /> : <FaCode className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                </div>
+            }
+            {/* REGRESSION ANALYSIS */}
+            {isOpen ?
+                <div className="py-4 mx-4 border-b border-border-colour">
+                    <div className="mb-4 text-sm font-medium">Regression Analysis</div>
+                    <Link href={"/create_model"}>
+                        <div className="flex flex-row gap-3 pb-2">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'create_model' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'create_model' ? <FaBolt className="text-accent-colour" /> : <FaBolt className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Build a Prediction Model</span>
+                        </div>
+                    </Link>
+                    <Link href={"/growth_marketing"}>
+                        <div className="flex flex-row gap-3 pb-2">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'growth_marketing' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'growth_marketing' ? <FaBullhorn className="text-accent-colour" /> : <FaBullhorn className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Growth and Marketing</span>
+                        </div>
+                    </Link>
+                    <Link href={"/customer_success"}>
+                        <div className="flex flex-row gap-3">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'customer_success' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'customer_success' ? <FaRegHeart className="text-accent-colour" /> : <FaRegHeart className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Sales and Customer Success</span>
+                        </div>
+                    </Link>
+                </div>
+            :
+                <div className="py-4 border-b border-border-colour">
+                    <Link href={"/create_model"} className="pb-2">
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'create_model' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'create_model' ? <FaBolt className="text-accent-colour" /> : <FaBolt className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                    <Link href={"/growth_marketing"} className="pb-2">
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'growth_marketing' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'growth_marketing' ? <FaBullhorn className="text-accent-colour" /> : <FaBullhorn className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                    <Link href={"/customer_success"}>
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'customer_success' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'customer_success' ? <FaRegHeart className="text-accent-colour" /> : <FaRegHeart className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                </div>
+            }
+
+            {/* TIME SERIES FORECAST */}
+            {isOpen ?
+                <div className="py-4 mx-4 border-b border-border-colour">
+                    <div className="mb-4 text-sm font-medium">Time Series Forecast</div>
+                    <Link href={"/sales_forecast"}>
+                        <div className="flex flex-row gap-3">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'sales_forecast' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'sales_forecast' ? <FaTag className="text-accent-colour" /> : <FaTag className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Total Sales Forecast</span>
+                        </div>
+                    </Link>
+                    {/* <Link href={"/growth_marketing"}>
+                        <div className="flex flex-row gap-3 pb-2">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'growth_marketing' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'growth_marketing' ? <FaBullhorn className="text-accent-colour" /> : <FaBullhorn className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Growth and Marketing</span>
+                        </div>
+                    </Link>
+                    <Link href={"/customer_success"}>
+                        <div className="flex flex-row gap-3">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'customer_success' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'customer_success' ? <FaRegHeart className="text-accent-colour" /> : <FaRegHeart className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Sales and Customer Success</span>
+                        </div>
+                    </Link> */}
+                </div>
+            :
+                <div className="py-4 border-b border-border-colour">
+                    <Link href={"/sales_forecast"} className="">
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'sales_forecast' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'sales_forecast' ? <FaTag className="text-accent-colour" /> : <FaTag className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                    {/* <Link href={"/growth_marketing"} className="pb-2">
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'growth_marketing' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'growth_marketing' ? <FaBullhorn className="text-accent-colour" /> : <FaBullhorn className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                    <Link href={"/customer_success"}>
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'customer_success' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'customer_success' ? <FaRegHeart className="text-accent-colour" /> : <FaRegHeart className="text-light-text-colour" />}
+                        </div>
+                    </Link> */}
+                </div>
+            }
+
+            {/* ACCOUNT */}
+            {isOpen ?
+                <div className="py-4 mx-4 border-b border-border-colour">
+                    <div className="mb-4 text-sm font-medium">Account</div>
+                    <Link href={"/integrations"}>
+                        <div className="flex flex-row gap-3">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'integrations' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'integrations' ? <DBIcon className="text-accent-colour" /> : <DBIcon className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Connect a Data Source</span>
+                        </div>
+                    </Link>
+                </div>
+            :
+                <div className="py-4 border-b border-border-colour">
+                    <Link href={"/integrations"} className="">
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'integrations' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'integrations' ? <DBIcon className="text-accent-colour" /> : <DBIcon className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                </div>
+            }
+
         </div>
     )
 }

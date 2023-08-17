@@ -80,7 +80,7 @@ const CreateModel = () => {
             <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <BaseLayout activeKey="create-model">
+        <BaseLayout activeKey="create_model">
             <div className="grid grid-cols-[3fr_1fr] grid-rows-1">
                 <div className="grid grid-rows-[max-content_1fr] grid-cols-1">
                     <div className="h-12 flex-row flex flex-basis-content p-1 bg-homepage-tab-background">

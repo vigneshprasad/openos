@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PrimaryButton } from "./PrimaryButton";
 import HighlightedText from "./TextHighlight";
-import { type ModelPredictionTabKeys } from "~/pages/create-model";
+import { type ModelPredictionTabKeys } from "~/pages/create_model";
 import useAnalytics from "~/utils/analytics/AnalyticsContext";
 import { api } from "~/utils/api";
 import { AnalyticsEvents } from "~/utils/analytics/types";

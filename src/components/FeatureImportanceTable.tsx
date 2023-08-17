@@ -1,10 +1,10 @@
-import type { FeatureImportance } from "@prisma/client";
+import type { FeatureImportance, GAFeatureImportance } from "@prisma/client";
 
 
 const FeaturesImportanceTable = ({
     features,
 }: {
-    features: FeatureImportance[],
+    features: FeatureImportance[] | GAFeatureImportance[],
 }) => {
 
     return <div className="bg-white flex flex-col gap-4 rounded-lg">

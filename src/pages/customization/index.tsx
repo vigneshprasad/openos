@@ -4,7 +4,7 @@ import { SavedTemplates } from "~/components/SavedTemplates";
 
 const CustomizationPage: NextPage = () => {
   return (
-    <BaseLayout activeKey="customization">
+    <BaseLayout activeKey="integrations">
         <div className="pl-5 pr-4 pt-6 bg-[#131313] grid grid-cols-1 grid-rows-[max-content_1fr]">
             <div className="pb-5 border-b border-solid border-[#333]">
                 <h1 className="text-xl text-[#fff]">
