@@ -5,7 +5,7 @@ import Head from "next/head";
 import { type NextPage } from "next";
 import { useEffect, useState } from "react";
 
-import { type GAInsights, type GAForecastModel, type GAFeatureImportance } from "@prisma/client";
+import { type GAInsights, type GAForecastModel, type GAFeatureImportance, GAForecastModelType } from "@prisma/client";
 import { BaseLayout2 } from "~/components/BaseLayout2";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import Select from "~/components/Select";
@@ -117,7 +117,7 @@ const SalesForecast: NextPage = () => {
     useEffect(() => {
         if (forecastModel) return;
         forecastModelMutation.mutate({
-            type: 'SALES'
+            type: GAForecastModelType.SALES_FORECAST
         });
     }, []);
 

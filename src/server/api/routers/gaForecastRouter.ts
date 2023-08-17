@@ -8,7 +8,7 @@ import { type GraphData } from "./dataModelRouter";
 import axios from "axios";
 import { GA_FORECAST_API_URL, GA_AGGREGATE_API_URL } from "~/constants/prophetConstants";
 import { TRPCError } from "@trpc/server";
-import { type GATimePeriodOption, type GADimension, type GAForecastModel, GAInsights } from "@prisma/client";
+import { type GATimePeriodOption, type GADimension, type GAForecastModel, GAInsights, GAForecastModelType } from "@prisma/client";
 import moment from "moment";
 
 export type ForecastResults = {
@@ -58,11 +58,14 @@ export const gaForecastRouter = createTRPCRouter({
                 // TODO
             }
 
-            // const type = input.type as GAForecastModelType;
+            const type = input.type as GAForecastModelType;
 
             let model;
             if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
                 model = await ctx.prisma.gAForecastModel.findFirst({
+                    where: {
+                        type: type,
+                    },
                     include: {
                         gaDimension: true,
                         gaMetric: true,
@@ -73,6 +76,7 @@ export const gaForecastRouter = createTRPCRouter({
                 model = await ctx.prisma.gAForecastModel.findFirst({
                     where: {
                         userId: ctx.session.user.id,
+                        type: type,
                     },
                     include: {
                         gaDimension: true,
@@ -123,12 +127,21 @@ export const gaForecastRouter = createTRPCRouter({
             if(user?.isDummy) {
                 // TODO
             }
-
-            const gaObject = await ctx.prisma.googleAnalytics.findFirst({
-                where: {
-                    userId: ctx.session.user.id
-                }
-            });  
+            
+            let gaObject;
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+                gaObject = await ctx.prisma.googleAnalytics.findFirst({
+                    orderBy: [{
+                        updatedAt: "desc"
+                    }]
+                });  
+            } else {    
+                gaObject = await ctx.prisma.googleAnalytics.findFirst({
+                    where: {
+                        userId: ctx.session.user.id
+                    }
+                });  
+            }
 
             const startDate = moment(input.startDate, "DD-MM-YYYY").format("YYYY-MM-DD")
             
@@ -177,17 +190,33 @@ export const gaForecastRouter = createTRPCRouter({
                 // TODO
             }
 
-            const gaObject = await ctx.prisma.googleAnalytics.findFirst({
-                where: {
-                    userId: ctx.session.user.id
-                }
-            });
+            let gaObject;
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+                gaObject = await ctx.prisma.googleAnalytics.findFirst({
+                    orderBy: [{
+                        updatedAt: "desc"
+                    }]
+                });  
+            } else {    
+                gaObject = await ctx.prisma.googleAnalytics.findFirst({
+                    where: {
+                        userId: ctx.session.user.id
+                    }
+                });  
+            }
 
-            const gAForecastModel = await ctx.prisma.gAForecastModel.findFirst({
-                where: {
-                    userId: ctx.session.user.id
-                }
-            });
+
+            let gAForecastModel;
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+                gAForecastModel = await ctx.prisma.gAForecastModel.findFirst({
+                });
+            } else {
+                gAForecastModel = await ctx.prisma.gAForecastModel.findFirst({
+                    where: {
+                        userId: ctx.session.user.id,
+                    },
+                });
+            }
             
             const gaModelPrimaryCohorts = await ctx.prisma.gAModelPrimaryCohorts.findFirst({
                 where: {
