@@ -180,6 +180,9 @@ export const gaForecastRouter = createTRPCRouter({
             }),
             metric: z.string({
                 required_error: "Metric is required"
+            }),
+            modelId: z.string({
+                required_error: "Model ID is required"
             })
         }))
         .mutation( async ({ ctx, input }):Promise<AggregatedForecastByDimension> => {
@@ -208,22 +211,10 @@ export const gaForecastRouter = createTRPCRouter({
                 });  
             }
 
-
-            let gAForecastModel;
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
-                gAForecastModel = await ctx.prisma.gAForecastModel.findFirst({
-                });
-            } else {
-                gAForecastModel = await ctx.prisma.gAForecastModel.findFirst({
-                    where: {
-                        userId: ctx.session.user.id,
-                    },
-                });
-            }
             
             const gaModelPrimaryCohorts = await ctx.prisma.gAModelPrimaryCohorts.findFirst({
                 where: {
-                    dataModelId: gAForecastModel?.id
+                    dataModelId: input.modelId,
                 }
             });
 

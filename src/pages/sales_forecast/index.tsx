@@ -105,7 +105,8 @@ const SalesForecast: NextPage = () => {
                 runGetAggregatedForecastByDimension.mutate({
                     startDate: defaultDateValue,
                     timePeriod: data.timePeriod[0]?.name,
-                    metric: 'conversions'
+                    metric: 'conversions',
+                    modelId: data.model.id,
                 });
             }
         },
@@ -163,12 +164,13 @@ const SalesForecast: NextPage = () => {
         const metricName = metrics.find((metricItem) => metricItem.value === selectedMetric)?.label;
         const dimensionName = dimensions.find((dimensionItem) => dimensionItem.value === selectedDimension)?.label;
         const timePeriodName = timePeriod.find((timePeriodItem) => timePeriodItem.value === selectedTimePeriod)?.label;
-        if(!metricName || !dimensionName || !timePeriodName) return;
+        if(!metricName || !dimensionName || !timePeriodName || !forecastModel) return;
         reRunAllQueries(metricName, dimensionName, timePeriodName, value);
         runGetAggregatedForecastByDimension.mutate({
             startDate: value,
             timePeriod: timePeriodName,
-            metric: 'conversions'
+            metric: 'conversions',
+            modelId: forecastModel.id,
         });
     }
 
@@ -179,12 +181,13 @@ const SalesForecast: NextPage = () => {
         const metricName = metrics.find((metricItem) => metricItem.value === selectedMetric)?.label;
         const dimensionName = dimensions.find((dimensionItem) => dimensionItem.value === selectedDimension)?.label;
         const timePeriodName = timePeriod.find((timePeriodItem) => timePeriodItem.value === value)?.label;
-        if(!metricName || !dimensionName || !timePeriodName) return;
+        if(!metricName || !dimensionName || !timePeriodName || !forecastModel) return;
         reRunAllQueries(metricName, dimensionName, timePeriodName, selectedStartDate);
         runGetAggregatedForecastByDimension.mutate({
             startDate: selectedStartDate,
             timePeriod: timePeriodName,
-            metric: 'conversions'
+            metric: 'conversions',
+            modelId: forecastModel.id,
         });  
     }
 
@@ -383,25 +386,6 @@ const SalesForecast: NextPage = () => {
                                                             </div>
                                                             <FeaturesImportanceTable features={features} />
                                                         </div>
-                                                }
-                                            </div>
-                                        }
-
-                                        {/* Aggregate Forecast */}
-                                        {
-                                            (aggregateDimensionForecast === undefined || aggregateDimensionForecast.cohort1.length > 0) && 
-                                            <div className="bg-white drop-shadow-md mb-8 rounded-lg">
-                                                {
-                                                    !aggregateDimensionForecast || aggregateDimensionForecastLoading ?
-                                                    <div className="flex justify-center"> <FadingCubesLoader /> </div> :
-                                                    <div>
-                                                        <div>
-                                                            
-                                                        </div>
-                                                        <div>
-                                                            
-                                                        </div>
-                                                    </div>
                                                 }
                                             </div>
                                         }

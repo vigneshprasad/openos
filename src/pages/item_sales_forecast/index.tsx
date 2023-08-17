@@ -17,7 +17,7 @@ import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import FeaturesImportanceTable from "~/components/FeatureImportanceTable";
 import { type AggregatedForecastByDimension } from "~/server/api/routers/gaForecastRouter";
 
-const RevenueForecast: NextPage = () => {
+const ItemSalesForecast: NextPage = () => {
 
     const [forecastModel, setForecastModel] = useState<GAForecastModel>();
     const [forecastModelLoading, setForecastModelLoading] = useState<boolean>(true);
@@ -105,12 +105,12 @@ const RevenueForecast: NextPage = () => {
                 runGetAggregatedForecastByDimension.mutate({
                     startDate: defaultDateValue,
                     timePeriod: data.timePeriod[0]?.name,
-                    metric: 'grossPurchaseRevenue',
-                    modelId: data.model.id
+                    metric: 'grossItemRevenue',
+                    modelId: data.model.id,
                 });
             }
         },
-        onError: () => {
+        onError: (error) => {
             setForecastModelLoading(false);
         }
     });
@@ -119,7 +119,7 @@ const RevenueForecast: NextPage = () => {
     useEffect(() => {
         if (forecastModel) return;
         forecastModelMutation.mutate({
-            type: GAForecastModelType.REVENUE_FORECAST
+            type: GAForecastModelType.ITEM_SALES_FORECAST,
         });
     }, []);
 
@@ -169,7 +169,7 @@ const RevenueForecast: NextPage = () => {
         runGetAggregatedForecastByDimension.mutate({
             startDate: value,
             timePeriod: timePeriodName,
-            metric: 'grossPurchaseRevenue',
+            metric: 'grossItemRevenue',
             modelId: forecastModel.id,
         });
     }
@@ -186,8 +186,8 @@ const RevenueForecast: NextPage = () => {
         runGetAggregatedForecastByDimension.mutate({
             startDate: selectedStartDate,
             timePeriod: timePeriodName,
-            metric: 'grossPurchaseRevenue',
-            modelId: forecastModel.id
+            metric: 'grossItemRevenue',
+            modelId: forecastModel.id,
         });  
     }
 
@@ -243,7 +243,7 @@ const RevenueForecast: NextPage = () => {
                 <meta name="description" content="Tools to to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <BaseLayout2 activeKey="revenue_forecast">
+            <BaseLayout2 activeKey="item_sales_forecast">
                 {forecastModelLoading || forecastModel !== undefined ?
                     <div className="flex flex-col">
                         {/* Navbar Selection Filters */}
@@ -302,7 +302,7 @@ const RevenueForecast: NextPage = () => {
                                                         <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                         <div>
                                                             <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
-                                                                <div className="text-dark-text-colour font-medium my-auto">Revenue Forecast</div>
+                                                                <div className="text-dark-text-colour font-medium my-auto">Item Sales Forecast</div>
                                                                 <div className="flex flex-row gap-2">
                                                                     <Select
                                                                         title="Dimension"
@@ -342,13 +342,13 @@ const RevenueForecast: NextPage = () => {
                                                         <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
-                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Top 5 Campaigns</div>
+                                                                <div className="text-dark-text-colour font-medium my-auto p-6">Top 5 Items</div>
                                                             </div>
                                                             <div>
                                                                 <div className="overflow-x-auto w-full">
                                                                     <div className="grid grid-cols-[1fr_0.5fr_0.5fr] text-xs bg-table-heading-background-colour text-light-grey-text-colour p-4 uppercase font-medium">
-                                                                        <div>Campaign Name</div>
-                                                                        <div>Gross Revenue</div>
+                                                                        <div>Item Name</div>
+                                                                        <div>Total Revenue</div>
                                                                         <div>Predicted Revenue Next 
                                                                             {timePeriod.find((timePeriodItem) => timePeriodItem.value === selectedTimePeriod)?.label}
                                                                         </div>
@@ -467,4 +467,4 @@ const RevenueForecast: NextPage = () => {
     );
 };
 
-export default RevenueForecast;
+export default ItemSalesForecast;
