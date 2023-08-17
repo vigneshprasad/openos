@@ -178,6 +178,9 @@ export const gaForecastRouter = createTRPCRouter({
             startDate: z.string({
                 required_error: "Start date is required"
             }),
+            metric: z.string({
+                required_error: "Metric is required"
+            })
         }))
         .mutation( async ({ ctx, input }):Promise<AggregatedForecastByDimension> => {
             const user = await ctx.prisma.user.findUnique({
@@ -236,7 +239,7 @@ export const gaForecastRouter = createTRPCRouter({
             
             const response = await axios.post(GA_AGGREGATE_API_URL, {
                 dimension: gaModelPrimaryCohorts?.predictionCohort1, 
-                metric: 'conversions',
+                metric: input.metric,
                 time_period: input.timePeriod,
                 object_id: gaObject?.id,
                 start_date: startDate

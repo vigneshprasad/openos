@@ -17,7 +17,7 @@ import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import FeaturesImportanceTable from "~/components/FeatureImportanceTable";
 import { type AggregatedForecastByDimension } from "~/server/api/routers/gaForecastRouter";
 
-const SalesForecast: NextPage = () => {
+const RevenueForecast: NextPage = () => {
 
     const [forecastModel, setForecastModel] = useState<GAForecastModel>();
     const [forecastModelLoading, setForecastModelLoading] = useState<boolean>(true);
@@ -105,11 +105,11 @@ const SalesForecast: NextPage = () => {
                 runGetAggregatedForecastByDimension.mutate({
                     startDate: defaultDateValue,
                     timePeriod: data.timePeriod[0]?.name,
-                    metric: 'conversions'
+                    metric: 'grossPurchaseRevenue'
                 });
             }
         },
-        onError: (error) => {
+        onError: () => {
             setForecastModelLoading(false);
         }
     });
@@ -118,7 +118,7 @@ const SalesForecast: NextPage = () => {
     useEffect(() => {
         if (forecastModel) return;
         forecastModelMutation.mutate({
-            type: GAForecastModelType.SALES_FORECAST
+            type: GAForecastModelType.REVENUE_FORECAST
         });
     }, []);
 
@@ -168,7 +168,7 @@ const SalesForecast: NextPage = () => {
         runGetAggregatedForecastByDimension.mutate({
             startDate: value,
             timePeriod: timePeriodName,
-            metric: 'conversions'
+            metric: 'grossPurchaseRevenue'
         });
     }
 
@@ -184,7 +184,7 @@ const SalesForecast: NextPage = () => {
         runGetAggregatedForecastByDimension.mutate({
             startDate: selectedStartDate,
             timePeriod: timePeriodName,
-            metric: 'conversions'
+            metric: 'grossPurchaseRevenue'
         });  
     }
 
@@ -240,7 +240,7 @@ const SalesForecast: NextPage = () => {
                 <meta name="description" content="Tools to to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <BaseLayout2 activeKey="sales_forecast">
+            <BaseLayout2 activeKey="revenue_forecast">
                 {forecastModelLoading || forecastModel !== undefined ?
                     <div className="flex flex-col">
                         {/* Navbar Selection Filters */}
@@ -299,7 +299,7 @@ const SalesForecast: NextPage = () => {
                                                         <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                         <div>
                                                             <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
-                                                                <div className="text-dark-text-colour font-medium my-auto">Sales Forecast</div>
+                                                                <div className="text-dark-text-colour font-medium my-auto">Revenue Forecast</div>
                                                                 <div className="flex flex-row gap-2">
                                                                     <Select
                                                                         title="Dimension"
@@ -345,8 +345,8 @@ const SalesForecast: NextPage = () => {
                                                                 <div className="overflow-x-auto w-full">
                                                                     <div className="grid grid-cols-[1fr_0.5fr_0.5fr] text-xs bg-table-heading-background-colour text-light-grey-text-colour p-4 uppercase font-medium">
                                                                         <div>Campaign Name</div>
-                                                                        <div>Total Conversion</div>
-                                                                        <div>Predicted Conversions Next 
+                                                                        <div>Gross Revenue</div>
+                                                                        <div>Predicted Revenue Next 
                                                                             {timePeriod.find((timePeriodItem) => timePeriodItem.value === selectedTimePeriod)?.label}
                                                                         </div>
                                                                     </div>
@@ -355,8 +355,8 @@ const SalesForecast: NextPage = () => {
                                                                             aggregateDimensionForecast.cohort1.slice(0, 5).map((item, index) => (
                                                                                 <div key={index} className={`grid grid-cols-[1fr_0.5fr_0.5fr] mx-4 py-4 ${index !== 4  ? "border-b border-border-colour" : ""}`}>
                                                                                     <div>{item.name}</div>
-                                                                                    <div>{item.aggregate}</div>
-                                                                                    <div>{item.predicted.toFixed(0)}</div>
+                                                                                    <div>₹ {item.aggregate}</div>
+                                                                                    <div>₹ {item.predicted.toFixed(0)}</div>
                                                                                 </div>
                                                                             ))
                                                                         }
@@ -483,4 +483,4 @@ const SalesForecast: NextPage = () => {
     );
 };
 
-export default SalesForecast;
+export default RevenueForecast;
