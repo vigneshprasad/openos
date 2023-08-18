@@ -361,6 +361,7 @@ export const dataModelRouter = createTRPCRouter({
             } else {
                 period = 'hourly'
                 const date = moment(input.date, "DD/MM/YYYY")
+
                 for(let i = 0; i <= 6; i++) {
                     const new_date = moment(date).add((i*4), 'hours').toDate();
                     timeSeries.push(new_date);
@@ -369,6 +370,10 @@ export const dataModelRouter = createTRPCRouter({
 
             // Get all the user predictions for the model in the relevant time period
             const usersPredictions = await getUserPredictions(input.modelId, startDate, endDate);
+
+            console.log("BRUVVVV START OFFSET: ", startDate.utcOffset())
+            console.log("BRUVVVV USER PREDICTIONS OFFSET: ", moment(usersPredictions[0]?.dateOfEvent).utcOffset())
+            console.log("BRUVVVV TIME SERIES OFFSET: ", moment(timeSeries[0]).utcOffset())
             
             // Get the primary graph parameters for the model
             const dataModelPrimaryGraph = await ctx.prisma.dataModelPrimaryGraph.findFirst({
@@ -472,14 +477,16 @@ export const dataModelRouter = createTRPCRouter({
                 for(let i = 0; i < timeSeries.length; i++) {
                     const start = timeSeries[i];
                     const startMoment = moment(start);
-                    let relevantUsers = usersPredictions.filter((userPrediction) => {
-                        return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
-                    });
+                    let relevantUsers;
                     if (period === 'hourly') {
                         const timeSeriesStart = moment(timeSeries[i])
                         const timeSeriesEnd = moment(timeSeries[i]).add(4, 'hours')
                         relevantUsers = usersPredictions.filter((userPrediction) => {
                             return moment(userPrediction.dateOfEvent).utc().isAfter(timeSeriesStart.utc()) && moment(userPrediction.dateOfEvent).utc().isBefore(timeSeriesEnd.utc())
+                        });
+                    } else {
+                        relevantUsers = usersPredictions.filter((userPrediction) => {
+                            return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
                         });
                     }
                     let count = 0;
@@ -580,10 +587,7 @@ export const dataModelRouter = createTRPCRouter({
                 previous_start_date = moment(date).subtract(1, 'days');
                 previous_end_date = moment(date).subtract(1, 'days');
             }
-
-
-            const usersPredictions = await getUserPredictions(input.modelId);
-
+            
             const churnResults:ChurnCards = {
                 totalUsers: 0,
                 totalUsersDeviation: 0,
@@ -593,13 +597,8 @@ export const dataModelRouter = createTRPCRouter({
                 actualChurnDeviation: 0
             }
 
-            const previousPeriodUsers = usersPredictions.filter((userPrediction) => {
-                return moment(userPrediction.dateOfEvent).isSameOrAfter(previous_start_date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore( previous_end_date, 'days');
-            });
-
-            const currentPeriodUsers = usersPredictions.filter((userPrediction) => {
-                return moment(userPrediction.dateOfEvent).isSameOrAfter(date, 'days') && moment(userPrediction.dateOfEvent).isSameOrBefore(end_date, 'days');
-            });
+            const previousPeriodUsers = await getUserPredictions(input.modelId, previous_start_date, previous_end_date);
+            const currentPeriodUsers = await getUserPredictions(input.modelId, date, end_date);
 
             churnResults.totalUsers = currentPeriodUsers.length;
             churnResults.totalUsersDeviation = (currentPeriodUsers.length - previousPeriodUsers.length) / previousPeriodUsers.length * 100;
