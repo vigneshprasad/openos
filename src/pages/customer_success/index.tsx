@@ -7,7 +7,7 @@ import { BaseLayout2 } from "~/components/BaseLayout2";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import Select from "~/components/Select";
-import { type ChurnCards, type DataModelList, type ChurnByThreshold, type UserToContact } from "~/server/api/routers/dataModelRouter";
+import { type ChurnCards, type DataModelList, type ChurnByThreshold, type UserToContact, UserToContactPaginationResponse } from "~/server/api/routers/dataModelRouter";
 import { type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 import Image from "next/image";
@@ -25,7 +25,7 @@ const CustomerSuccess: NextPage = () => {
     const [selectedModelId, setSelectedModelId] = useState<string>();
     const [selectedDate, setSelectedDate] = useState<string>();
     const [selectedEndDate, setSelectedEndDate] = useState<string>();
-    
+
     // CHURN CARD STATES
     const [churnCardData, setChurnCardData] = useState<ChurnCards>();
     const [churnCardLoading, setChurnCardLoading] = useState<boolean>(true);
@@ -40,9 +40,11 @@ const CustomerSuccess: NextPage = () => {
     const [churnByThresholdLoading, setChurnByThresholdLoading] = useState<boolean>(true);
 
     // USER LIST STATES
-    const [userList, setUserList] = useState<UserToContact[]>();
+    const [userList, setUserList] = useState<UserToContact[]>([]);
     const [userListLoading, setUserListLoading] = useState<boolean>(true);
-    const [userListShowCount, setUserListShowCount] = useState<number>(10);
+    const [totalLength, setTotalLength] = useState<number>(0);
+    const [userListLoadingMore, setUserListLoadingMore] = useState<boolean>(false);
+    const [skip, setSkip] = useState<number>(0); // for pagination
 
     const loading = churnCardLoading || insightsLoading;
 
@@ -94,9 +96,12 @@ const CustomerSuccess: NextPage = () => {
     })
 
     const runGetUserList = api.dataModelRouter.getUsersToContact.useMutation({
-        onSuccess: (data: UserToContact[]) => {
-            setUserList(data);
+        onSuccess: (data: UserToContactPaginationResponse) => {
+            const newUserList = userList.concat(data.users);
+            setUserList(newUserList);
+            setTotalLength(data.total);          
             setUserListLoading(false);
+            setUserListLoadingMore(false);
         }
     })
 
@@ -153,6 +158,20 @@ const CustomerSuccess: NextPage = () => {
         reRunAllQueries(selectedModelId, selectedDate, value);
     }
 
+    const handleLoadMore = () => {
+        console.log("WHY ARE YOU GETTING CALLED?")
+        setUserListLoadingMore(true);
+        setSkip(skip + 10);
+        if(!selectedDate || !selectedModelId || !selectedDate) return;
+        runGetUserList.mutate({
+            date: selectedDate,
+            modelId: selectedModelId,
+            endDate: selectedDate,
+            skip: skip,
+        });
+    }
+
+
     // RE-RUN ALL QUERIES
     const reRunAllQueries = (modelId: string, date: string, endDate: string, modelChange?: boolean) => {
         setChurnCardLoading(true);
@@ -178,6 +197,7 @@ const CustomerSuccess: NextPage = () => {
             date: date,
             modelId: modelId,
             endDate: endDate,
+            skip: skip,
         });
 
         if(modelChange) {
@@ -372,7 +392,7 @@ const CustomerSuccess: NextPage = () => {
                                             (userList === undefined || userList.length > 0) &&
                                             <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                                 {
-                                                    userListLoading || !userList ?
+                                                    userListLoading || !userList || !totalLength ?
                                                     <div className="flex justify-center"> 
                                                         <FadingCubesLoader height={100} width={100} /> 
                                                     </div> :
@@ -381,18 +401,27 @@ const CustomerSuccess: NextPage = () => {
                                                             <div className="text-dark-text-colour font-medium my-auto p-6">List of Users Likely to Convert</div>
                                                         </div>
                                                         <div>
-                                                            <UsersToContactTable users={userList.slice(0, userListShowCount)} />
+                                                            <UsersToContactTable users={userList} />
                                                         </div>
                                                         <div className="border-t border-border-colour p-4">
                                                             {
-                                                                userListShowCount < userList.length &&
-                                                                <div className="align-center mx-auto">
-                                                                    <PrimaryButton2 
-                                                                        onClick={() => setUserListShowCount(userListShowCount + 10)}
-                                                                        paddingY={1}>
-                                                                        <p>Load More</p>
-                                                                    </PrimaryButton2>
-                                                                </div>
+                                                                userList.length < totalLength &&
+                                                                <>
+                                                                    {
+                                                                        userListLoadingMore ? 
+                                                                            <div className="align-center mx-auto">
+                                                                                <FadingCubesLoader height={50} width={50} />
+                                                                            </div>
+                                                                            :
+                                                                            <div className="align-center mx-auto">
+                                                                                <PrimaryButton2 
+                                                                                    onClick={() => void handleLoadMore()}
+                                                                                    paddingY={1}>
+                                                                                    <p>Load More</p>
+                                                                                </PrimaryButton2>
+                                                                            </div>
+                                                                    }
+                                                                </> 
                                                             }
                                                         </div>
                                                     </div>

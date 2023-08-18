@@ -484,7 +484,7 @@ export const getDummyUserToContact = (date: string, modelId: string, endDate: st
     faker.seed(seed)
 
     const users:UserToContact[] = []
-    for(let i = 0; i < 200; i++) {
+    for(let i = 0; i < 10; i++) {
         users.push({
             id: faker.string.uuid(),
             distinctId: faker.internet.email(),

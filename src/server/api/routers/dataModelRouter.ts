@@ -109,6 +109,11 @@ export type UserToContact = {
     feedback?: number | null,
 }
 
+export type UserToContactPaginationResponse = {
+    users: UserToContact[],
+    total: number,
+}
+
 export const dataModelRouter = createTRPCRouter({
     getModels: protectedProcedure
         .mutation(async ({ ctx }):Promise<DataModelList[]> => {
@@ -1141,15 +1146,21 @@ export const dataModelRouter = createTRPCRouter({
             endDate: z.string({
                 required_error: "End date is required"
             }),
+            skip: z.number({
+                required_error: "Skip is required"
+            })
         }))
-        .mutation(async ({ctx, input}): Promise<UserToContact[]>=> {
+        .mutation(async ({ctx, input}): Promise<UserToContactPaginationResponse>=> {
             const user = await ctx.prisma.user.findUnique({
                 where: {
                     id: ctx.session.user.id,
                 }
             });
             if(user?.isDummy) {
-                return getDummyUserToContact(input.modelId, input.date, input.endDate);
+                return {
+                    users: getDummyUserToContact(input.modelId, input.date, input.endDate),
+                    total: 10
+                }
             }
             
             const date = moment(input.date, "DD/MM/YYYY")
@@ -1184,6 +1195,10 @@ export const dataModelRouter = createTRPCRouter({
                 })
 
             }
-            return results;
+            
+            return {
+                users: results.slice(input.skip, input.skip + 10),
+                total: results.length
+            };
         }),
 })
