@@ -7,7 +7,7 @@ import { BaseLayout2 } from "~/components/BaseLayout2";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import Select from "~/components/Select";
-import { type ChurnCards, type DataModelList, type ChurnByThreshold, type UserToContact, UserToContactPaginationResponse } from "~/server/api/routers/dataModelRouter";
+import { type ChurnCards, type DataModelList, type ChurnByThreshold, type UserToContact, type UserToContactPaginationResponse } from "~/server/api/routers/dataModelRouter";
 import { type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 import Image from "next/image";
@@ -44,7 +44,6 @@ const CustomerSuccess: NextPage = () => {
     const [userListLoading, setUserListLoading] = useState<boolean>(true);
     const [totalLength, setTotalLength] = useState<number>(0);
     const [userListLoadingMore, setUserListLoadingMore] = useState<boolean>(false);
-    const [skip, setSkip] = useState<number>(0); // for pagination
 
     const loading = churnCardLoading || insightsLoading;
 
@@ -161,13 +160,12 @@ const CustomerSuccess: NextPage = () => {
     const handleLoadMore = () => {
         console.log("WHY ARE YOU GETTING CALLED?")
         setUserListLoadingMore(true);
-        setSkip(skip + 10);
         if(!selectedDate || !selectedModelId || !selectedDate) return;
         runGetUserList.mutate({
             date: selectedDate,
             modelId: selectedModelId,
             endDate: selectedDate,
-            skip: skip,
+            skip: userList.length,
         });
     }
 
@@ -197,7 +195,7 @@ const CustomerSuccess: NextPage = () => {
             date: date,
             modelId: modelId,
             endDate: endDate,
-            skip: skip,
+            skip: userList.length,
         });
 
         if(modelChange) {
