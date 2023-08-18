@@ -102,6 +102,7 @@ const RevenueForecast: NextPage = () => {
                 setSelectedMetric(data.metrics[0]?.id);
                 setSelectedTimePeriod(data.timePeriod[0]?.id);
                 reRunAllQueries(data.metrics[0]?.name, data.dimensions[0]?.name, data.timePeriod[0]?.name, defaultDateValue, true, data.model.id);
+                setAggregateDimensionForecastLoading(true);
                 runGetAggregatedForecastByDimension.mutate({
                     startDate: defaultDateValue,
                     timePeriod: data.timePeriod[0]?.name,
@@ -166,6 +167,7 @@ const RevenueForecast: NextPage = () => {
         const timePeriodName = timePeriod.find((timePeriodItem) => timePeriodItem.value === selectedTimePeriod)?.label;
         if(!metricName || !dimensionName || !timePeriodName || !forecastModel) return;
         reRunAllQueries(metricName, dimensionName, timePeriodName, value);
+        setAggregateDimensionForecastLoading(true);
         runGetAggregatedForecastByDimension.mutate({
             startDate: value,
             timePeriod: timePeriodName,
@@ -183,6 +185,7 @@ const RevenueForecast: NextPage = () => {
         const timePeriodName = timePeriod.find((timePeriodItem) => timePeriodItem.value === value)?.label;
         if(!metricName || !dimensionName || !timePeriodName || !forecastModel) return;
         reRunAllQueries(metricName, dimensionName, timePeriodName, selectedStartDate);
+        setAggregateDimensionForecastLoading(true);
         runGetAggregatedForecastByDimension.mutate({
             startDate: selectedStartDate,
             timePeriod: timePeriodName,
@@ -339,7 +342,7 @@ const RevenueForecast: NextPage = () => {
                                             <div className="grid gap-4 mb-8 bg-white drop-shadow-md rounded-lg">
                                                 {
                                                     aggregateDimensionForecastLoading || !aggregateDimensionForecast ?
-                                                        <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
+                                                        <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
                                                                 <div className="text-dark-text-colour font-medium my-auto p-6">Top 5 Campaigns</div>
@@ -402,7 +405,7 @@ const RevenueForecast: NextPage = () => {
                                                             <div className="text-dark-text-colour font-medium my-auto">Actionables Derived from your Data using AI 🤖</div>
                                                         </div>
                                                         <div className="grid grid-cols-[1fr_2fr]">
-                                                            <div className="p-4">
+                                                            <div className="p-4 max-h-72 overflow-y-auto">
                                                                 {
                                                                 insights.map((insight, index) => {                                                                    
                                                                         if(insight.id === selectedInsight.id) {

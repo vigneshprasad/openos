@@ -102,6 +102,7 @@ const ItemSalesForecast: NextPage = () => {
                 setSelectedMetric(data.metrics[0]?.id);
                 setSelectedTimePeriod(data.timePeriod[0]?.id);
                 reRunAllQueries(data.metrics[0]?.name, data.dimensions[0]?.name, data.timePeriod[0]?.name, defaultDateValue, true, data.model.id);
+                setAggregateDimensionForecastLoading(true);
                 runGetAggregatedForecastByDimension.mutate({
                     startDate: defaultDateValue,
                     timePeriod: data.timePeriod[0]?.name,
@@ -165,6 +166,7 @@ const ItemSalesForecast: NextPage = () => {
         const dimensionName = dimensions.find((dimensionItem) => dimensionItem.value === selectedDimension)?.label;
         const timePeriodName = timePeriod.find((timePeriodItem) => timePeriodItem.value === selectedTimePeriod)?.label;
         if(!metricName || !dimensionName || !timePeriodName || !forecastModel) return;
+        setAggregateDimensionForecastLoading(true);
         reRunAllQueries(metricName, dimensionName, timePeriodName, value);
         runGetAggregatedForecastByDimension.mutate({
             startDate: value,
@@ -182,6 +184,7 @@ const ItemSalesForecast: NextPage = () => {
         const dimensionName = dimensions.find((dimensionItem) => dimensionItem.value === selectedDimension)?.label;
         const timePeriodName = timePeriod.find((timePeriodItem) => timePeriodItem.value === value)?.label;
         if(!metricName || !dimensionName || !timePeriodName || !forecastModel) return;
+        setAggregateDimensionForecastLoading(true);
         reRunAllQueries(metricName, dimensionName, timePeriodName, selectedStartDate);
         runGetAggregatedForecastByDimension.mutate({
             startDate: selectedStartDate,
@@ -339,7 +342,7 @@ const ItemSalesForecast: NextPage = () => {
                                             <div className="grid gap-4 mb-8 bg-white drop-shadow-md rounded-lg">
                                                 {
                                                     aggregateDimensionForecastLoading || !aggregateDimensionForecast ?
-                                                        <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
+                                                        <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                         <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                             <div className="border-b border-border-colour">
                                                                 <div className="text-dark-text-colour font-medium my-auto p-6">Top 5 Items</div>
@@ -402,7 +405,7 @@ const ItemSalesForecast: NextPage = () => {
                                                             <div className="text-dark-text-colour font-medium my-auto">Actionables Derived from your Data using AI 🤖</div>
                                                         </div>
                                                         <div className="grid grid-cols-[1fr_2fr]">
-                                                            <div className="p-4">
+                                                            <div className="p-4 max-h-72 overflow-y-auto">
                                                                 {
                                                                 insights.map((insight, index) => {                                                                    
                                                                         if(insight.id === selectedInsight.id) {

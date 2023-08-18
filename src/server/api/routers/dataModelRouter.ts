@@ -123,7 +123,7 @@ export const dataModelRouter = createTRPCRouter({
             }            
 
             let models = []
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com" || user?.email === "tarun@openos.tools") {
                 models = await ctx.prisma.dataModel.findMany({
                     where: {
                         completionStatus: true,
@@ -173,7 +173,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });        
 
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com" || user?.email === "tarun@openos.tools") {
                 return ctx.prisma.dataModel.findMany();
             }
 

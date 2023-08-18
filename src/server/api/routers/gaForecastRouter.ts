@@ -8,7 +8,7 @@ import { type GraphData } from "./dataModelRouter";
 import axios from "axios";
 import { GA_FORECAST_API_URL, GA_AGGREGATE_API_URL } from "~/constants/prophetConstants";
 import { TRPCError } from "@trpc/server";
-import { type GATimePeriodOption, type GADimension, type GAForecastModel, GAInsights, GAForecastModelType } from "@prisma/client";
+import { type GATimePeriodOption, type GADimension, type GAForecastModel, type GAInsights, type GAForecastModelType } from "@prisma/client";
 import moment from "moment";
 
 export type ForecastResults = {
@@ -61,7 +61,7 @@ export const gaForecastRouter = createTRPCRouter({
             const type = input.type as GAForecastModelType;
 
             let model;
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com" || user?.email === "tarun@openos.tools") {
                 model = await ctx.prisma.gAForecastModel.findFirst({
                     where: {
                         type: type,
@@ -129,7 +129,7 @@ export const gaForecastRouter = createTRPCRouter({
             }
             
             let gaObject;
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com" || user?.email === "tarun@openos.tools") {
                 gaObject = await ctx.prisma.googleAnalytics.findFirst({
                     orderBy: [{
                         updatedAt: "desc"
@@ -197,7 +197,7 @@ export const gaForecastRouter = createTRPCRouter({
             }
 
             let gaObject;
-            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com") {
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com" || user?.email === "tarun@openos.tools") {
                 gaObject = await ctx.prisma.googleAnalytics.findFirst({
                     orderBy: [{
                         updatedAt: "desc"
@@ -224,7 +224,6 @@ export const gaForecastRouter = createTRPCRouter({
                     message: "No data found"
                 })
             }
-
 
             const startDate = moment(input.startDate, "DD-MM-YYYY").format("YYYY-MM-DD")
             
