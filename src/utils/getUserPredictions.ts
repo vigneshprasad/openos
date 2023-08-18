@@ -11,13 +11,16 @@ export const getUserPredictions = async (modelId: string, start?: Moment, end?: 
 
     let userPredictions:UserPrediction[] = [];
 
-    userPredictionCount = userPredictionCount > 5000 ? 5000 : userPredictionCount;
+    userPredictionCount = userPredictionCount > 5000 ? 3000 : userPredictionCount;
 
     for(let i = 0; i < userPredictionCount; i = i + 1000) {
         
         const userPredictionChunk = await prisma.userPrediction.findMany({
             where: {
                 dataModelId: modelId,
+            },
+            orderBy: {
+                dateOfEvent: 'desc',
             },
             skip: i,
             take: 1000,
