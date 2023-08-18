@@ -114,13 +114,6 @@ const GrowthMarketing: NextPage = () => {
         }
     });
 
-    // const runGetUserList = api.dataModelRouter.getUserList.useMutation({
-    //     onSuccess: (userList) => {
-    //         setUserList(userList);
-    //         setUserListLoading(false);
-    //     }
-    // })
-
     const runGetFeatures = api.dataModelRouter.getFeatures.useMutation({
         onSuccess: (data: FeatureImportance[]) => {
             setFeatures(data);
@@ -251,11 +244,6 @@ const GrowthMarketing: NextPage = () => {
             modelId: modelId,
             endDate: endDate,
         });
-        // runGetUserList.mutate({
-        //     date: date,
-        //     modelId: modelId,
-        //     endDate: endDate,
-        // });
         runGetUsersToIncludeAndExclude.mutate({
             date: date,
             modelId: modelId,

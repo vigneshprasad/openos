@@ -597,8 +597,8 @@ export const dataModelRouter = createTRPCRouter({
                 actualChurnDeviation: 0
             }
 
-            const previousPeriodUsers = await getUserPredictions(input.modelId, previous_start_date, previous_end_date);
-            const currentPeriodUsers = await getUserPredictions(input.modelId, date, end_date);
+            const previousPeriodUsers = await getUserPredictions(input.modelId, previous_start_date, previous_end_date, true);
+            const currentPeriodUsers = await getUserPredictions(input.modelId, date, end_date, true);
 
             churnResults.totalUsers = currentPeriodUsers.length;
             churnResults.totalUsersDeviation = (currentPeriodUsers.length - previousPeriodUsers.length) / previousPeriodUsers.length * 100;
