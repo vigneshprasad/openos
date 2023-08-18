@@ -43,13 +43,15 @@ export const getUserPredictions = async (modelId: string, start?: Moment, end?: 
 }
 
 export const getUserPredictionsSortedByProbability = async (modelId: string, start?: Moment, end?: Moment, orderByAsc?: boolean ): Promise<UserPrediction[]> => {
-    const userPredictionCount = await prisma.userPrediction.count({
+    let userPredictionCount = await prisma.userPrediction.count({
         where: {
             dataModelId: modelId,
         },
     });
 
     let userPredictions:UserPrediction[] = [];
+
+    userPredictionCount = userPredictionCount > 5000 ? 3000 : userPredictionCount;
 
     for(let i = 0; i < userPredictionCount; i = i + 1000) {
         const userPredictionChunk = await prisma.userPrediction.findMany({
