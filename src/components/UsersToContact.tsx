@@ -31,7 +31,7 @@ const UsersToContactTable = ({
                                 </div>
                             </div>
                             <div className="my-auto text-center">{(item.probability * 100).toFixed(2)}%</div>
-                            <div className="my-auto text-center">{item.phoneNumber}</div>
+                            <div className="my-auto text-center">{item.phoneNumber?.split('.')[0]}</div>
                             <div className="my-auto text-center"><UserPredictionFeedback userPrediction={item}/></div>
                         </div>
                     ))

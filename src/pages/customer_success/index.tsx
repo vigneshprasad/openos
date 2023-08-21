@@ -107,6 +107,7 @@ const CustomerSuccess: NextPage = () => {
     // SELECTION HANDLERS
     const handleModelChange = (value: string, dataModels?: DataModelList[]) => {
         setSelectedModelId(value);
+        setUserList([]);
         let selectedModel = models?.find((model: DataModelList) => model.model.id === value);
         if(dataModels) {
             selectedModel = dataModels?.find((model: DataModelList) => model.model.id === value);
@@ -158,7 +159,6 @@ const CustomerSuccess: NextPage = () => {
     }
 
     const handleLoadMore = () => {
-        console.log("WHY ARE YOU GETTING CALLED?")
         setUserListLoadingMore(true);
         if(!selectedDate || !selectedModelId || !selectedDate) return;
         runGetUserList.mutate({

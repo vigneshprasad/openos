@@ -838,7 +838,11 @@ export const dataModelRouter = createTRPCRouter({
             });
 
             // Get all the user predictions for the model in the relevant time period
-            const userPredictions = await getUserPredictions(input.modelId, date, end);
+            let userPredictions = await getUserPredictions(input.modelId, date, end);
+
+            userPredictions = userPredictions.filter((userPrediction) => {
+                return userPrediction.userDistinctId !== undefined && userPrediction.userDistinctId !== null && userPrediction.userDistinctId !== "";
+            });
 
             const headings: string[] = ['converted_predicted', '0_predicted_proba', '1_predicted_proba'];
             for(let j = 0; j < userPredictions.length; j++) {
@@ -1184,6 +1188,7 @@ export const dataModelRouter = createTRPCRouter({
                 let phone = "Unknown";
                 if(model?.phoneNumberField && userData.hasOwnProperty(model?.phoneNumberField)) {
                     phone = userData[model?.phoneNumberField] as string;
+
                 }
                 results.push({
                     id: userPrediction.id,
