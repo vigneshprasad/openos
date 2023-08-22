@@ -298,5 +298,32 @@ export const gaForecastRouter = createTRPCRouter({
                 }
             });
         }),
+
+    getProductCorrelations: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model Id is required"
+            })  
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+
+            if(user?.isDummy) {
+                // return dummyInsights;
+            }            
+
+            return ctx.prisma.productCorrelation.findMany({
+                where: {
+                    gaForecastModelId: input.modelId
+                },
+                orderBy: {
+                    correlationValue: "desc"
+                }
+            });
+        }),
 });
   

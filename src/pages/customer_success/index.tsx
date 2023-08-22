@@ -1,4 +1,4 @@
-import type { Insights } from "@prisma/client";
+import { CustomerSuccessUsersFilter, type Insights } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import router from "next/router";
@@ -14,6 +14,7 @@ import Image from "next/image";
 import moment from "moment";
 import ChurnByThresholdTable from "~/components/ChurnByThresholdTable";
 import UsersToContactTable from "~/components/UsersToContact";
+import { set } from "zod";
 
 
 const CustomerSuccess: NextPage = () => {
@@ -38,6 +39,12 @@ const CustomerSuccess: NextPage = () => {
     // CHURN BY THRESHOLD STATES
     const [churnByThreshold, setChurnByThreshold] = useState<ChurnByThreshold[]>();
     const [churnByThresholdLoading, setChurnByThresholdLoading] = useState<boolean>(true);
+
+    // USER FILTER STATES
+    const [userFilterList, setUserFilterList] = useState<SelectOption[]>([]);
+    const [userFilterListLoading, setUserFilterListLoading] = useState<boolean>(true);
+    const [selectedUserFilter, setSelectedUserFilter] = useState<string>();
+    const [userFilterInputText, setUserFilterInputText] = useState<string>();
 
     // USER LIST STATES
     const [userList, setUserList] = useState<UserToContact[]>([]);
@@ -101,6 +108,22 @@ const CustomerSuccess: NextPage = () => {
             setTotalLength(data.total);          
             setUserListLoading(false);
             setUserListLoadingMore(false);
+        }
+    })
+
+    const runGetCustomerSuccessUsersFilter = api.dataModelRouter.getCustomerSuccessUsersFilter.useMutation({
+        onSuccess: (data: CustomerSuccessUsersFilter[]) => {
+            let userFilterList = data.map((filter) => ({
+                label: filter.fieldName,
+                value: filter.id,
+            }));
+            userFilterList = [{
+                label: 'All',
+                value: 'all',
+            }, ...userFilterList]
+            setUserFilterList(userFilterList);
+            setSelectedUserFilter(userFilterList[0]?.value);
+            setUserFilterListLoading(false);
         }
     })
 
@@ -169,6 +192,29 @@ const CustomerSuccess: NextPage = () => {
         });
     }
 
+    const handleUserFilterSubmit = () => {
+        if(!selectedUserFilter || !selectedModelId || !selectedDate) return;
+        const selectedFilter = userFilterList.find((filter) => filter.value === selectedUserFilter);
+        selectedUserFilter === 'all' ? undefined : selectedUserFilter;
+        setUserListLoading(true);
+        setUserList([]);
+        runGetUserList.mutate({
+            date: selectedDate,
+            modelId: selectedModelId,
+            endDate: selectedDate,
+            skip: 0,
+            filterName: selectedFilter?.label,
+            filterValue: userFilterInputText,
+        });
+    }
+
+    const handleCustomerSuccessFilterChange = (value: string) => {
+        // if(!value) return;
+        const selectedFilter = userFilterList.find((filter) => filter.value === value);
+        if(!selectedFilter) return;
+        setSelectedUserFilter(selectedFilter?.value as string);
+    }
+
 
     // RE-RUN ALL QUERIES
     const reRunAllQueries = (modelId: string, date: string, endDate: string, modelChange?: boolean) => {
@@ -200,6 +246,9 @@ const CustomerSuccess: NextPage = () => {
 
         if(modelChange) {
             runGetInsights.mutate({
+                modelId: modelId,
+            });
+            runGetCustomerSuccessUsersFilter.mutate({
                 modelId: modelId,
             });
         }
@@ -387,19 +436,42 @@ const CustomerSuccess: NextPage = () => {
 
                                         {/* User List*/}
                                         {
-                                            (userList === undefined || userList.length > 0) &&
                                             <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                                 {
-                                                    userListLoading || !userList || !totalLength ?
+                                                    userListLoading || !userList || !totalLength || userFilterListLoading ?
                                                     <div className="flex justify-center"> 
                                                         <FadingCubesLoader height={100} width={100} /> 
                                                     </div> :
                                                     <div className="grid grid-rows-[auto_1fr_auto] h-full">
-                                                        <div className="border-b border-border-colour">
+                                                        <div className="border-b border-border-colour flex justify-between">
                                                             <div className="text-dark-text-colour font-medium my-auto p-6">List of Users Likely to Convert</div>
+                                                            <div className="flex flex-row my-auto p-6 gap-2">
+                                                                <Select
+                                                                    title="Form ID"
+                                                                    options={userFilterList}
+                                                                    onChange={handleCustomerSuccessFilterChange}
+                                                                    value={selectedUserFilter} />
+                                                                <input 
+                                                                    className="border-2 border-border-colour rounded-md p-2 w-72 h-[36px] text-light-text-colour"
+                                                                    placeholder="Enter Value"
+                                                                    value={userFilterInputText}
+                                                                    onChange={(e) => setUserFilterInputText(e.target.value)} />
+                                                                <PrimaryButton2 
+                                                                    onClick={() => void handleUserFilterSubmit()}
+                                                                    paddingY={2}>
+                                                                    <p>Submit</p>
+                                                                </PrimaryButton2>
+                                                            </div>
                                                         </div>
                                                         <div>
-                                                            <UsersToContactTable users={userList} />
+                                                            {
+                                                                userList.length > 0 ?
+                                                                <UsersToContactTable users={userList} />
+                                                                :
+                                                                <div className="flex justify-center">
+                                                                    <p>No Users Found</p>
+                                                                </div>
+                                                            }
                                                         </div>
                                                         <div className="border-t border-border-colour p-4">
                                                             {

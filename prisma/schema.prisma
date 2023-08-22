@@ -271,29 +271,30 @@ model SQLQueryModification {
 }
 
 model DataModel {
-    id                    String                  @id @default(cuid())
-    createdAt             DateTime                @default(now())
-    updatedAt             DateTime                @updatedAt
-    deletedAt             DateTime?
-    userId                String
-    type                  String
-    name                  String
-    userFilter            String?
-    predictionTimeframe   String?
-    eventA                String
-    eventB                String?
-    eventAFrequency       Int?
-    predictionWindow      Int?
-    description           String
-    completionStatus      Boolean                 @default(false)
-    timeInterval          Int?
-    phoneNumberField      String?
-    user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    FeatureImportance     FeatureImportance[]
-    UserPrediction        UserPrediction[]
-    Cohorts               Cohorts[]
-    Insights              Insights[]
-    DataModelPrimaryGraph DataModelPrimaryGraph[]
+    id                         String                       @id @default(cuid())
+    createdAt                  DateTime                     @default(now())
+    updatedAt                  DateTime                     @updatedAt
+    deletedAt                  DateTime?
+    userId                     String
+    type                       String
+    name                       String
+    userFilter                 String?
+    predictionTimeframe        String?
+    eventA                     String
+    eventB                     String?
+    eventAFrequency            Int?
+    predictionWindow           Int?
+    description                String
+    completionStatus           Boolean                      @default(false)
+    timeInterval               Int?
+    phoneNumberField           String?
+    user                       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    FeatureImportance          FeatureImportance[]
+    UserPrediction             UserPrediction[]
+    Cohorts                    Cohorts[]
+    Insights                   Insights[]
+    DataModelPrimaryGraph      DataModelPrimaryGraph[]
+    CustomerSuccessUsersFilter CustomerSuccessUsersFilter[]
 
     @@index([userId])
 }
@@ -477,7 +478,8 @@ model GAForecastModel {
     GAInsights            GAInsights[]
     GAModelPrimaryCohorts GAModelPrimaryCohorts[]
 
-    type GAForecastModelType @default(SALES_FORECAST)
+    type               GAForecastModelType  @default(SALES_FORECAST)
+    ProductCorrelation ProductCorrelation[]
 
     @@index([googleAnalyticsId])
     @@index([userId])
@@ -534,4 +536,32 @@ enum GAForecastModelType {
     USER_RETENTION
     REVENUE_FORECAST
     ITEM_SALES_FORECAST
+}
+
+model ProductCorrelation {
+    id                String          @id @default(cuid())
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+    gaForecastModelId String
+    product1Name      String
+    product2Name      String
+    product1ImageUrl  String
+    product2ImageUrl  String
+    correlationValue  Float
+    gaForecastModel   GAForecastModel @relation(fields: [gaForecastModelId], references: [id], onDelete: Cascade)
+
+    @@index([gaForecastModelId])
+}
+
+model CustomerSuccessUsersFilter {
+    id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    deletedAt   DateTime?
+    fieldName   String
+    dataModelId String
+    dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+
+    @@index([dataModelId])
 }

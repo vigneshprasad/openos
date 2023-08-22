@@ -5,7 +5,7 @@ import Head from "next/head";
 import { type NextPage } from "next";
 import { useEffect, useState } from "react";
 
-import { type GAInsights, type GAForecastModel, type GAFeatureImportance, GAForecastModelType } from "@prisma/client";
+import { type GAInsights, type GAForecastModel, type GAFeatureImportance, GAForecastModelType, ProductCorrelation } from "@prisma/client";
 import { BaseLayout2 } from "~/components/BaseLayout2";
 import { FadingCubesLoader } from "~/components/FadingCubesLoader";
 import Select from "~/components/Select";
@@ -16,6 +16,7 @@ import AreaGraph from "~/components/AreaGraph";
 import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import FeaturesImportanceTable from "~/components/FeatureImportanceTable";
 import { type AggregatedForecastByDimension } from "~/server/api/routers/gaForecastRouter";
+import ProductCorrelations from "~/components/ProductCorrelations";
 
 const ItemSalesForecast: NextPage = () => {
 
@@ -43,6 +44,11 @@ const ItemSalesForecast: NextPage = () => {
     // AGGREGATE DIMENSION FORECAST
     const [aggregateDimensionForecast, setAggregateDimensionForecast] = useState<AggregatedForecastByDimension>();
     const [aggregateDimensionForecastLoading, setAggregateDimensionForecastLoading] = useState<boolean>(true); 
+
+    // PRODUCT CORRELATIONS
+    const [productCorrelations, setProductCorrelations] = useState<ProductCorrelation[]>();
+    const [productCorrelationsLoading, setProductCorrelationsLoading] = useState<boolean>(true);
+
 
 
     // INSIGHT AND ACTIONABLE INSIGHTS
@@ -155,6 +161,13 @@ const ItemSalesForecast: NextPage = () => {
         }
     })
 
+    const runGetProductCorrelations = api.gaForecastRouter.getProductCorrelations.useMutation({
+        onSuccess: (data) => {
+            setProductCorrelations(data);
+            setProductCorrelationsLoading(false);
+        }
+    })
+
 
 
     // SELECTION HANDLERS
@@ -230,10 +243,14 @@ const ItemSalesForecast: NextPage = () => {
         if(modelChange && modelId) {
             setFeaturesLoading(true);
             setInsightsLoading(true);
+            setProductCorrelationsLoading(true);
             runGetFeatures.mutate({
                 modelId: modelId,
             });
             runGetInsights.mutate({
+                modelId: modelId,
+            });
+            runGetProductCorrelations.mutate({
                 modelId: modelId,
             });
         }
@@ -374,20 +391,20 @@ const ItemSalesForecast: NextPage = () => {
                                             </div>
                                         }
 
-                                        {/* Feature Importance */}
+                                        {/* Product Correlation */}
                                         {
-                                            (features === undefined || features.length > 0) &&
+                                            (productCorrelations === undefined || productCorrelations.length > 0) &&
                                                 <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                                 {
-                                                    featuresLoading || !features ?
+                                                    featuresLoading || !features || !productCorrelations ?
                                                         <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                         <div>
                                                             <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
                                                                 <div className="text-dark-text-colour font-medium my-auto">
-                                                                    Features impacting the target variable 🎯
+                                                                    Product Sales Correlated With Each Other
                                                                 </div>                                                  
                                                             </div>
-                                                            <FeaturesImportanceTable features={features} />
+                                                            <ProductCorrelations productCorrelations={productCorrelations} />
                                                         </div>
                                                 }
                                             </div>

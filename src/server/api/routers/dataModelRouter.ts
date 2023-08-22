@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type Prisma, type DataModel } from "@prisma/client";
+import { type Prisma, type DataModel, CustomerSuccessUsersFilter } from "@prisma/client";
 import { dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
+import { form } from "@segment/analytics-next/dist/types/core/auto-track";
 
 export type Cohort = {
     name: string,
@@ -1151,7 +1152,9 @@ export const dataModelRouter = createTRPCRouter({
             }),
             skip: z.number({
                 required_error: "Skip is required"
-            })
+            }),
+            filterName: z.string().optional(),
+            filterValue: z.string().optional(),
         }))
         .mutation(async ({ctx, input}): Promise<UserToContactPaginationResponse>=> {
             const user = await ctx.prisma.user.findUnique({
@@ -1171,12 +1174,27 @@ export const dataModelRouter = createTRPCRouter({
 
             const model = await ctx.prisma.dataModel.findUnique({
                 where: {
-                    id: input.modelId
+                    id: input.modelId,
                 },
             });
 
             // Get all the user predictions for the model in the relevant time period
-            const userPredictions = await getUserPredictionsSortedByProbability(input.modelId, date, end);
+            let userPredictions = await getUserPredictionsSortedByProbability(input.modelId, date, end);
+            userPredictions = userPredictions.filter((userPrediction) => {
+                return userPrediction.userDistinctId !== undefined && userPrediction.userDistinctId !== null && userPrediction.userDistinctId !== "";
+            });
+
+            if(input.filterName && input.filterValue) {
+                userPredictions = userPredictions.filter((userPrediction) => {
+                    const userData = userPrediction.userData as Prisma.JsonObject
+                    if(input.filterName && userData.hasOwnProperty(input.filterName)) {
+                        return userData[input.filterName] === input.filterValue;
+                    } else {
+                        return false;
+                    }
+                })
+            }
+
             const results: UserToContact[] = [];
             
             for(let j = 0; j < userPredictions.length; j++) {
@@ -1204,5 +1222,20 @@ export const dataModelRouter = createTRPCRouter({
                 users: results.slice(input.skip, input.skip + 10),
                 total: results.length
             };
+        }),
+
+    getCustomerSuccessUsersFilter: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+        }))
+        .mutation(async ({ctx, input}): Promise<CustomerSuccessUsersFilter[]>=> {
+            const filters = await ctx.prisma.customerSuccessUsersFilter.findMany({
+                where: {
+                    dataModelId: input.modelId
+                }
+            });
+            return filters;
         }),
 })
