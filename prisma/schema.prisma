@@ -64,6 +64,7 @@ model User {
     AmplitudeResource   AmplitudeResource[]
     GAForecastModel     GAForecastModel[]
     GAInsights          GAInsights[]
+    UserDataModelAccess UserDataModelAccess[]
 }
 
 model VerificationToken {
@@ -295,6 +296,7 @@ model DataModel {
     Insights                   Insights[]
     DataModelPrimaryGraph      DataModelPrimaryGraph[]
     CustomerSuccessUsersFilter CustomerSuccessUsersFilter[]
+    UserDataModelAccess        UserDataModelAccess[]
 
     @@index([userId])
 }
@@ -563,5 +565,19 @@ model CustomerSuccessUsersFilter {
     dataModelId String
     dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
 
+    @@index([dataModelId])
+}
+
+model UserDataModelAccess {
+    id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    deletedAt   DateTime?
+    userId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+    dataModelId String
+
+    @@index([userId])
     @@index([dataModelId])
 }
