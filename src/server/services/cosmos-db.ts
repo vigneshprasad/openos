@@ -56,7 +56,7 @@ export const getChurnCards = async (modelId: string, startDate: string, endDate:
         actualChurn: currentActualChurnedUsers / currentActualTotalUsers * 100,
         actualChurnDeviation: currentActualChurn - previousActualChurn,
     }
-
+    
     return churnResults
     
 }
@@ -134,32 +134,31 @@ export const getModelPrimaryGraph = async (modelId: string, startDate: string, e
         const resultsChurned = (await runQuery(querySpecChurned, modelId)).resources as unknown as IResultType[]
         const results2Churned = (await runQuery(querySpec2Churned, modelId)).resources as unknown as IResultType[]
 
+
         for(let j = 0; j < 5; j++) { 
-            if(!resultsChurned[j] || !resultsTotal[j] || !results2Churned[j] || !results2Total[j]) {
-                continue
-            }
-
-            const resultValue = resultsTotal.find((item) => item.label === resultData.cohort1.data[j]?.name)?.value
-            const resultChurnValue = resultsChurned.find((item) => item.label === resultData.cohort1.data[j]?.name)?.value
+            let resultValue = resultsTotal.find((item) => item.label === resultData.cohort1.data[j]?.name)?.value
+            let resultChurnValue = resultsChurned.find((item) => item.label === resultData.cohort1.data[j]?.name)?.value
+            resultChurnValue = resultChurnValue ? resultChurnValue : 0
+            resultValue = resultValue ? resultValue : 0
             
-            if(resultValue !== undefined && resultChurnValue !== undefined) {
-                const cohort1result = resultChurnValue  / resultValue
-                resultData.cohort1.data[j]?.data.push(
-                    cohort1result
-                )
-            }
+            const cohort1result = resultChurnValue  / resultValue
+            resultData.cohort1.data[j]?.data.push(
+                cohort1result
+            )
 
-            const result2Value = results2Total.find((item) => item.label === resultData.cohort2.data[j]?.name)?.value
-            const result2ChurnValue = results2Churned.find((item) => item.label === resultData.cohort2.data[j]?.name)?.value
+            let result2Value = results2Total.find((item) => item.label === resultData.cohort2.data[j]?.name)?.value
+            let result2ChurnValue = results2Churned.find((item) => item.label === resultData.cohort2.data[j]?.name)?.value
 
-            if(result2ChurnValue !== undefined && result2Value !== undefined) {
-                const cohort2result = result2ChurnValue / result2Value;
-                resultData.cohort2.data[j]?.data.push(
-                    cohort2result
-                )
-            }
+            result2Value = result2Value ? result2Value : 0
+            result2ChurnValue = result2ChurnValue ? result2ChurnValue : 0
+
+            const cohort2result = result2ChurnValue / result2Value;
+            resultData.cohort2.data[j]?.data.push(
+                cohort2result
+            )
         }
     }
+
     
     return resultData;
 }
@@ -238,7 +237,7 @@ export const getAggregateChurnByPrimaryCohorts = async (modelId: string, startDa
             resultData.cohort1.data.push({
                 title: cohort1Label,
                 totalUsers: resultValue,
-                predictedChurnUsers: resultChurnValue,
+                predictedChurnUsers: resultChurnValue / resultValue * 100,
             });
          
         }
@@ -250,13 +249,11 @@ export const getAggregateChurnByPrimaryCohorts = async (modelId: string, startDa
             resultData.cohort2.data.push({
                 title: cohort2Label,
                 totalUsers: result2Value,
-                predictedChurnUsers: result2ChurnValue,
+                predictedChurnUsers: result2ChurnValue / result2Value * 100,
             });
         }
 
     }
-
-    console.log(resultData);
 
     return resultData;
 }

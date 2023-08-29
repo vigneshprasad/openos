@@ -399,7 +399,6 @@ export const dataModelRouter = createTRPCRouter({
                     timeSeries.push(date.toDate());
                     date.add(1, 'days');
                 }
-                date.add(1, 'days');
                 timeSeries.push(date.toDate());
             } else {
                 period = 'hourly'
