@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type Prisma, type DataModel, CustomerSuccessUsersFilter } from "@prisma/client";
+import { type Prisma, type DataModel, type CustomerSuccessUsersFilter } from "@prisma/client";
 import { dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { form } from "@segment/analytics-next/dist/types/core/auto-track";
+import { getChurnCards, getLastDate, getModelPrimaryGraph } from "~/server/services/cosmos-db";
 
 export type Cohort = {
     name: string,
@@ -162,22 +162,28 @@ export const dataModelRouter = createTRPCRouter({
             for(let i = 0; i < models.length; i++) {
                 const model = models[i]
                 const modelId = models[i]?.id;
-                const start_date = models[i]?.createdAt;
+                const start_date = models[i]?.predictionStartDate;
                 if(!model || !start_date || !modelId) continue;
-                const userPredictions = await ctx.prisma.userPrediction.findFirst({
-                    where: {
-                        dataModelId: modelId
-                    },
-                    orderBy: {
-                       dateOfEvent: "desc"
-                    }
-                });
+                let lastDate;
+                if (model?.isCosmosDB) {
+                    lastDate = await getLastDate(modelId);
+                } else {
+                    const userPredictions = await ctx.prisma.userPrediction.findFirst({
+                        where: {
+                            dataModelId: modelId
+                        },
+                        orderBy: {
+                        dateOfEvent: "desc"
+                        }
+                    });
+                    lastDate = userPredictions?.dateOfEvent;
+                }
 
-                if(!userPredictions) continue;
+                if(!lastDate) continue;
                 results.push({
                     model: model,
                     start_date: start_date,
-                    end_date: userPredictions.dateOfEvent
+                    end_date: lastDate,
                 })   
             }
 
@@ -216,7 +222,6 @@ export const dataModelRouter = createTRPCRouter({
             });
             models = models.concat(additionalModels);
             return models;
-
         }),
 
     getFeatures: protectedProcedure
@@ -375,6 +380,12 @@ export const dataModelRouter = createTRPCRouter({
                 return getDummyModelGraph(input.date, input.modelId, input.endDate);
             }  
 
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
             // Get time series based on whether the data is weekly or hourly
             const timeSeries: Date[] = []
             const startDate = moment(input.date, "DD/MM/YYYY")
@@ -400,10 +411,6 @@ export const dataModelRouter = createTRPCRouter({
 
             // Get all the user predictions for the model in the relevant time period
             const usersPredictions = await getUserPredictions(input.modelId, startDate, endDate);
-
-            console.log("BRUVVVV START OFFSET: ", startDate.utcOffset())
-            console.log("BRUVVVV USER PREDICTIONS OFFSET: ", moment(usersPredictions[0]?.dateOfEvent).utcOffset())
-            console.log("BRUVVVV TIME SERIES OFFSET: ", moment(timeSeries[0]).utcOffset())
             
             // Get the primary graph parameters for the model
             const dataModelPrimaryGraph = await ctx.prisma.dataModelPrimaryGraph.findFirst({
@@ -429,6 +436,10 @@ export const dataModelRouter = createTRPCRouter({
 
             const predictionCohort1 = dataModelPrimaryGraph?.predictionCohort1;
             const predictionCohort2 = dataModelPrimaryGraph?.predictionCohort2;
+
+            if (model?.isCosmosDB) {
+                return getModelPrimaryGraph(input.modelId, input.date, input.endDate, timeSeries, predictionCohort1, predictionCohort2);
+            }
 
             // Get the frequency of each cohort for each time period
             const predictionCohort1Frequency: {[key: string]: {
@@ -606,6 +617,16 @@ export const dataModelRouter = createTRPCRouter({
             if(user?.isDummy) {
                 return getDummyChurnCards(input.date, input.modelId, input.endDate);
             }  
+
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
+            if(model?.isCosmosDB) {
+                return getChurnCards(input.modelId, input.date, input.endDate);
+            }
     
             const date = moment(input.date, "DD/MM/YYYY")
             const end_date = moment(input.endDate, "DD/MM/YYYY")
