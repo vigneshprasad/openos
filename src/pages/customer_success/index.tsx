@@ -51,7 +51,7 @@ const CustomerSuccess: NextPage = () => {
     const [totalLength, setTotalLength] = useState<number>(0);
     const [userListLoadingMore, setUserListLoadingMore] = useState<boolean>(false);
 
-    const loading = churnCardLoading || insightsLoading;
+    const loading = churnCardLoading || insightsLoading || churnByThresholdLoading || userListLoading || userListLoadingMore;
 
     // SETTING FIRST MODEL AS DEFAULT
     const modelMutation = api.dataModelRouter.getModels.useMutation({
@@ -169,7 +169,7 @@ const CustomerSuccess: NextPage = () => {
         if (moment(value, 'DD/MM/YYYY').isAfter(moment(selectedEndDate, 'DD/MM/YYYY'))) {
             setSelectedEndDate(value);
         }
-        if(loading || !selectedModelId || !selectedEndDate) return;
+        if(!selectedModelId || !selectedEndDate) return;
         reRunAllQueries(selectedModelId, value, selectedEndDate);
     }
 
@@ -225,7 +225,6 @@ const CustomerSuccess: NextPage = () => {
     // RE-RUN ALL QUERIES
     const reRunAllQueries = (modelId: string, date: string, endDate: string, modelChange?: boolean) => {
         setChurnCardLoading(true);
-        setInsightsLoading(true);
         setChurnByThresholdLoading(true);
         setUserListLoading(true);
         
@@ -251,9 +250,11 @@ const CustomerSuccess: NextPage = () => {
         });
 
         if(modelChange) {
+            setInsightsLoading(true);
             runGetInsights.mutate({
                 modelId: modelId,
             });
+            setUserFilterListLoading(true);
             runGetCustomerSuccessUsersFilter.mutate({
                 modelId: modelId,
             });
@@ -279,17 +280,20 @@ const CustomerSuccess: NextPage = () => {
                                     <form className="flex flex-row gap-5 items-center">
                                         <Select
                                             title="Model Name"
+                                            disabled={loading}
                                             options={modelOptions}
                                             onChange={handleModelChange}
                                             value={selectedModelId} />
                                         <Select 
                                             title="Date"
+                                            disabled={loading}
                                             options={dateOptions}
                                             onChange={handleDateChange}
                                             value={selectedDate} />
                                         to
                                         <Select
                                             title="End Date"
+                                            disabled={loading}
                                             onChange={handleEndDateChange}
                                             options={dateOptions.filter((date) => moment(date.value, 'DD/MM/YYYY') >= moment(selectedDate, 'DD/MM/YYYY'))}
                                             value={selectedEndDate} />
