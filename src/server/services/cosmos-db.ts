@@ -1,8 +1,9 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, ChurnByThreshold, UserToContactPaginationResponse, UserToContact } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, type ChurnByThreshold, type UserToContactPaginationResponse, type UserToContact } from "../api/routers/dataModelRouter";
 import moment from "moment";
 import { type ExcelCell } from "~/types/types";
 import { type Prisma } from "@prisma/client";
+import { CONVERSION_MODEL } from "~/constants/modelTypes";
  
 const endpoint = process.env.COSMOS_END_POINT // Add your endpoint
 const masterKey = process.env.COSMOS_MASTER_KEY // Add the masterkey of the endpoint
@@ -308,8 +309,8 @@ export const getIncludeAndExcludeUsers = async (modelId: string, startDate: stri
     includeUserListSheet.push(header);
     excludeUserListSheet.push(header);
 
-    const includeList = type == 'Conversion' ? results : results2;
-    const excludeList = type == 'Conversion' ? results2 : results;
+    const includeList = type == CONVERSION_MODEL ? results : results2;
+    const excludeList = type == CONVERSION_MODEL ? results2 : results;
 
     for(let j = 0; j < includeList.length; j++) {
         const userPrediction = includeList[j] as Prisma.JsonObject;

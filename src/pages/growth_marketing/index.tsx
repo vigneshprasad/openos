@@ -19,6 +19,7 @@ import { api } from "~/utils/api";
 import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import Image from "next/image";
 import moment from "moment";
+import { CONVERSION_MODEL } from "~/constants/modelTypes";
 
 
 const GrowthMarketing: NextPage = () => {
@@ -373,7 +374,7 @@ const GrowthMarketing: NextPage = () => {
                                                             <div className="flex justify-center"> <FadingCubesLoader height={50} width={50} /> </div> :
                                                             <div className="flex flex-col gap-1">
                                                                 <div className="text-dark-grey-text-colour text-sm font-semibold">
-                                                                    Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} Rate
+                                                                    Predicted {selectedModel.model.type == CONVERSION_MODEL ? 'Conversion' : 'Churn'} Rate
                                                                 </div>
                                                                 <div className="text-2xl text-dark-text-colour">
                                                                     {churnCardData?.predictedChurn.toFixed(2)} %
@@ -404,7 +405,7 @@ const GrowthMarketing: NextPage = () => {
                                                             <div className="flex justify-center"> <FadingCubesLoader height={50} width={50} /> </div> :
                                                             <div className="flex flex-col gap-1">
                                                                 <div className="text-dark-grey-text-colour text-sm font-semibold">
-                                                                    Actual {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'}
+                                                                    Actual {selectedModel.model.type == CONVERSION_MODEL ? 'Conversion' : 'Churn'}
                                                                 </div>
                                                                 <div className="text-2xl text-dark-text-colour">
                                                                     {churnCardData?.actualChurn ? churnCardData?.actualChurn.toFixed(2) : '-'} %
@@ -443,7 +444,7 @@ const GrowthMarketing: NextPage = () => {
                                                             <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                             <div>
                                                                 <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
-                                                                    <div className="text-dark-text-colour font-medium my-auto">Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} by Source</div>
+                                                                    <div className="text-dark-text-colour font-medium my-auto">Predicted {selectedModel.model.type == CONVERSION_MODEL ? 'Conversion' : 'Churn'} by Source</div>
                                                                     <Select
                                                                         title="Cohort"
                                                                         options={[{
@@ -479,7 +480,7 @@ const GrowthMarketing: NextPage = () => {
                                                                 <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                                 <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                                     <div className="border-b border-border-colour">
-                                                                        <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} by {aggregateChurnByPrimaryCohorts.cohort1.title}</div>
+                                                                        <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted {selectedModel.model.type == CONVERSION_MODEL ? 'Conversion' : 'Churn'} by {aggregateChurnByPrimaryCohorts.cohort1.title}</div>
                                                                     </div>
                                                                     <div>
                                                                         <CohortTable data={aggregateChurnByPrimaryCohorts.cohort1.data} isConversion={selectedModel.model.type == 'Conversion'}/>
@@ -500,10 +501,10 @@ const GrowthMarketing: NextPage = () => {
                                                                 <div className="flex justify-center"> <FadingCubesLoader height={100} width={100} /> </div> :
                                                                 <div className="grid grid-rows-[auto_1fr_auto] h-full">
                                                                     <div className="border-b border-border-colour">
-                                                                        <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted {selectedModel.model.type == 'Conversion' ? 'Conversion' : 'Churn'} by {aggregateChurnByPrimaryCohorts.cohort2.title}</div>
+                                                                        <div className="text-dark-text-colour font-medium my-auto p-6">Aggregate Predicted {selectedModel.model.type == CONVERSION_MODEL ? 'Conversion' : 'Churn'} by {aggregateChurnByPrimaryCohorts.cohort2.title}</div>
                                                                     </div>
                                                                     <div className="mb-">
-                                                                        <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} isConversion={selectedModel.model.type == 'Conversion'}/>
+                                                                        <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} isConversion={selectedModel.model.type == CONVERSION_MODEL}/>
                                                                     </div>
                                                                     {/* <div className="border-t border-border-colour p-4">
                                                                         <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
@@ -609,7 +610,7 @@ const GrowthMarketing: NextPage = () => {
                                                                         <div className="text-dark-text-colour font-medium my-auto p-6">Type of Users to Target When Marketing 🕵🏻</div>
                                                                     </div>
                                                                     <div className="mb-">
-                                                                        <UsersTable data={includeAndExcludeUsers.include.users} isConversion={selectedModel.model.type == 'Conversion'}/>
+                                                                        <UsersTable data={includeAndExcludeUsers.include.users} isConversion={selectedModel.model.type == CONVERSION_MODEL}/>
                                                                     </div>
                                                                     {
                                                                         includeAndExcludeUsers?.include.userList.sheet.length > 0 &&

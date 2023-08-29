@@ -8,6 +8,7 @@ import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
 import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact } from "~/server/services/cosmos-db";
+import { CONVERSION_MODEL } from "~/constants/modelTypes";
 
 export type Cohort = {
     name: string,
@@ -930,7 +931,7 @@ export const dataModelRouter = createTRPCRouter({
                 })
             }
 
-            if(model && model.type === "Conversion") {
+            if(model && model.type === CONVERSION_MODEL) {
                 userPredictions.sort((a, b) => {
                     return b.probability - a.probability;
                 })
