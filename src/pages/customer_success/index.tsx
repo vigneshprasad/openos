@@ -228,7 +228,7 @@ const CustomerSuccess: NextPage = () => {
         setChurnByThresholdLoading(true);
         setUserListLoading(true);
         
-        if(moment(date, 'DD/MM/YYYY').isBefore(moment(endDate, 'DD/MM/YYYY'))) {
+        if(moment(date, 'DD/MM/YYYY').isAfter(moment(endDate, 'DD/MM/YYYY'))) {
             endDate = date;
         }
 
