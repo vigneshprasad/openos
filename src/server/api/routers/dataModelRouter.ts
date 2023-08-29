@@ -7,7 +7,7 @@ import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts } from "~/server/services/cosmos-db";
+import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers } from "~/server/services/cosmos-db";
 
 export type Cohort = {
     name: string,
@@ -898,6 +898,10 @@ export const dataModelRouter = createTRPCRouter({
                     id: input.modelId
                 }
             });
+
+            if(model?.isCosmosDB) {
+                return getIncludeAndExcludeUsers(input.modelId, input.date, input.endDate, model.type);
+            }
 
             // Get all the user predictions for the model in the relevant time period
             let userPredictions = await getUserPredictions(input.modelId, date, end);

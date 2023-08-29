@@ -1,6 +1,8 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, IncludeAndExcludeUsers, LookAlikeUsers } from "../api/routers/dataModelRouter";
 import moment from "moment";
+import { ExcelCell } from "~/types/types";
+import { Prisma } from "@prisma/client";
  
 const endpoint = process.env.COSMOS_END_POINT // Add your endpoint
 const masterKey = process.env.COSMOS_MASTER_KEY // Add the masterkey of the endpoint
@@ -257,6 +259,111 @@ export const getAggregateChurnByPrimaryCohorts = async (modelId: string, startDa
 
     return resultData;
 }
+
+export const getIncludeAndExcludeUsers = async (modelId: string, startDate: string, endDate: string, type: string): Promise<IncludeAndExcludeUsers> => {
+
+    const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
+    const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
+
+    const includeUserListSheet: ExcelCell[][] = [];
+    const excludeUserListSheet: ExcelCell[][] = [];
+
+    const includeUsers: LookAlikeUsers[] = [];
+    const excludeUsers: LookAlikeUsers[] = [];
+
+    const querySpec = {
+        query: `SELECT TOP 100 * from c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} ORDER BY c.probability DESC`
+    }
+    const results = (await runQuery(querySpec, modelId)).resources
+
+
+    const querySpec2 = {
+        query: `SELECT TOP 100 * from c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} ORDER BY c.probability ASC`
+    }
+    const results2 = (await runQuery(querySpec2, modelId)).resources
+
+    const headings:string[] = [];
+    for(let j = 0; j < results.length; j++) {
+        const userPrediction = results[j] as Prisma.JsonObject;
+        for (const key in userPrediction) {
+            if(!headings.includes(key)) {
+                headings.push(key);
+            }
+        }
+        const userPrediction2 = results2[j] as Prisma.JsonObject;
+        for (const key in userPrediction2) {
+            if(!headings.includes(key)) {
+                headings.push(key);
+            }
+        }
+    }
+    const header: ExcelCell[] = [];
+    for(const key of headings) { 
+        header.push({
+            value: key
+        })
+    }
+
+    includeUserListSheet.push(header);
+    excludeUserListSheet.push(header);
+
+    const includeList = type == 'Conversion' ? results : results2;
+    const excludeList = type == 'Conversion' ? results2 : results;
+
+    for(let j = 0; j < includeList.length; j++) {
+        const userPrediction = includeList[j] as Prisma.JsonObject;
+        const row: ExcelCell[] = [];
+        for(const key of headings) { 
+            const userPredictionValue:string = (userPrediction[key] ? userPrediction[key] : "") as string
+            row.push({
+                value: userPredictionValue
+            })
+        }
+        includeUserListSheet.push(row);
+        if(j < 10) {
+            includeUsers.push({
+                distinctId: userPrediction['distinctId'] as string,
+                probability: userPrediction.probability as number,
+            })
+        }
+    }
+
+    for(let j = 0; j < excludeList.length; j++) {
+        const userPrediction = excludeList[j] as Prisma.JsonObject;
+        const row: ExcelCell[] = [];
+        for(const key of headings) { 
+            const userPredictionValue:string = (userPrediction[key] ? userPrediction[key] : "") as string
+            row.push({
+                value: userPredictionValue
+            })
+        }
+        excludeUserListSheet.push(row);
+        if(j < 10) {
+            excludeUsers.push({
+                distinctId: userPrediction['distinctId'] as string,
+                probability: userPrediction.probability as number,
+            })
+        }
+    }
+
+    return {
+        include: {
+            users: includeUsers,
+            userList: {
+                heading: 'Include Users',
+                sheet: includeUserListSheet
+            }
+        },
+        exclude: {
+            users: excludeUsers,
+            userList: {
+                heading: 'Exclude Users',
+                sheet: excludeUserListSheet
+            }
+        }
+    }
+}
+
 
 const getUserCountByDate = async (modelId: string, start: number, end: number, filter1Param?:  string, filter1Value?: string, filterCondition?: string): Promise<number> => {
     let query = `SELECT VALUE COUNT(1) FROM c WHERE c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end}`

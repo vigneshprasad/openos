@@ -579,7 +579,7 @@ const GrowthMarketing: NextPage = () => {
                                                                     <div className="border-t border-border-colour p-4">
                                                                         <CSVLink 
                                                                             className="w-fit-content mx-auto" 
-                                                                            data={convertSimpleReportToExcel(includeAndExcludeUsers?.include.userList.sheet)}
+                                                                            data={convertSimpleReportToExcel(includeAndExcludeUsers?.exclude.userList.sheet)}
                                                                             target="_blank">
                                                                             <PrimaryButton2 paddingY={1}>
                                                                                 <p>Download List</p>
@@ -603,7 +603,7 @@ const GrowthMarketing: NextPage = () => {
                                                                     <div className="border-t border-border-colour p-4">
                                                                         <CSVLink 
                                                                             className="w-fit-content mx-auto" 
-                                                                            data={convertSimpleReportToExcel(includeAndExcludeUsers?.exclude.userList.sheet)}
+                                                                            data={convertSimpleReportToExcel(includeAndExcludeUsers?.include.userList.sheet)}
                                                                             target="_blank">
                                                                             <PrimaryButton2 paddingY={1}>
                                                                                 <p>Download List</p>
