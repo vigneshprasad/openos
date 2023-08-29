@@ -1,5 +1,5 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, ChurnByThreshold, UserToContactPaginationResponse, UserToContact } from "../api/routers/dataModelRouter";
 import moment from "moment";
 import { type ExcelCell } from "~/types/types";
 import { type Prisma } from "@prisma/client";
@@ -398,6 +398,110 @@ export const getScatterPlot = async (modelId: string, startDate: string, endDate
 
     
 }   
+
+export const getChurnByThreshold = async (modelId: string, startDate: string, endDate: string): Promise<ChurnByThreshold[]> => {
+    const resultData:ChurnByThreshold[] = [
+        {
+            name: "0-5% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0,
+            upperBound: 0.05,
+        },
+        {
+            name: "5-10% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.05,
+            upperBound: 0.10,
+        },
+        {
+            name: "10-20% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.1,
+            upperBound: 0.2,
+        },
+        {
+            name: "20-40% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.2,
+            upperBound: 0.4,
+        },
+        {
+            name: "40-60% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.4,
+            upperBound: 0.6,
+        },
+        {
+            name: "60+% Probability to Convert",
+            numberOfUsers: 0,
+            lowerBound: 0.6,
+            upperBound: 1,
+        },
+    ];
+
+    const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
+    const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
+
+    const newResults:ChurnByThreshold[] = []
+
+    for (let i = 0; i < resultData.length; i++) {
+        const name = resultData[i]?.name;
+        const lowerBound = resultData[i]?.lowerBound;
+        const upperBound = resultData[i]?.upperBound;
+        if(lowerBound == undefined || upperBound == undefined || !name) {
+            continue
+        }
+        const querySpec = {
+            query: `SELECT VALUE COUNT(1) FROM c WHERE c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.probability >= ${lowerBound} AND c.probability < ${upperBound}`
+        };
+
+        const results = await runQuery(querySpec, modelId)
+        const numberOfUsers = results?.resources[0] as number
+        newResults.push({
+            name: name,
+            lowerBound: lowerBound,
+            upperBound: upperBound,
+            numberOfUsers: numberOfUsers
+        })
+    }
+
+    return newResults;
+}
+
+export const getUsersToContact = async (modelId: string, startDate: string, endDate: string, phoneNumberField?: string, skip?: number, filterName?: string, filterValue?: string): Promise<UserToContactPaginationResponse> => {
+    const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
+    const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
+    const currentTotalUsers = await getUserCountByDate(modelId, start, end, filterName, filterValue ? `"${filterValue}"` : undefined, "=")
+
+    
+    let query = `SELECT * FROM c WHERE c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end}`
+    if (filterName && filterValue) {
+        query = query + ` AND c.${filterName} = '${filterValue}'`
+    }
+    query += ` ORDER BY c.probability DESC OFFSET ${skip ? skip : 0} LIMIT 10`
+    const querySpec = {
+        query: query,
+    };
+    const results = await runQuery(querySpec, modelId)
+    const users: UserToContact[] = [];
+
+    for(let i = 0; i < results.resources.length; i++) {
+        const user = results.resources[i] as Prisma.JsonObject;
+        let phoneNumber = phoneNumberField ? user[phoneNumberField] : undefined
+        phoneNumber = phoneNumber ? phoneNumber as string : "Unknown"
+        users.push({
+            id: user.id as string,
+            distinctId: user.distinctId as string,
+            probability: user.probability as number,
+            phoneNumber: phoneNumber,
+        })
+    }
+    return {
+        users: users,
+        total: currentTotalUsers
+    }
+}
+
 
 
 const getUserCountByDate = async (modelId: string, start: number, end: number, filter1Param?:  string, filter1Value?: string, filterCondition?: string): Promise<number> => { 

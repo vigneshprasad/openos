@@ -1,4 +1,4 @@
-import { CustomerSuccessUsersFilter, type Insights } from "@prisma/client";
+import { type CustomerSuccessUsersFilter, type Insights } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import router from "next/router";
@@ -14,7 +14,6 @@ import Image from "next/image";
 import moment from "moment";
 import ChurnByThresholdTable from "~/components/ChurnByThresholdTable";
 import UsersToContactTable from "~/components/UsersToContact";
-import { set } from "zod";
 
 
 const CustomerSuccess: NextPage = () => {
@@ -105,7 +104,7 @@ const CustomerSuccess: NextPage = () => {
         onSuccess: (data: UserToContactPaginationResponse) => {
             const newUserList = userList.concat(data.users);
             setUserList(newUserList);
-            setTotalLength(data.total);          
+            setTotalLength(data.total);
             setUserListLoading(false);
             setUserListLoadingMore(false);
         }
@@ -163,7 +162,10 @@ const CustomerSuccess: NextPage = () => {
 
     const handleDateChange = (value: string) => {
         if(!value) return;
+        setSelectedUserFilter(undefined);
+        setUserFilterInputText('');
         setSelectedDate(value);
+        setUserList([]);
         if (moment(value, 'DD/MM/YYYY').isAfter(moment(selectedEndDate, 'DD/MM/YYYY'))) {
             setSelectedEndDate(value);
         }
@@ -184,11 +186,15 @@ const CustomerSuccess: NextPage = () => {
     const handleLoadMore = () => {
         setUserListLoadingMore(true);
         if(!selectedDate || !selectedModelId || !selectedDate) return;
+        const selectedFilter = userFilterList.find((filter) => filter.value === selectedUserFilter)?.label;
+        const filterName = selectedFilter === 'all' ? undefined : selectedFilter;
         runGetUserList.mutate({
             date: selectedDate,
             modelId: selectedModelId,
             endDate: selectedDate,
             skip: userList.length,
+            filterName: filterName,
+            filterValue: userFilterInputText,
         });
     }
 

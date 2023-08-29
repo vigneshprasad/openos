@@ -7,7 +7,7 @@ import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot } from "~/server/services/cosmos-db";
+import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact } from "~/server/services/cosmos-db";
 
 export type Cohort = {
     name: string,
@@ -1131,6 +1131,16 @@ export const dataModelRouter = createTRPCRouter({
                 return getDummyChurnByThreshold(input.modelId, input.date, input.endDate);
             }
 
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
+            if (model?.isCosmosDB) {
+                return getChurnByThreshold(input.modelId, input.date, input.endDate);
+            }
+
             const date = moment(input.date, "DD/MM/YYYY")
             const end = moment(input.endDate, "DD/MM/YYYY")
 
@@ -1245,14 +1255,18 @@ export const dataModelRouter = createTRPCRouter({
                 }
             }
             
-            const date = moment(input.date, "DD/MM/YYYY")
-            const end = moment(input.endDate, "DD/MM/YYYY")
-
             const model = await ctx.prisma.dataModel.findUnique({
                 where: {
                     id: input.modelId,
                 },
             });
+
+            if(model?.isCosmosDB) {
+                return getUsersToContact(input.modelId, input.date, input.endDate, model.phoneNumberField !== null ? model.phoneNumberField : undefined, input.skip, input.filterName, input.filterValue);
+            }
+            
+            const date = moment(input.date, "DD/MM/YYYY")
+            const end = moment(input.endDate, "DD/MM/YYYY")
 
             // Get all the user predictions for the model in the relevant time period
             let userPredictions = await getUserPredictionsSortedByProbability(input.modelId, date, end);
