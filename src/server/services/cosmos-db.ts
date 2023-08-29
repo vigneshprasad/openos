@@ -1,7 +1,6 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { ModelGraph, type ChurnCards } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts } from "../api/routers/dataModelRouter";
 import moment from "moment";
-import { start } from "repl";
  
 const endpoint = process.env.COSMOS_END_POINT // Add your endpoint
 const masterKey = process.env.COSMOS_MASTER_KEY // Add the masterkey of the endpoint
@@ -97,8 +96,8 @@ export const getModelPrimaryGraph = async (modelId: string, startDate: string, e
         }
     }
     for(let i = 0; i < 5; i++) {
-        const cohort1 = cohort1Values[i] ? cohort1Values[i] : "Unknown"
-        const cohort2 = cohort2Values[i] ? cohort2Values[i] : "Unknown"
+        const cohort1 = cohort1Values[i] ? cohort1Values[i] : ""
+        const cohort2 = cohort2Values[i] ? cohort2Values[i] : ""
         if(!cohort1 || !cohort2) {
             return resultData
         }
@@ -135,14 +134,13 @@ export const getModelPrimaryGraph = async (modelId: string, startDate: string, e
         const resultsChurned = (await runQuery(querySpecChurned, modelId)).resources as unknown as IResultType[]
         const results2Churned = (await runQuery(querySpec2Churned, modelId)).resources as unknown as IResultType[]
 
-
         for(let j = 0; j < 5; j++) { 
             if(!resultsChurned[j] || !resultsTotal[j] || !results2Churned[j] || !results2Total[j]) {
                 continue
             }
 
-            const resultValue = resultsChurned[j]?.value
-            const resultChurnValue = resultsTotal[j]?.value
+            const resultValue = resultsTotal.find((item) => item.label === resultData.cohort1.data[j]?.name)?.value
+            const resultChurnValue = resultsChurned.find((item) => item.label === resultData.cohort1.data[j]?.name)?.value
             
             if(resultValue !== undefined && resultChurnValue !== undefined) {
                 const cohort1result = resultChurnValue  / resultValue
@@ -151,8 +149,8 @@ export const getModelPrimaryGraph = async (modelId: string, startDate: string, e
                 )
             }
 
-            const result2Value = results2Churned[j]?.value
-            const result2ChurnValue = results2Total[j]?.value
+            const result2Value = results2Total.find((item) => item.label === resultData.cohort2.data[j]?.name)?.value
+            const result2ChurnValue = results2Churned.find((item) => item.label === resultData.cohort2.data[j]?.name)?.value
 
             if(result2ChurnValue !== undefined && result2Value !== undefined) {
                 const cohort2result = result2ChurnValue / result2Value;
@@ -167,7 +165,101 @@ export const getModelPrimaryGraph = async (modelId: string, startDate: string, e
 }
 
 
+export const getAggregateChurnByPrimaryCohorts = async (modelId: string, startDate: string, endDate: string, cohort1: string, cohort2: string): Promise<AggregateChurnByPrimaryCohorts> => {
+    const resultData: AggregateChurnByPrimaryCohorts = {
+        cohort1: {
+            title: cohort1,
+            data: []
+        },
+        cohort2: {
+            title: cohort2,
+            data: []
+        }
+    }
 
+    const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
+    const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
+
+    interface IResultType {
+        value: number
+        label: string
+    }
+
+    const querySpec = {
+        query: `SELECT c.${cohort1} AS "label", COUNT(c.${cohort1}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} GROUP BY c.${cohort1}`
+    }
+    const results = (await runQuery(querySpec, modelId)).resources as unknown as IResultType[]
+    const top5Cohort1 = results.sort((a, b) => b.value - a.value).splice(0, 10)
+    const cohort1Values = top5Cohort1.map((item) => item.label)
+
+    const querySpec2 = {
+        query: `SELECT c.${cohort2} AS "label", COUNT(c.${cohort2}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} GROUP BY c.${cohort2}`
+    }
+    const results2 = (await runQuery(querySpec2, modelId)).resources as unknown as IResultType[]
+    const top5Cohort2 = results2.sort((a, b) => b.value - a.value).splice(0, 10)
+    const cohort2Values = top5Cohort2.map((item) => item.label)
+    
+
+    const cohort1String = "(" + cohort1Values.map((item) => `'${item}'`).join(",") + ")"
+    const cohort2String = "(" + cohort2Values.map((item) => `'${item}'`).join(",") + ")"
+    const querySpecTotal = {
+        query: `SELECT c.${cohort1} AS "label", COUNT(c.${cohort1}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.${cohort1} in ${cohort1String} GROUP BY c.${cohort1}`
+    }
+    const querySpec2Total = {
+        query: `SELECT c.${cohort2} AS "label", COUNT(c.${cohort2}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.${cohort2} in ${cohort2String} GROUP BY c.${cohort2}`
+    }
+    const querySpecChurned = {
+        query: `SELECT c.${cohort1} AS "label", COUNT(c.${cohort1}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.${cohort1} in ${cohort1String} AND c.probability > 0.5 GROUP BY c.${cohort1}`
+    }
+    const querySpec2Churned = {
+        query: `SELECT c.${cohort2} AS "label", COUNT(c.${cohort2}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.${cohort2} in ${cohort2String} AND c.probability > 0.5 GROUP BY c.${cohort2}`
+    }
+
+    const resultsTotal = (await runQuery(querySpecTotal, modelId)).resources as unknown as IResultType[]
+    const results2Total = (await runQuery(querySpec2Total, modelId)).resources as unknown as IResultType[]
+    const resultsChurned = (await runQuery(querySpecChurned, modelId)).resources as unknown as IResultType[]
+    const results2Churned = (await runQuery(querySpec2Churned, modelId)).resources as unknown as IResultType[]
+
+    for(let j = 0; j < 10; j++) { 
+        if(!resultsChurned[j] || !resultsTotal[j] || !results2Churned[j] || !results2Total[j]) {
+            continue
+        }
+
+        const cohort1Label = cohort1Values[j] ? cohort1Values[j] : ""
+        const cohort2Label = cohort2Values[j] ? cohort2Values[j] : ""
+        if(!cohort1Label || !cohort2Label) {
+            return resultData
+        }
+
+        const resultValue = resultsTotal.find((item) => item.label === cohort1Label)?.value
+        const resultChurnValue = resultsChurned.find((item) => item.label === cohort1Label)?.value
+            
+        if(resultValue !== undefined && resultChurnValue !== undefined) {
+            resultData.cohort1.data.push({
+                title: cohort1Label,
+                totalUsers: resultValue,
+                predictedChurnUsers: resultChurnValue,
+            });
+         
+        }
+
+        const result2Value = results2Total.find((item) => item.label === cohort2Label)?.value
+        const result2ChurnValue = results2Churned.find((item) => item.label === cohort2Label)?.value
+
+        if(result2ChurnValue !== undefined && result2Value !== undefined) {
+            resultData.cohort2.data.push({
+                title: cohort2Label,
+                totalUsers: result2Value,
+                predictedChurnUsers: result2ChurnValue,
+            });
+        }
+
+    }
+
+    console.log(resultData);
+
+    return resultData;
+}
 
 const getUserCountByDate = async (modelId: string, start: number, end: number, filter1Param?:  string, filter1Value?: string, filterCondition?: string): Promise<number> => {
     let query = `SELECT VALUE COUNT(1) FROM c WHERE c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end}`

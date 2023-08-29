@@ -7,7 +7,7 @@ import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { getChurnCards, getLastDate, getModelPrimaryGraph } from "~/server/services/cosmos-db";
+import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts } from "~/server/services/cosmos-db";
 
 export type Cohort = {
     name: string,
@@ -399,6 +399,8 @@ export const dataModelRouter = createTRPCRouter({
                     timeSeries.push(date.toDate());
                     date.add(1, 'days');
                 }
+                date.add(1, 'days');
+                timeSeries.push(date.toDate());
             } else {
                 period = 'hourly'
                 const date = moment(input.date, "DD/MM/YYYY")
@@ -738,6 +740,16 @@ export const dataModelRouter = createTRPCRouter({
 
             const predictionCohort1 = dataModelPrimaryGraph?.predictionCohort1;
             const predictionCohort2 = dataModelPrimaryGraph?.predictionCohort2;
+
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
+            if(model?.isCosmosDB) {
+                return getAggregateChurnByPrimaryCohorts(input.modelId, input.date, input.endDate, predictionCohort1, predictionCohort2);
+            }
 
             // Get the frequency of each cohort to sort them
             const predictionCohort1Frequency: {[key: string]: {
