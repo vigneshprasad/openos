@@ -184,9 +184,6 @@ const GrowthMarketing: NextPage = () => {
         if(!feature && !selectedFeature) return;
         setSelectedFeature(feature ? feature : selectedFeature);
         if(!selectedModelId || !selectedDate || !selectedEndDate) return;
-        if (moment(selectedEndDate, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
-            setSelectedEndDate(selectedDate);
-        }
         setScatterPlotLoading(true);
         runGetScatterPlot.mutate({
             modelId: selectedModelId,
@@ -249,6 +246,17 @@ const GrowthMarketing: NextPage = () => {
             modelId: modelId,
             endDate: endDate,
         });
+        if(selectedFeature) {
+            const feature = features?.find((feature) => feature.id === selectedFeature.id);
+            if(!feature) return;
+            setScatterPlotLoading(true);
+            runGetScatterPlot.mutate({
+                modelId: modelId,
+                featureId: selectedFeature.id,
+                date: date,
+                endDate: endDate,
+            })
+        }
         if(modelChange) {
             setFeaturesLoading(true);
             setInsightsLoading(true);

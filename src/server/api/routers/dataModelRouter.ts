@@ -7,7 +7,7 @@ import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers } from "~/server/services/cosmos-db";
+import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot } from "~/server/services/cosmos-db";
 
 export type Cohort = {
     name: string,
@@ -1033,8 +1033,11 @@ export const dataModelRouter = createTRPCRouter({
             const date = moment(input.date, "DD/MM/YYYY")
             const end = moment(input.endDate, "DD/MM/YYYY")
 
-            // Get all the user predictions for the model in the relevant time period
-            const userPredictions = await getUserPredictions(input.modelId, date, end);
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
 
             const feature = await ctx.prisma.featureImportance.findUnique({
                 where: {
@@ -1048,6 +1051,14 @@ export const dataModelRouter = createTRPCRouter({
                     series: []
                 }
             }
+
+            if (model?.isCosmosDB) {
+                return getScatterPlot(input.modelId, input.date, input.endDate, featureName);
+            }
+
+            // Get all the user predictions for the model in the relevant time period
+            const userPredictions = await getUserPredictions(input.modelId, date, end);
+            
             const features: {[key: string]: {
                 total: number,
                 probability: number,

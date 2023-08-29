@@ -1,8 +1,8 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, IncludeAndExcludeUsers, LookAlikeUsers } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData } from "../api/routers/dataModelRouter";
 import moment from "moment";
-import { ExcelCell } from "~/types/types";
-import { Prisma } from "@prisma/client";
+import { type ExcelCell } from "~/types/types";
+import { type Prisma } from "@prisma/client";
  
 const endpoint = process.env.COSMOS_END_POINT // Add your endpoint
 const masterKey = process.env.COSMOS_MASTER_KEY // Add the masterkey of the endpoint
@@ -62,6 +62,7 @@ export const getChurnCards = async (modelId: string, startDate: string, endDate:
     return churnResults
     
 }
+
 
 export const getModelPrimaryGraph = async (modelId: string, startDate: string, endDate: string, timeSeries: Date[], cohort1: string, cohort2: string): Promise<ModelGraph> => {
     const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
@@ -364,8 +365,42 @@ export const getIncludeAndExcludeUsers = async (modelId: string, startDate: stri
     }
 }
 
+export const getScatterPlot = async (modelId: string, startDate: string, endDate: string, featureName: string): Promise<ScatterPlotData> => {
+    const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
+    const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
 
-const getUserCountByDate = async (modelId: string, start: number, end: number, filter1Param?:  string, filter1Value?: string, filterCondition?: string): Promise<number> => {
+    interface IResultType {
+        value: number
+        label: string
+        probability: number
+    }
+    const querySpec = {
+        query: `SELECT c["${featureName}"] AS "label", AVG(c.probability) AS "probability", COUNT(c["${featureName}"]) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} GROUP BY c["${featureName}"]`
+    }
+
+    const results = (await runQuery(querySpec, modelId)).resources as unknown as IResultType[]
+
+    const churnGraph = []
+    for(let i = 0; i < results.length; i++) {
+        const result = results[i];
+        if(!result || !result.label) {
+            continue
+        }
+        churnGraph.push({
+            x: result.label,
+            y: result.probability / result.value
+        })
+    }
+    const resultData: ScatterPlotData = {
+        series: churnGraph
+    }
+    return resultData
+
+    
+}   
+
+
+const getUserCountByDate = async (modelId: string, start: number, end: number, filter1Param?:  string, filter1Value?: string, filterCondition?: string): Promise<number> => { 
     let query = `SELECT VALUE COUNT(1) FROM c WHERE c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end}`
     if (filter1Param && filter1Value && filterCondition) {
         query = query + ` AND c.${filter1Param} ${filterCondition} ${filter1Value}`
