@@ -900,7 +900,7 @@ export const dataModelRouter = createTRPCRouter({
             });
 
             if(model?.isCosmosDB) {
-                return getIncludeAndExcludeUsers(input.modelId, input.date, input.endDate, model.type);
+                return getIncludeAndExcludeUsers(input.modelId, input.date, input.endDate, model.type, model.anonymous);
             }
 
             // Get all the user predictions for the model in the relevant time period
@@ -987,20 +987,20 @@ export const dataModelRouter = createTRPCRouter({
                     excludeUserListSheet.push(row);
                 }
             }
-            
+
             return {
                 include: {
                     users: includeUsers,
                     userList: {
                         heading: 'Include Users',
-                        sheet: includeUserListSheet
+                        sheet: model?.anonymous ? [] : includeUserListSheet
                     }
                 },
                 exclude: {
                     users: excludeUsers.reverse(),
                     userList: {
                         heading: 'Exclude Users',
-                        sheet: excludeUserListSheet
+                        sheet: model?.anonymous ? [] : excludeUserListSheet
                     }
                 }
             }

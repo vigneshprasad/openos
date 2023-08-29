@@ -291,6 +291,7 @@ model DataModel {
     phoneNumberField           String?
     predictionStartDate        DateTime?                    @default(now())
     isCosmosDB                 Boolean                      @default(false)
+    anonymous                  Boolean                      @default(false)
     user                       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
     FeatureImportance          FeatureImportance[]
     UserPrediction             UserPrediction[]

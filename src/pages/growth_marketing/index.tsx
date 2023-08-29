@@ -584,16 +584,19 @@ const GrowthMarketing: NextPage = () => {
                                                                     <div>
                                                                         <UsersTable data={includeAndExcludeUsers.exclude.users} isConversion={selectedModel.model.type == 'Conversion'}/>
                                                                     </div>
-                                                                    <div className="border-t border-border-colour p-4">
-                                                                        <CSVLink 
-                                                                            className="w-fit-content mx-auto" 
-                                                                            data={convertSimpleReportToExcel(includeAndExcludeUsers?.exclude.userList.sheet)}
-                                                                            target="_blank">
-                                                                            <PrimaryButton2 paddingY={1}>
-                                                                                <p>Download List</p>
-                                                                            </PrimaryButton2>
-                                                                        </CSVLink>
-                                                                    </div>
+                                                                    {
+                                                                        includeAndExcludeUsers?.exclude.userList.sheet.length > 0 && 
+                                                                        <div className="border-t border-border-colour p-4">
+                                                                            <CSVLink 
+                                                                                className="w-fit-content mx-auto" 
+                                                                                data={convertSimpleReportToExcel(includeAndExcludeUsers?.exclude.userList.sheet)}
+                                                                                target="_blank">
+                                                                                <PrimaryButton2 paddingY={1}>
+                                                                                    <p>Download List</p>
+                                                                                </PrimaryButton2>
+                                                                            </CSVLink>
+                                                                        </div>
+                                                                    }
                                                                 </div>
                                                         }
                                                     </div>
@@ -608,16 +611,19 @@ const GrowthMarketing: NextPage = () => {
                                                                     <div className="mb-">
                                                                         <UsersTable data={includeAndExcludeUsers.include.users} isConversion={selectedModel.model.type == 'Conversion'}/>
                                                                     </div>
-                                                                    <div className="border-t border-border-colour p-4">
-                                                                        <CSVLink 
-                                                                            className="w-fit-content mx-auto" 
-                                                                            data={convertSimpleReportToExcel(includeAndExcludeUsers?.include.userList.sheet)}
-                                                                            target="_blank">
-                                                                            <PrimaryButton2 paddingY={1}>
-                                                                                <p>Download List</p>
-                                                                            </PrimaryButton2>
-                                                                        </CSVLink>
-                                                                    </div>
+                                                                    {
+                                                                        includeAndExcludeUsers?.include.userList.sheet.length > 0 &&
+                                                                        <div className="border-t border-border-colour p-4">
+                                                                            <CSVLink 
+                                                                                className="w-fit-content mx-auto" 
+                                                                                data={convertSimpleReportToExcel(includeAndExcludeUsers?.include.userList.sheet)}
+                                                                                target="_blank">
+                                                                                <PrimaryButton2 paddingY={1}>
+                                                                                    <p>Download List</p>
+                                                                                </PrimaryButton2>
+                                                                            </CSVLink>
+                                                                        </div>
+                                                                    }
                                                                 </div>
                                                         }
                                                     </div>

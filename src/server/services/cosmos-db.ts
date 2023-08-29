@@ -261,7 +261,7 @@ export const getAggregateChurnByPrimaryCohorts = async (modelId: string, startDa
     return resultData;
 }
 
-export const getIncludeAndExcludeUsers = async (modelId: string, startDate: string, endDate: string, type: string): Promise<IncludeAndExcludeUsers> => {
+export const getIncludeAndExcludeUsers = async (modelId: string, startDate: string, endDate: string, type: string, anonymous: boolean): Promise<IncludeAndExcludeUsers> => {
 
     const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
     const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
@@ -352,14 +352,14 @@ export const getIncludeAndExcludeUsers = async (modelId: string, startDate: stri
             users: includeUsers,
             userList: {
                 heading: 'Include Users',
-                sheet: includeUserListSheet
+                sheet: anonymous ? [] : includeUserListSheet
             }
         },
         exclude: {
             users: excludeUsers,
             userList: {
                 heading: 'Exclude Users',
-                sheet: excludeUserListSheet
+                sheet: anonymous ? [] : excludeUserListSheet
             }
         }
     }
