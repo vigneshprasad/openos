@@ -1,5 +1,5 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, type ChurnByThreshold, type UserToContactPaginationResponse, type UserToContact } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, type ChurnByThreshold, type UserToContactPaginationResponse, type UserToContact, type UsersByBucket, type UserFeature } from "../api/routers/dataModelRouter";
 import moment from "moment";
 import { type ExcelCell } from "~/types/types";
 import { type Prisma } from "@prisma/client";
@@ -503,6 +503,60 @@ export const getUsersToContact = async (modelId: string, startDate: string, endD
     }
 }
 
+export const getUserPredictionsByBucket = async (modelId: string):Promise<UsersByBucket[]> => {
+    const resultData:UsersByBucket[] = [
+        {
+            name: "At risk users",
+            lowerBound: 0,
+            upperBound: 0.33,
+            users: []
+        },
+        {
+            name: "Less than Average Chance",
+            lowerBound: 0.33,
+            upperBound: 0.67,
+            users: []
+        },
+        {
+            name: "Above Average Chance",
+            lowerBound: 0.67,
+            upperBound: 1,
+            users: []
+        },
+    ];
+
+    for (let i = 0; i < resultData.length; i++) {
+        const name = resultData[i]?.name;
+        const lowerBound = resultData[i]?.lowerBound;
+        const upperBound = resultData[i]?.upperBound;
+        if(lowerBound == undefined || upperBound == undefined || !name) {
+            continue
+        }
+        const querySpec = {
+            query: `SELECT * FROM c WHERE c.probability >= ${lowerBound} AND c.probability < ${upperBound}`
+        };
+
+        interface IResultType {
+            "Org_ID": string,
+            "Organisation Name (As per Invoice)": string,
+            probability: number,
+            featureImportance: Prisma.JsonObject[]
+        }
+
+        const results = await runQuery(querySpec, modelId)
+        const resources = results?.resources as IResultType[]
+        for(const item of resources) {
+            resultData[i]?.users.push({
+                distinctId: item["Org_ID"],
+                name: item["Organisation Name (As per Invoice)"],
+                probability: item.probability,
+                features: item.featureImportance.slice(0,5) as UserFeature[]
+            })
+        }
+    }
+
+    return resultData;
+}
 
 
 const getUserCountByDate = async (modelId: string, start: number, end: number, filter1Param?:  string, filter1Value?: string, filterCondition?: string): Promise<number> => { 

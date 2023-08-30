@@ -314,7 +314,7 @@ const CustomerSuccess: NextPage = () => {
                                                 <p className="text-light-text-colour text-sm">{selectedModel.model.description} </p>
                                             </div>
                                             <div className="flex justify-end my-auto">
-                                                <PrimaryButton2 onClick={() => router.push('/create-model')}>
+                                                <PrimaryButton2 onClick={() => router.push('/create_model')}>
                                                     Create Model
                                                 </PrimaryButton2>
                                             </div>                                        

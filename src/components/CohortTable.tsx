@@ -1,4 +1,3 @@
-import { CONVERSION_MODEL } from "~/constants/modelTypes";
 import { type AggregateChurn } from "~/server/api/routers/dataModelRouter";
 
 const CohortTable = ({
@@ -14,7 +13,7 @@ const CohortTable = ({
             <div className="grid grid-cols-[1fr_0.5fr_0.5fr] text-xs bg-table-heading-background-colour text-light-grey-text-colour p-4 uppercase font-medium">
                 <div>Cohort</div>
                 <div>Total</div>
-                <div>{isConversion ? CONVERSION_MODEL : 'Churn'} Rate</div>
+                <div>{isConversion ? 'Conversion' : 'Churn'} Rate</div>
             </div>
             <div className="text-xs text-light-text-colour font-light">
                 {

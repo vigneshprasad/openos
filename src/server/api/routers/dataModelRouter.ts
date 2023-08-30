@@ -7,8 +7,8 @@ import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact } from "~/server/services/cosmos-db";
-import { CONVERSION_MODEL } from "~/constants/modelTypes";
+import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact, getUserPredictionsByBucket } from "~/server/services/cosmos-db";
+import { B2B_SAAS, CONVERSION_MODEL } from "~/constants/modelTypes";
 
 export type Cohort = {
     name: string,
@@ -103,6 +103,26 @@ export type ChurnByThreshold = {
     upperBound: number
 }
 
+export type UserFeature = {
+    feature: string,
+    score: number,
+}
+
+export type UserForBucket = {
+    name: string,
+    distinctId: string,
+    probability: number,
+    features: UserFeature[]
+
+}
+
+export type UsersByBucket = {
+    name: string,
+    users: UserForBucket[],
+    lowerBound: number,
+    upperBound: number
+}
+
 export type UserToContact = {
     id: string
     distinctId: string,
@@ -134,12 +154,14 @@ export const dataModelRouter = createTRPCRouter({
                 models = await ctx.prisma.dataModel.findMany({
                     where: {
                         completionStatus: true,
+                        type: { not: B2B_SAAS }
                     }
                 });
             } else {
                 models = await ctx.prisma.dataModel.findMany({
                     where: {
                         userId: ctx.session.user.id,
+                        type: { not: B2B_SAAS },
                         completionStatus: true,
                     }
                 });
@@ -148,6 +170,7 @@ export const dataModelRouter = createTRPCRouter({
                         userId: ctx.session.user.id,
                     }
                 });
+                //@TODO - Add check for B2B_SAAS
                 const additionalModels = await ctx.prisma.dataModel.findMany({
                     where: {
                         id: {
@@ -185,6 +208,52 @@ export const dataModelRouter = createTRPCRouter({
                     model: model,
                     start_date: start_date,
                     end_date: lastDate,
+                })   
+            }
+
+            return results;
+        }),
+    
+    getB2BSaasModels: protectedProcedure
+        .mutation(async ({ ctx }):Promise<DataModelList[]> => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+
+            if(user?.isDummy) {
+                // DUMMY DATA FOR B2B SAAS MODEL
+            }            
+
+            let models = []
+            if(user?.email === "vignesh@openos.tools" || user?.email === "vivan@openos.tools" || user?.email === "vivanpuri22@gmail.com" || user?.email === "tarun@openos.tools") {
+                models = await ctx.prisma.dataModel.findMany({
+                    where: {
+                        completionStatus: true,
+                        type: B2B_SAAS
+                    }
+                });
+            } else {
+                models = await ctx.prisma.dataModel.findMany({
+                    where: {
+                        userId: ctx.session.user.id,
+                        type: B2B_SAAS,
+                        completionStatus: true,
+                    }
+                });
+            }
+
+            const results:DataModelList[] = [];
+
+            for(let i = 0; i < models.length; i++) {
+                const model = models[i]
+                const start_date = models[i]?.predictionStartDate ? models[i]?.predictionStartDate : moment('2021-01-01').toDate()
+                if(!model || !start_date) continue;
+                results.push({
+                    model: model,
+                    start_date: start_date,
+                    end_date: moment().toDate(),
                 })   
             }
 
@@ -247,7 +316,7 @@ export const dataModelRouter = createTRPCRouter({
                 orderBy: {
                     importance: "desc"
                 },
-                take: 6,
+                take: 9,
             })
         }),
  
@@ -1224,6 +1293,36 @@ export const dataModelRouter = createTRPCRouter({
             }
             
             return resultData;
+        }),
+
+    getUsersByBucket: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+        }))
+        .mutation(async ({ctx, input}) : Promise<UsersByBucket[]> => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+
+            if(user?.isDummy) {
+                //TODO DUMMY DATA
+            }
+
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
+            if (model?.isCosmosDB) {
+                return getUserPredictionsByBucket(input.modelId);
+            } else {
+                return [];
+            }
         }),
 
     getUsersToContact: protectedProcedure
