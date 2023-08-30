@@ -1232,7 +1232,8 @@ export const dummyModel: DataModelList[] = [{
         timeInterval: null,
         phoneNumberField: null,
         predictionStartDate: null,
-        isCosmosDB: false
+        isCosmosDB: false,
+        anonymous: false
     },
     start_date: new Date("2023-07-01"),
     end_date: new Date(),
