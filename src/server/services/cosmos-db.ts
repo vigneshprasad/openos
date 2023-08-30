@@ -389,7 +389,7 @@ export const getScatterPlot = async (modelId: string, startDate: string, endDate
         }
         churnGraph.push({
             x: result.label,
-            y: result.probability / result.value
+            y: result.probability
         })
     }
     const resultData: ScatterPlotData = {
@@ -512,13 +512,13 @@ export const getUserPredictionsByBucket = async (modelId: string):Promise<UsersB
             users: []
         },
         {
-            name: "Less than Average Chance",
+            name: "Engage these users",
             lowerBound: 0.33,
             upperBound: 0.67,
             users: []
         },
         {
-            name: "Above Average Chance",
+            name: "High probability to convert",
             lowerBound: 0.67,
             upperBound: 1,
             users: []

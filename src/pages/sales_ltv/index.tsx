@@ -175,7 +175,7 @@ const B2BSaas: NextPage = () => {
                 <meta name="description" content="Tools to to make your life easier" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <BaseLayout2 activeKey="growth_marketing">
+            <BaseLayout2 activeKey="sales_ltv">
                 <div className="flex flex-col">
                     {modelsLoading || models.length > 0 ? 
                         <div>

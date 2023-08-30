@@ -5,9 +5,9 @@ import { useState } from "react";
 import ExpandIcon from "./icons/Expand";
 import ContractIcon from "./icons/Contract";
 
-import { FaCode, FaBolt, FaBullhorn, FaRegHeart, FaTag, FaMoneyBillTrendUp, FaCartPlus } from "react-icons/fa6";
+import { FaCode, FaBolt, FaBullhorn, FaRegHeart, FaTag, FaMoneyBillTrendUp, FaCartPlus, FaChartPie } from "react-icons/fa6";
 
-export type SideNavKeys = "terminal" | "create_model" | "growth_marketing" | "customer_success" | "sales_forecast" | "item_sales_forecast" | "revenue_forecast" | "integrations";
+export type SideNavKeys = "terminal" | "create_model" | "growth_marketing" | "customer_success" | "sales_ltv" | "sales_forecast" | "item_sales_forecast" | "revenue_forecast" | "integrations";
 
 type IProps = {
     activeKey: SideNavKeys;
@@ -104,11 +104,19 @@ export const SideNavbar: React.FC<IProps> = ({ activeKey }) => {
                         </div>
                     </Link>
                     <Link href={"/customer_success"}>
-                        <div className="flex flex-row gap-3">
+                        <div className="flex flex-row gap-3 pb-2">
                             <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'customer_success' ? "bg-button-active-state" : ""} rounded-full`}>
                                 {activeKey === 'customer_success' ? <FaRegHeart className="text-accent-colour" /> : <FaRegHeart className="text-light-text-colour" />}
                             </div>
-                            <span className="text-sm text-light-text-colour my-auto">Sales and Customer Success</span>
+                            <span className="text-sm text-light-text-colour my-auto">Customer Success</span>
+                        </div>
+                    </Link>
+                    <Link href={"/sales_ltv"}>
+                        <div className="flex flex-row gap-3">
+                            <div className={`flex w-8 h-8 items-center justify-center ${activeKey === 'sales_ltv' ? "bg-button-active-state" : ""} rounded-full`}>
+                                {activeKey === 'sales_ltv' ? <FaChartPie className="text-accent-colour" /> : <FaChartPie className="text-light-text-colour" />}
+                            </div>
+                            <span className="text-sm text-light-text-colour my-auto">Sales and LTV</span>
                         </div>
                     </Link>
                 </div>
@@ -124,11 +132,17 @@ export const SideNavbar: React.FC<IProps> = ({ activeKey }) => {
                             {activeKey === 'growth_marketing' ? <FaBullhorn className="text-accent-colour" /> : <FaBullhorn className="text-light-text-colour" />}
                         </div>
                     </Link>
-                    <Link href={"/customer_success"}>
+                    <Link href={"/customer_success"} className="pb-2">
                         <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'customer_success' ? "bg-button-active-state" : ""} rounded-full `}>
                             {activeKey === 'customer_success' ? <FaRegHeart className="text-accent-colour" /> : <FaRegHeart className="text-light-text-colour" />}
                         </div>
                     </Link>
+                    <Link href={"/sales_ltv"}>
+                        <div className={`flex flex-col w-10 h-10 mx-auto items-center justify-center ${activeKey === 'sales_ltv' ? "bg-button-active-state" : ""} rounded-full `}>
+                            {activeKey === 'sales_ltv' ? <FaChartPie className="text-accent-colour" /> : <FaChartPie className="text-light-text-colour" />}
+                        </div>
+                    </Link>
+                    
                 </div>
             }
 
