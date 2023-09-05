@@ -1,4 +1,4 @@
-import { type ChurnCards, type ModelGraph, type IncludeAndExcludeUsers, type ScatterPlotData, type AggregateChurnByPrimaryCohorts, ChurnByThreshold, UserToContact} from "~/server/api/routers/dataModelRouter"
+import { type ChurnCards, type ModelGraph, type IncludeAndExcludeUsers, type ScatterPlotData, type AggregateChurnByPrimaryCohorts, ChurnByThreshold, UserToContact, GraphData} from "~/server/api/routers/dataModelRouter"
 import { faker } from '@faker-js/faker';
 import moment from "moment";
 
@@ -495,4 +495,62 @@ export const getDummyUserToContact = (date: string, modelId: string, endDate: st
     }
 
     return users.sort((a, b) => b.probability - a.probability);
+}
+
+export const getDummyModelGraphData = (dateInput: string, modelId: string, endDateInput: string, filterName: string):GraphData => {
+    const timeSeries: Date[] = []
+    if(dateInput !== endDateInput) {
+        const date = moment(dateInput, "DD/MM/YYYY")
+        const end_date = moment(endDateInput, "DD/MM/YYYY")
+        while(date.isSameOrBefore(end_date, 'days')) {
+            timeSeries.push(date.toDate());
+            date.add(1, 'days');
+        }
+
+    } else {
+        const date = moment(dateInput, "DD/MM/YYYY")
+        
+        for(let i = 1; i <= 6; i++) {
+            const new_date = moment(date).add((i*4), 'hours').toDate();
+            timeSeries.push(new_date);
+        }
+    }
+    const seed = encode(`${dateInput}${modelId}${endDateInput}${filterName}`)
+    faker.seed(seed)
+
+    const resultData: GraphData = {
+        xAxis: timeSeries.slice(0, timeSeries.length - 1),
+        title: filterName,
+        data: [
+            {
+                name: filterName === 'utm_source' ? "Google" : "New-Ad-Campaign",
+                data: []
+            },
+            {
+                name: filterName === 'utm_source' ? "Facebook" : "Fb-Test",
+                data: []
+            },
+            {
+                name: filterName === 'utm_source' ? "LinkedIn" : "Google Ads Sales",
+                data: []
+            },
+            {
+                name: filterName === 'utm_source' ? "Twitter" : "Fb-influencer",
+                data: []
+            },
+            {
+                name: filterName === 'utm_source' ? "Email Newsletter" : "organic-newsletter",
+                data: []
+            },
+        ]
+    }
+    for (let i = 0; i < timeSeries.length - 1; i++) {
+        for (let j = 0; j < 5; j++) {
+            resultData.data[j]?.data.push(
+                faker.number.float({ min: 0, max: 1, })
+            )
+        }
+    }
+
+    return resultData;
 }

@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { type Prisma, type DataModel, type CustomerSuccessUsersFilter, type DataModelGraphFilter } from "@prisma/client";
-import { dummyFeatures, dummyModel } from "~/constants/dummyData";
+import { dummyFeatures, dummyGraphFilters, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
-import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
+import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact, getDummyModelGraphData } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
 import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact, getUserPredictionsByBucket, getModelPrimaryGraphData } from "~/server/services/cosmos-db";
 import { B2B_SAAS, CONVERSION_MODEL } from "~/constants/modelTypes";
@@ -450,7 +450,7 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                //TODO - DUMMY DATA FOR PRIMARY GRAPH
+                return getDummyModelGraphData(input.date, input.modelId, input.endDate, input.filterName);
             }  
 
             const model = await ctx.prisma.dataModel.findUnique({
@@ -828,14 +828,9 @@ export const dataModelRouter = createTRPCRouter({
                 }
             });
             if(user?.isDummy) {
-                //TODO 
+                return dummyGraphFilters;
             }  
 
-            const model = await ctx.prisma.dataModel.findUnique({
-                where: {
-                    id: input.modelId
-                }
-            });
 
             // Get the primary graph parameters for the model
             return ctx.prisma.dataModelGraphFilter.findMany({
@@ -843,7 +838,6 @@ export const dataModelRouter = createTRPCRouter({
                     dataModelId: input.modelId,
                 }
             });
-
 
         }),
     

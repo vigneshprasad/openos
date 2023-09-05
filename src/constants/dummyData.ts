@@ -1,4 +1,4 @@
-import { type Insights, type FeatureImportance } from "@prisma/client"
+import { type Insights, type FeatureImportance, type DataModelGraphFilter } from "@prisma/client"
 import { PREMADE_MODEL } from "./modelTypes"
 import { type DataModelList } from "~/server/api/routers/dataModelRouter"
 
@@ -1369,3 +1369,23 @@ export const dummyInsights: Insights[] = [
         tag: "Marketing"
     }
 ]
+
+export const dummyGraphFilters: DataModelGraphFilter[] = [
+    {
+        id: "dummy-filter-1",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        dataModelId: "dummy",
+        name: "utm_source"
+    },
+    {
+        id: "dummy-filter-2",
+        createdAt: new Date("2023-07-01"),
+        updatedAt: new Date("2023-07-01"),
+        deletedAt: null,
+        dataModelId: "dummy",
+        name: "utm_campaign"
+    },
+]
+
