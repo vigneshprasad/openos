@@ -15,7 +15,9 @@ export const userRouter = createTRPCRouter({
                     StripeResource: true,
                     MixpanelResource: true,
                     GoogleAnalytics: true,
-                    AmplitudeResource: true
+                    AmplitudeResource: true,
+                    DataModel: true,
+                    UserDataModelAccess: true,
                 }
             })
 
@@ -27,7 +29,9 @@ export const userRouter = createTRPCRouter({
                 user?.StripeResource.length === 0 &&
                 user?.MixpanelResource.length === 0 &&
                 user?.GoogleAnalytics.length === 0 &&
-                user?.AmplitudeResource.length === 0
+                user?.AmplitudeResource.length === 0 &&
+                user?.DataModel.length === 0 &&
+                user?.UserDataModelAccess.length === 0
 
             const stage3 = !user?.isOnboarded
 
