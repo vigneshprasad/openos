@@ -1,5 +1,5 @@
 import { CosmosClient, type SqlQuerySpec } from "@azure/cosmos";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, type ChurnByThreshold, type UserToContactPaginationResponse, type UserToContact, type UsersByBucket, type UserFeature } from "../api/routers/dataModelRouter";
+import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type LookAlikeUsers, type ScatterPlotData, type ChurnByThreshold, type UserToContactPaginationResponse, type UserToContact, type UsersByBucket, type UserFeature, type GraphData } from "../api/routers/dataModelRouter";
 import moment from "moment";
 import { type ExcelCell } from "~/types/types";
 import { type Prisma } from "@prisma/client";
@@ -26,7 +26,6 @@ export const getLastDate = async (modelId: string): Promise<Date | void> => {
     }
     
 }
-
 
 export const getChurnCards = async (modelId: string, startDate: string, endDate: string): Promise<ChurnCards> => {
     const startDateMoment = moment(startDate, "DD/MM/YYYY")
@@ -63,7 +62,6 @@ export const getChurnCards = async (modelId: string, startDate: string, endDate:
     return churnResults
     
 }
-
 
 export const getModelPrimaryGraph = async (modelId: string, startDate: string, endDate: string, timeSeries: Date[], cohort1: string, cohort2: string): Promise<ModelGraph> => {
     const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
@@ -163,10 +161,71 @@ export const getModelPrimaryGraph = async (modelId: string, startDate: string, e
         }
     }
 
-    
     return resultData;
 }
 
+export const getModelPrimaryGraphData = async (modelId: string, startDate: string, endDate: string, timeSeries: Date[], filterName: string, ): Promise<GraphData> => {
+    const start = moment(startDate, "DD/MM/YYYY").valueOf() / 1000
+    const end = moment(endDate, "DD/MM/YYYY").add(1, 'days').valueOf() / 1000;
+
+    interface IResultType {
+        value: number
+        label: string
+    }
+    const querySpec = {
+        query: `SELECT c.${filterName} AS "label", COUNT(c.${filterName}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} GROUP BY c.${filterName}`
+    }
+    const results = (await runQuery(querySpec, modelId)).resources as unknown as IResultType[]
+    const top5Cohort1 = results.sort((a, b) => b.value - a.value).splice(0, 5)
+    const cohort1Values = top5Cohort1.map((item) => item.label)
+
+    const resultData: GraphData = {
+        xAxis: timeSeries.slice(0, timeSeries.length),
+        title: filterName,
+        data: []
+    }
+
+    for(let i = 0; i < 5; i++) {
+        const value = cohort1Values[i] ? cohort1Values[i] : ""
+        if(!value) {
+            return resultData
+        }
+        resultData.data.push({
+            name: value,
+            data: []
+        });
+    }
+
+    for(let i = 0; i < timeSeries.length - 1; i++) {
+        const start = moment(timeSeries[i]).valueOf() / 1000;
+        const end = moment(timeSeries[i + 1]).valueOf() / 1000;
+        const cohort1String = "(" + cohort1Values.map((item) => `'${item}'`).join(",") + ")"
+        const querySpecTotal = {
+            query: `SELECT c.${filterName} AS "label", COUNT(c.${filterName}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.${filterName} in ${cohort1String} GROUP BY c.${filterName}`
+        }
+        const querySpecChurned = {
+            query: `SELECT c.${filterName} AS "label", COUNT(c.${filterName}) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} AND c.${filterName} in ${cohort1String} AND c.probability > 0.5 GROUP BY c.${filterName}`
+        }
+
+        const resultsTotal = (await runQuery(querySpecTotal, modelId)).resources as unknown as IResultType[]
+        const resultsChurned = (await runQuery(querySpecChurned, modelId)).resources as unknown as IResultType[]
+
+        for(let j = 0; j < 5; j++) { 
+            let resultValue = resultsTotal.find((item) => item.label === resultData.data[j]?.name)?.value
+            let resultChurnValue = resultsChurned.find((item) => item.label === resultData.data[j]?.name)?.value
+            resultChurnValue = resultChurnValue ? resultChurnValue : 0
+            resultValue = resultValue ? resultValue : 0
+            
+            const cohort1result = resultChurnValue  / resultValue
+            resultData.data[j]?.data.push(
+                cohort1result
+            )
+        }
+    }
+
+    
+    return resultData;
+}
 
 export const getAggregateChurnByPrimaryCohorts = async (modelId: string, startDate: string, endDate: string, cohort1: string, cohort2: string): Promise<AggregateChurnByPrimaryCohorts> => {
     const resultData: AggregateChurnByPrimaryCohorts = {

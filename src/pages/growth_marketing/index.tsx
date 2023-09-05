@@ -1,4 +1,4 @@
-import type { FeatureImportance, Insights } from "@prisma/client";
+import { type DataModelGraphFilter, type FeatureImportance, type Insights } from "@prisma/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import router from "next/router";
@@ -13,13 +13,14 @@ import { PrimaryButton2 } from "~/components/PrimaryButton2";
 import { ScatterPlot } from "~/components/ScatterPlot";
 import Select from "~/components/Select";
 import UsersTable from "~/components/UsersTable";
-import { type ModelGraph, type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList } from "~/server/api/routers/dataModelRouter";
+import { type ChurnCards, type AggregateChurnByPrimaryCohorts, type IncludeAndExcludeUsers, type ScatterPlotData, type DataModelList, type GraphData } from "~/server/api/routers/dataModelRouter";
 import { type SelectOption } from "~/types/types";
 import { api } from "~/utils/api";
 import { convertSimpleReportToExcel } from "~/utils/convertJSONtoExcel";
 import Image from "next/image";
 import moment from "moment";
 import { CONVERSION_MODEL } from "~/constants/modelTypes";
+import { run } from "node:test";
 
 
 const GrowthMarketing: NextPage = () => {
@@ -36,23 +37,22 @@ const GrowthMarketing: NextPage = () => {
     const [churnCardData, setChurnCardData] = useState<ChurnCards>();
     const [churnCardLoading, setChurnCardLoading] = useState<boolean>(true);
 
-
     // PRIMARY GRAPH STATES
-    const [primaryGraphData, setPrimaryGraphData] = useState<ModelGraph>();
+    const [primaryGraphData, setPrimaryGraphData] = useState<GraphData>();
     const [primaryGraphLoading, setPrimaryGraphLoading] = useState<boolean>(true);
-    const [selectedPrimaryGraph, setSelectedPrimaryGraph] = useState<'cohort 1' | 'cohort 2'>('cohort 1');
 
     // AGGREGATE CHURN FOR PRIMARY METRICS STATES
     const [aggregateChurnByPrimaryCohorts, setAggregateChurnByPrimaryCohorts] = useState<AggregateChurnByPrimaryCohorts>();
     const [aggregateChurnByPrimaryCohortsLoading, setAggregateChurnByPrimaryCohortsLoading] = useState<boolean>(true);
 
-    // USER LIST STATES
-    // const [userList, setUserList] = useState<ExcelSheet>();
-    // const [userListLoading, setUserListLoading] = useState<boolean>(true);
-    
     // FEATURE IMPORTANCE STATES
     const [features, setFeatures] = useState<FeatureImportance[]>();
     const [featuresLoading, setFeaturesLoading] = useState<boolean>(true);
+
+    // DATA MODEL GRAPH FILTERS
+    const [dataModelGraphFilters, setDataModelGraphFilters] = useState<DataModelGraphFilter[]>([]);
+    const [dataModelGraphFiltersLoading, setDataModelGraphFiltersLoading] = useState<boolean>(true);
+    const [selectedDataModelGraphFilter, setSelectedDataModelGraphFilter] = useState<DataModelGraphFilter>();
 
     // SCATTER PLOT STATES
     const [scatterPlotData, setScatterPlotDataLoading] = useState<ScatterPlotData>();
@@ -101,9 +101,9 @@ const GrowthMarketing: NextPage = () => {
         }
     });
 
-    const modelPrimaryGraph = api.dataModelRouter.modelPrimaryGraph.useMutation({
-        onSuccess: (primaryGraphData) => {
-            setPrimaryGraphData(primaryGraphData);
+    const modelPrimaryGraph = api.dataModelRouter.getModelPrimaryGraph.useMutation({
+        onSuccess: (data: GraphData) => {
+            setPrimaryGraphData(data);
             setPrimaryGraphLoading(false);
         }
     });
@@ -147,6 +147,16 @@ const GrowthMarketing: NextPage = () => {
         }
     })
 
+    const runGetModelGraphFilters = api.dataModelRouter.getModelGraphFilters.useMutation({
+        onSuccess: (data: DataModelGraphFilter[]) => {
+            setDataModelGraphFilters(data);
+            setDataModelGraphFiltersLoading(false);
+            if(data[0]) {
+                handlePrimaryGraphFilterChange(data[0].id, data[0]);
+            }
+        }
+    })
+
     // CHANGE HANDLERS
     const handleModelChange = (value: string, dataModels?: DataModelList[]) => {
         setSelectedModelId(value);
@@ -176,7 +186,7 @@ const GrowthMarketing: NextPage = () => {
         if (defaultDateValue) {
             setSelectedDate(defaultDateValue);
             setSelectedEndDate(defaultDateValue);
-            reRunAllQueries(value, defaultDateValue, defaultDateValue, true);
+            reRunAllQueries(value, defaultDateValue, defaultDateValue, true, );
         }
     }
 
@@ -191,6 +201,22 @@ const GrowthMarketing: NextPage = () => {
             featureId: value,
             date: selectedDate,
             endDate: selectedEndDate,
+        })
+    }
+
+    const handlePrimaryGraphFilterChange = (value: string, selectedFilter?: DataModelGraphFilter) => {
+        const filter = dataModelGraphFilters?.find((filter) => filter.id === value);
+        console.log(filter);
+        if(!filter && !selectedFilter) return;
+        setSelectedDataModelGraphFilter(filter ? filter : selectedFilter);
+        const filterName = filter ? filter.name : selectedFilter?.name;
+        if(!selectedModelId || !selectedDate || !selectedEndDate || !filterName) return;
+        setPrimaryGraphLoading(true);
+        modelPrimaryGraph.mutate({
+            modelId: selectedModelId,
+            date: selectedDate,
+            endDate: selectedEndDate,
+            filterName: filterName,
         })
     }
 
@@ -210,7 +236,7 @@ const GrowthMarketing: NextPage = () => {
         if (moment(value, 'DD/MM/YYYY').isBefore(moment(selectedDate, 'DD/MM/YYYY'))) {
             setSelectedDate(value);
         }
-        if(loading || !selectedModelId || !selectedDate) return;
+        if(loading || !selectedModelId || !selectedDate || !selectedDataModelGraphFilter)  return;
         reRunAllQueries(selectedModelId, selectedDate, value);
     }
 
@@ -220,7 +246,6 @@ const GrowthMarketing: NextPage = () => {
         setChurnCardLoading(true);
         setPrimaryGraphLoading(true);
         setAggregateChurnByPrimaryCohortsLoading(true);
-        // setUserListLoading(true);
         setIncludeAndExcludeUsersLoading(true);
         
         if(moment(date, 'DD/MM/YYYY').isAfter(moment(endDate, 'DD/MM/YYYY'))) {
@@ -228,11 +253,6 @@ const GrowthMarketing: NextPage = () => {
         }
 
         runGetChurnCards.mutate({
-            date: date,
-            modelId: modelId,
-            endDate: endDate,
-        });
-        modelPrimaryGraph.mutate({
             date: date,
             modelId: modelId,
             endDate: endDate,
@@ -247,6 +267,14 @@ const GrowthMarketing: NextPage = () => {
             modelId: modelId,
             endDate: endDate,
         });
+        if(selectedDataModelGraphFilter) {
+            modelPrimaryGraph.mutate({
+                date: date,
+                modelId: modelId,
+                endDate: endDate,
+                filterName: selectedDataModelGraphFilter.name,
+            });
+        }
         if(selectedFeature) {
             const feature = features?.find((feature) => feature.id === selectedFeature.id);
             if(!feature) return;
@@ -261,10 +289,14 @@ const GrowthMarketing: NextPage = () => {
         if(modelChange) {
             setFeaturesLoading(true);
             setInsightsLoading(true);
+            setDataModelGraphFiltersLoading(true);
             runGetFeatures.mutate({
                 modelId: modelId,
             });
             runGetInsights.mutate({
+                modelId: modelId,
+            });
+            runGetModelGraphFilters.mutate({
                 modelId: modelId,
             });
         }
@@ -437,32 +469,28 @@ const GrowthMarketing: NextPage = () => {
 
                                             {/* Primary Graph */}
                                             {
-                                                (primaryGraphData === undefined || primaryGraphData.cohort1.data.length > 0 || primaryGraphData.cohort2.data.length > 0) && 
+                                                (primaryGraphData === undefined || primaryGraphData.data.length > 0) &&
                                                 <div className="bg-white drop-shadow-md mb-8 rounded-lg">
                                                     {
-                                                        primaryGraphLoading || !primaryGraphData || !selectedPrimaryGraph ?
+                                                        primaryGraphLoading || !primaryGraphData || !selectedDataModelGraphFilter || !dataModelGraphFilters || dataModelGraphFiltersLoading ?
                                                             <div className="flex justify-center"> <FadingCubesLoader /> </div> :
                                                             <div>
                                                                 <div className="border-b border-border-colour flex flex-row p-6 justify-between align-middle">
                                                                     <div className="text-dark-text-colour font-medium my-auto">Predicted {selectedModel.model.type == CONVERSION_MODEL ? 'Conversion' : 'Churn'} by Source</div>
                                                                     <Select
                                                                         title="Cohort"
-                                                                        options={[{
-                                                                            label: primaryGraphData.cohort1.title,
-                                                                            value: 'cohort 1',
-                                                                        }, {
-                                                                            label: primaryGraphData.cohort2.title,
-                                                                            value: 'cohort 2'
-                                                                        }]}
-                                                                        onChange={
-                                                                            (selectedPrimaryGraph) => 
-                                                                                setSelectedPrimaryGraph(selectedPrimaryGraph === 'cohort 1' ? 'cohort 1' : 'cohort 2')
-                                                                        }
-                                                                        value={selectedPrimaryGraph} />                                                        
+                                                                        options={dataModelGraphFilters.map((filter) => {
+                                                                            return {
+                                                                                label: filter.name,
+                                                                                value: filter.id
+                                                                            }
+                                                                        })}
+                                                                        onChange={handlePrimaryGraphFilterChange}
+                                                                        value={selectedDataModelGraphFilter?.id} /> 
                                                                 </div>
                                                                 <div className="p-4">
                                                                     <AreaGraph 
-                                                                        graphData={selectedPrimaryGraph === 'cohort 1' ? primaryGraphData.cohort1 : primaryGraphData.cohort2} 
+                                                                        graphData={primaryGraphData} 
                                                                         categoriesFormat={selectedDate === selectedEndDate ? "h:mm a" : "MMM Do YYYY"} />
                                                                 </div>
                                                             </div>
@@ -506,13 +534,6 @@ const GrowthMarketing: NextPage = () => {
                                                                     <div className="mb-">
                                                                         <CohortTable data={aggregateChurnByPrimaryCohorts.cohort2.data} isConversion={selectedModel.model.type == CONVERSION_MODEL}/>
                                                                     </div>
-                                                                    {/* <div className="border-t border-border-colour p-4">
-                                                                        <CSVLink className="w-fit-content mx-auto" data={convertSimpleReportToExcel(userList.sheet)}       target="_blank">
-                                                                            <PrimaryButton2 paddingY={1}>
-                                                                                <p>Download All Users</p>
-                                                                            </PrimaryButton2>
-                                                                        </CSVLink>
-                                                                    </div> */}
                                                                 </div>
                                                         }
                                                     </div>

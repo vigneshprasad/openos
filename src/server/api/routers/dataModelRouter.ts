@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type Prisma, type DataModel, type CustomerSuccessUsersFilter } from "@prisma/client";
+import { type Prisma, type DataModel, type CustomerSuccessUsersFilter, type DataModelGraphFilter } from "@prisma/client";
 import { dummyFeatures, dummyModel } from "~/constants/dummyData";
 import { sendResourceAddedMessage } from "~/utils/sendSlackMessage";
 import { type ExcelCell, type ExcelSheet } from "~/types/types";
 import moment from "moment";
 import { getDummyIncludeAndExclude, getDummyScatterPlot, getDummyChurnCards, getDummyModelGraph, getDummyAggregateChurnByPrimaryCohorts, getDummyChurnByThreshold, getDummyUserToContact } from "~/constants/fakerFunctions";
 import { getUserPredictions, getUserPredictionsSortedByProbability } from "~/utils/getUserPredictions";
-import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact, getUserPredictionsByBucket } from "~/server/services/cosmos-db";
+import { getChurnCards, getLastDate, getModelPrimaryGraph, getAggregateChurnByPrimaryCohorts, getIncludeAndExcludeUsers, getScatterPlot, getChurnByThreshold, getUsersToContact, getUserPredictionsByBucket, getModelPrimaryGraphData } from "~/server/services/cosmos-db";
 import { B2B_SAAS, CONVERSION_MODEL } from "~/constants/modelTypes";
 
 export type Cohort = {
@@ -428,6 +428,154 @@ export const dataModelRouter = createTRPCRouter({
             });
         }),
     
+    getModelPrimaryGraph: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+            date: z.string({
+                required_error: "String is required"
+            }),
+            endDate: z.string({
+                required_error: "End date is required"
+            }),
+            filterName: z.string({
+                required_error: "Filter name is required"
+            })
+        }))    
+        .mutation(async ({ctx, input}) : Promise<GraphData> => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+            if(user?.isDummy) {
+                //TODO - DUMMY DATA FOR PRIMARY GRAPH
+            }  
+
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
+            // Get time series based on whether the data is weekly or hourly
+            const timeSeries: Date[] = []
+            const startDate = moment(input.date, "DD/MM/YYYY")
+            const endDate = moment(input.endDate, "DD/MM/YYYY")
+            let period = ''
+            if(input.date !== input.endDate) {
+                period = 'weekly'
+                const date = moment(input.date, "DD/MM/YYYY")
+                const end_date = moment(input.endDate, "DD/MM/YYYY")
+                while(date.isSameOrBefore(end_date, 'days')) {
+                    timeSeries.push(date.toDate());
+                    date.add(1, 'days');
+                }
+                timeSeries.push(date.toDate());
+            } else {
+                period = 'hourly'
+                const date = moment(input.date, "DD/MM/YYYY")
+
+                for(let i = 0; i <= 6; i++) {
+                    const new_date = moment(date).add((i*4), 'hours').toDate();
+                    timeSeries.push(new_date);
+                }
+            }
+
+            if (model?.isCosmosDB) {
+                return getModelPrimaryGraphData(input.modelId, input.date, input.endDate, timeSeries, input.filterName);
+            }
+
+            // Get all the user predictions for the model in the relevant time period
+            const usersPredictions = await getUserPredictions(input.modelId, startDate, endDate);
+
+            // Get the frequency of each cohort for each time period
+            const predictionCohort1Frequency: {[key: string]: {
+                count: number,
+            }} = {};
+            
+            for(let i = 0; i < usersPredictions.length; i++) {
+                const userPrediction = usersPredictions[i];
+                if(!userPrediction) {
+                    continue
+                }
+                const userData = userPrediction.userData as Prisma.JsonObject
+
+                if(userData.hasOwnProperty(input.filterName)) {
+                    const value = userData[input.filterName] as string;
+                    const count = predictionCohort1Frequency[value]?.count;
+                    predictionCohort1Frequency[value] = {
+                        count: count ? count + 1 : 1
+                    };
+                }
+            }
+
+            // Sort the frequency arrays in descending order
+            const predictionCohort1FrequencyArray = Object.keys(predictionCohort1Frequency);
+            predictionCohort1FrequencyArray.sort((a, b) => {
+                const aValue = (predictionCohort1Frequency[a] && predictionCohort1Frequency[a]?.count) ? predictionCohort1Frequency[a]?.count : 0;
+                const bValue = (predictionCohort1Frequency[b] && predictionCohort1Frequency[b]?.count) ? predictionCohort1Frequency[b]?.count : 0;
+                if(bValue && aValue)
+                    return bValue - aValue;
+                else
+                    return 0;
+            });
+
+            const resultData:GraphData = {
+                xAxis: timeSeries.slice(0, timeSeries.length),
+                title: input.filterName,
+                data: []
+            }
+
+            // For the top 5 cohorts, get the number of users in each cohort for each time period
+            for (let j = 0; j < predictionCohort1FrequencyArray.length; j++) {
+                const cohortValue = predictionCohort1FrequencyArray[j];
+                if (j > 4) break;
+                const cohortDataSeries: GraphDataSeries = {
+                    name: cohortValue ? cohortValue : "Unknown",
+                    data: []
+                }
+                for(let i = 0; i < timeSeries.length; i++) {
+                    const start = timeSeries[i];
+                    const startMoment = moment(start);
+                    let relevantUsers;
+                    if (period === 'hourly') {
+                        const timeSeriesStart = moment(timeSeries[i])
+                        const timeSeriesEnd = moment(timeSeries[i]).add(4, 'hours')
+                        relevantUsers = usersPredictions.filter((userPrediction) => {
+                            return moment(userPrediction.dateOfEvent).utc().isAfter(timeSeriesStart.utc()) && moment(userPrediction.dateOfEvent).utc().isBefore(timeSeriesEnd.utc())
+                        });
+                    } else {
+                        relevantUsers = usersPredictions.filter((userPrediction) => {
+                            return moment(userPrediction.dateOfEvent).isSame(startMoment, 'days')
+                        });
+                    }
+                    let count = 0;
+                    let total = 0;
+                    for (let k = 0; k < relevantUsers.length; k++) {
+                        const userPrediction = relevantUsers[k];
+                        if(!userPrediction) {
+                            continue
+                        }
+                        const userData = userPrediction.userData as Prisma.JsonObject
+                        if (userData[input.filterName] === cohortValue) {
+                            total++;
+                            if (userPrediction.probability > 0.5) {
+                                count++;
+                            }
+                        }
+                    } 
+                    const percentage = count / total;
+                    cohortDataSeries.data.push(total == 0 ? 0 : percentage);
+                }
+
+                resultData.data.push(cohortDataSeries);
+            }
+
+            return resultData;
+        }),
+
     modelPrimaryGraph: protectedProcedure
         .input(z.object({
             modelId: z.string({
@@ -480,9 +628,6 @@ export const dataModelRouter = createTRPCRouter({
                 }
             }
 
-            // Get all the user predictions for the model in the relevant time period
-            const usersPredictions = await getUserPredictions(input.modelId, startDate, endDate);
-            
             // Get the primary graph parameters for the model
             const dataModelPrimaryGraph = await ctx.prisma.dataModelPrimaryGraph.findFirst({
                 where: {
@@ -511,6 +656,9 @@ export const dataModelRouter = createTRPCRouter({
             if (model?.isCosmosDB) {
                 return getModelPrimaryGraph(input.modelId, input.date, input.endDate, timeSeries, predictionCohort1, predictionCohort2);
             }
+
+            // Get all the user predictions for the model in the relevant time period
+            const usersPredictions = await getUserPredictions(input.modelId, startDate, endDate);
 
             // Get the frequency of each cohort for each time period
             const predictionCohort1Frequency: {[key: string]: {
@@ -667,6 +815,38 @@ export const dataModelRouter = createTRPCRouter({
             return resultData;
         }),
 
+    getModelGraphFilters: protectedProcedure
+        .input(z.object({
+            modelId: z.string({
+                required_error: "Model ID is required"
+            }),
+        }))    
+        .mutation(async ({ctx, input}) : Promise<DataModelGraphFilter[]> => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                }
+            });
+            if(user?.isDummy) {
+                //TODO 
+            }  
+
+            const model = await ctx.prisma.dataModel.findUnique({
+                where: {
+                    id: input.modelId
+                }
+            });
+
+            // Get the primary graph parameters for the model
+            return ctx.prisma.dataModelGraphFilter.findMany({
+                where: {
+                    dataModelId: input.modelId,
+                }
+            });
+
+
+        }),
+    
     getChurnCards: protectedProcedure
         .input(z.object({
             modelId: z.string({

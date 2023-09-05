@@ -15,7 +15,9 @@ const FeaturesImportanceTable = ({
                         <div className="w-6 h-6 bg-light-grey-background-colour text-sm flex justify-center"> 
                             <div className="my-auto">{index + 1}</div>
                         </div>
-                        <div className="border-y-0 border-l-0">{row.featureName}</div>
+                        <div className="border-y-0 border-l-0 overflow-hidden text-ellipsis">
+                            {row.featureName}
+                        </div>
                         <div className="w-full rounded-md bg-light-grey-background-colour">
                             <div 
                                 className="bg-accent-colour h-full rounded-md w-1/2"

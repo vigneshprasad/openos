@@ -300,6 +300,7 @@ model DataModel {
     DataModelPrimaryGraph      DataModelPrimaryGraph[]
     CustomerSuccessUsersFilter CustomerSuccessUsersFilter[]
     UserDataModelAccess        UserDataModelAccess[]
+    DataModelGraphFilter       DataModelGraphFilter[]
 
     @@index([userId])
 }
@@ -582,5 +583,17 @@ model UserDataModelAccess {
     dataModelId String
 
     @@index([userId])
+    @@index([dataModelId])
+}
+
+model DataModelGraphFilter {
+    id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    deletedAt   DateTime?
+    dataModelId String
+    name        String
+    dataModel   DataModel @relation(fields: [dataModelId], references: [id], onDelete: Cascade)
+
     @@index([dataModelId])
 }
