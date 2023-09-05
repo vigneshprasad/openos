@@ -434,16 +434,20 @@ export const getScatterPlot = async (modelId: string, startDate: string, endDate
         label: string
         probability: number
     }
+
+    const totalUsers = await getUserCountByDate(modelId, start, end)
+
     const querySpec = {
         query: `SELECT c["${featureName}"] AS "label", AVG(c.probability) AS "probability", COUNT(c["${featureName}"]) AS "value" FROM c where c.eventTimestamp >= ${start} AND c.eventTimestamp <= ${end} GROUP BY c["${featureName}"]`
     }
 
+
     const results = (await runQuery(querySpec, modelId)).resources as unknown as IResultType[]
 
-    const churnGraph = []
+    let churnGraph = []
     for(let i = 0; i < results.length; i++) {
         const result = results[i];
-        if(!result || !result.label) {
+        if(!result) {
             continue
         }
         churnGraph.push({
@@ -451,6 +455,79 @@ export const getScatterPlot = async (modelId: string, startDate: string, endDate
             y: result.probability
         })
     }
+
+    // Check if all x values can be converted to numbers
+    const allXAreNumbers = churnGraph.every(item => !isNaN(Number(item.x))) && !featureName.toLowerCase().includes("phone");
+
+    // Convert x values to numbers if they're all numbers
+    let sortedData: { x: string | number; y: number }[]
+    if (allXAreNumbers) {
+        churnGraph = churnGraph.map(item => ({ x: Number(item.x), y: item.y }));
+        sortedData = churnGraph.sort((a, b) => a.x - b.x);
+    } else {
+        sortedData = churnGraph.sort((a, b) => a.x.localeCompare(b.x));
+    }
+
+    if(churnGraph.length > (totalUsers * 0.5) && !allXAreNumbers) {
+        const notNullBucket = sortedData.filter(item => item.x !== "");
+        const nullBucket = sortedData.filter(item => item.x === "");
+
+        const averageY = (bucket: { x: string | number; y: number }[]) => bucket.reduce((sum, item) => sum + item.y, 0) / bucket.length;
+
+        const result: { x: string | number; y: number }[] = [];
+        if (notNullBucket.length > 0) {
+            result.push({ x: "not null", y: averageY(notNullBucket) });
+        }
+        if (nullBucket.length > 0) {
+            result.push({ x: "null", y: averageY(nullBucket) });
+        }
+
+        churnGraph = result;
+    } else if(churnGraph.length > 20) {
+        if (allXAreNumbers) {
+            const minX = Math.min(...sortedData.map(item => item.x as number));
+            const maxX = Math.max(...sortedData.map(item => item.x as number));
+    
+            const range = maxX - minX;
+            const interval = range / 5;
+    
+            const continuousBuckets: { x: string | number; y: number }[][] = Array(5).fill(null).map(() => []);
+    
+            for (const point of sortedData) {
+                let index = Math.floor(((point.x as number) - minX) / interval);
+                if (index === 5) index = 4; // To handle the maximum x value
+                continuousBuckets[index]?.push(point);
+            }
+    
+            churnGraph = continuousBuckets.map((bucket, i) => {
+                const start = minX + i * interval;
+                const end = start + interval;
+                const avgY = bucket.reduce((sum, item) => sum + item.y, 0) / bucket.length;
+                return {
+                    x: `${start.toFixed(2)}-${end.toFixed(2)}`,
+                    y: avgY
+                };
+            });
+        } else {
+            const bucketSize = Math.ceil(sortedData.length / 5);
+            const buckets = [];
+
+            for (let i = 0; i < sortedData.length; i += bucketSize) {
+                const currentBucket = sortedData.slice(i, i + bucketSize);
+                const firstX = currentBucket[0]?.x;
+                const lastX = currentBucket[currentBucket.length - 1]?.x;
+                const avgY = currentBucket.reduce((sum, item) => sum + item.y, 0) / currentBucket.length;
+
+                buckets.push({
+                    x: `${firstX as string}-${lastX as string}`,
+                    y: avgY
+                });
+            }
+            churnGraph = buckets;
+        }
+    }
+
+
     const resultData: ScatterPlotData = {
         series: churnGraph
     }
