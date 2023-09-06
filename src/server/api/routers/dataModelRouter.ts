@@ -242,6 +242,19 @@ export const dataModelRouter = createTRPCRouter({
                         completionStatus: true,
                     }
                 });
+                const modelAccess = await ctx.prisma.userDataModelAccess.findMany({
+                    where: {
+                        userId: ctx.session.user.id,
+                    }
+                });
+                const additionalModels = await ctx.prisma.dataModel.findMany({
+                    where: {
+                        id: {
+                            in: modelAccess.map((access) => access.dataModelId)
+                        }
+                    }
+                });
+                models = models.concat(additionalModels);
             }
 
             const results:DataModelList[] = [];
