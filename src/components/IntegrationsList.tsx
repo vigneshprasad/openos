@@ -7,6 +7,7 @@ import { MARIADB, POSTGRES, MYSQL } from "~/constants/dbTypes"
 import { MixpanelResourceForm } from "./MixpanelResourceForm"
 import { GoogleAnalyticsForm } from "./GoogleAnalyticsForm"
 import { AmplitudeResourceForm } from "./AmplitudeResourceForm"
+import { FacebookResourceForm } from "./FacebookResourceForm"
 
 const INTEGRATIONS = [
     {
@@ -81,11 +82,19 @@ const INTEGRATIONS = [
         url: "https://amplitude.com/",
         button: <AmplitudeResourceForm />
     },
+    {
+        key: "facebook",
+        title: "Facebook",
+        description: "Simple and powerful analytics tool",
+        imageSrc: "/amplitude.png",
+        url: "https://facebook.com/",
+        button: <FacebookResourceForm />
+    },
 ]
 
 export const IntegrationsList: React.FC = () => {
     return (
-        <>
+        <div>
             {INTEGRATIONS.map((integration) => (
                 <div key={integration.key}>
                     <div 
@@ -120,6 +129,6 @@ export const IntegrationsList: React.FC = () => {
                     </div>
                 </div>
             ))}
-        </>
+        </div>
     )
 }
