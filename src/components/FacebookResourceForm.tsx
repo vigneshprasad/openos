@@ -24,7 +24,7 @@ export const FacebookResourceForm: React.FC = () => {
 
     };
 
-    const url = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${FACEBOOK_APPLICATION_ID}&redirect_uri=google.com&config_id=3183854955257524`
+    const url = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${FACEBOOK_APPLICATION_ID}&redirect_uri=https://openos.app/integrations&config_id=3183854955257524`
     console.log("URL: ", url);
 
     return (
